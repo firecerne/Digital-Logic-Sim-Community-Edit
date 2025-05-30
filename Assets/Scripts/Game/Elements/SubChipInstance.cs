@@ -378,12 +378,6 @@ namespace DLS.Game
 			}
 		}
 
-		public void UpdateInternalData(uint[] data)
-		{
-			if (!ChipTypeHelper.IsInternalDataModifiable(ChipType)) throw new Exception("Internal Data is not modifiable for the type of chip : " + ChipTypeHelper.GetName(ChipType));
-			Array.Copy(data, InternalData, data.Length);
-		}
-
 		void LoadOutputPinColours(OutputPinColourInfo[] cols)
 		{
 			if (cols == null) return;

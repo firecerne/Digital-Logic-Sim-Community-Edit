@@ -296,14 +296,6 @@ namespace DLS.Game
 			simChip.UpdateInternalState(romChip.InternalData);
 		}
 
-		public void NotifyRomContentsEditedRuntime(SimChip simChip)
-		{
-			bool foundChip = ViewedChip.TryGetSubChipByID(simChip.ID, out SubChipInstance instance);
-			if (foundChip) {
-				instance.UpdateInternalData(simChip.InternalState);
-			}
-		}
-
 		public void NotifyLEDColourChanged(SubChipInstance ledChip, uint colIndex)
 		{
 			SimChip simChip = rootSimChip.GetSubChipFromID(ledChip.ID);
@@ -311,6 +303,9 @@ namespace DLS.Game
 			ledChip.InternalData[0] = colIndex;
 		}
 
+<<<<<<< HEAD
+		public void DeleteChip(string chipToDeleteName)
+=======
 		public void NotifyButtonColourChanged(SubChipInstance buttonChip, uint colIndex)
 		{
             SimChip simChip = rootSimChip.GetSubChipFromID(buttonChip.ID);
@@ -326,18 +321,10 @@ namespace DLS.Game
                 instance.UpdateInternalData(simChip.InternalState);
             }
         }
-		
-		public void NotifyConstantEdited(SubChipInstance constantChip, ushort value)
-		{
-            SimChip simChip = rootSimChip.
-				GetSubChipFromID
-				(constantChip.ID);
-			constantChip.InternalData[0] = value;
-            simChip.UpdateInternalState(constantChip.InternalData);
 
-        }
 
         public void DeleteChip(string chipToDeleteName)
+>>>>>>> parent of dbecdc9 (Merge pull request #8 from firecerne/constant)
 		{
 			// If the current chip only contains the deleted chip directly as a subchip, it will be removed from the sim and everything is fine.
 			// However, if it is contained indirectly somewhere within one of the chip's subchips (or their subchips, etc), then it's a bit tricky (and

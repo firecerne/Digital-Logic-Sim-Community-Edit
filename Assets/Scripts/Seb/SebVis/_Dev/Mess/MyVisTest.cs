@@ -169,13 +169,8 @@ public class MyVisTest : MonoBehaviour
 				Vector2 c = tri.transform.position;
 				Draw.Triangle(c + tri.offsetA, c + tri.offsetB, c + tri.offsetC, tri.col);
 			}
-
-			else if (t.TryGetComponent(out SquircleVisTest s))
-			{
-				Draw.Squircle(s.transform.position, s.size, s.radius, s.col);
-			}
-
-			// Seb.Vis.Draw.EndTransformState();
 		}
+
+		// Seb.Vis.Draw.EndTransformState();
 	}
 }

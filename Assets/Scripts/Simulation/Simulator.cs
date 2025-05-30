@@ -499,40 +499,14 @@ namespace DLS.Simulation
 					chip.OutputPins[1].State = (ushort)(data & ByteMask);
 					break;
 				}
-
-                case ChipType.EEPROM_256x16:
-                {
-                        const int ByteMask = 0b11111111;
-
-						uint address = PinState.GetBitStates(chip.InputPins[0].State);
-                        bool isWriting = PinState.FirstBitHigh(chip.InputPins[3].State);
-                        bool clockHigh = PinState.FirstBitHigh(chip.InputPins[4].State);
-                        bool isRisingEdge = clockHigh && chip.InternalState[^1] == 0;
-                        chip.InternalState[^1] = clockHigh ? 1u : 0;
-
-                        if (isWriting && isRisingEdge)
-						{
-							uint writeData = (ushort)(((PinState.GetBitStates(chip.InputPins[1].State) << 8) & (ByteMask<<8)) | (PinState.GetBitStates(chip.InputPins[2].State) & ByteMask));
-
-							chip.InternalState[address] = writeData;
-
-							Project.ActiveProject.NotifyRomContentsEditedRuntime(chip);
-							
-						}
-                        uint data = chip.InternalState[address];
-                        chip.OutputPins[0].State = (ushort)((data >> 8) & ByteMask);
-                        chip.OutputPins[1].State = (ushort)(data & ByteMask);
-                        break;
-                }
-
-                case ChipType.Buzzer:
+				case ChipType.Buzzer:
 				{
 					int freqIndex = PinState.GetBitStates(chip.InputPins[0].State);
 					int volumeIndex = PinState.GetBitStates(chip.InputPins[1].State);
 					audioState.RegisterNote(freqIndex, (uint)volumeIndex);
 					break;
 				}
-          
+<<<<<<< HEAD
 				case ChipType.RTC:
 				{
 					const uint ByteMask = 0b11111111;
@@ -541,14 +515,10 @@ namespace DLS.Simulation
 					chip.OutputPins[1].State = (ushort)((unixTime >> 16) & ByteMask);
 					chip.OutputPins[2].State = (ushort)((unixTime >> 8) & ByteMask);
 					chip.OutputPins[3].State = (ushort)(unixTime & ByteMask);
-          break;
-          
-				case ChipType.Constant_8Bit:
-				{
-					const uint bytemask = 0b11111111;
-          chip.OutputPins[0].State = (ushort)(chip.InternalState[0] & bytemask);
 					break;
 				}
+=======
+>>>>>>> parent of dbecdc9 (Merge pull request #8 from firecerne/constant)
 				// ---- Bus types ----
 				default:
 				{

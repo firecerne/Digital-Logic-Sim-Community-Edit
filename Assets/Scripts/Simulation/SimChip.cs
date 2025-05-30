@@ -77,7 +77,6 @@ namespace DLS.Simulation
 					InternalState[i] = BitConverter.ToUInt32(randomBytes);
 				}
 			}
-
 			// Load in serialized persistent state (rom data, etc.)
 			else if (internalState is { Length: > 0 })
 			{

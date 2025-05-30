@@ -2,15 +2,15 @@
   "ProjectName": "MainTest",
   "DLSVersion_LastSaved": "2.1.6",
   "DLSVersion_EarliestCompatible": "2.0.0",
-  "CreationTime": "2025-03-14T18:23:30.404+01:00",
-  "LastSaveTime": "2025-05-24T12:45:42.516+02:00",
+  "CreationTime": "2025-03-15T00:23:30.404+07:00",
+  "LastSaveTime": "2025-05-23T21:42:49.409+07:00",
   "Prefs_MainPinNamesDisplayMode": 2,
   "Prefs_ChipPinNamesDisplayMode": 1,
   "Prefs_GridDisplayMode": 1,
   "Prefs_Snapping": 0,
   "Prefs_StraightWires": 0,
   "Prefs_SimPaused": false,
-  "Prefs_SimTargetStepsPerSecond": 100,
+  "Prefs_SimTargetStepsPerSecond": 150,
   "Prefs_SimStepsPerClockTick": 6,
   "AllCustomChipNames":[
     "AND",
@@ -63,11 +63,14 @@
     "TEST MergeSplit",
     "#",
     "BuzzTest",
+<<<<<<< HEAD
+    "RTCTest"
+=======
     "EEPROM_test",
     "BUTTON_test",
     "BUTTON_test2",
-    "4sw",
-    "ConstTest"
+    "4sw"
+>>>>>>> parent of dbecdc9 (Merge pull request #8 from firecerne/constant)
   ],
   "StarredList":[
     {
@@ -103,6 +106,9 @@
       "IsCollection":false
     },
     {
+<<<<<<< HEAD
+      "Name":"RTCTest",
+=======
       "Name":"EEPROM_test",
       "IsCollection":false
     },
@@ -116,56 +122,57 @@
     },
     {
       "Name":"4sw",
-      "IsCollection":false
-    },
-    {
-      "Name":"ConstTest",
+>>>>>>> parent of dbecdc9 (Merge pull request #8 from firecerne/constant)
       "IsCollection":false
     }
   ],
   "ChipCollections":[
     {
       "Chips":["NAND","AND","NOT","NOR","XOR","OR","KEY","CLOCK","3-STATE BUFFER"],
-      "IsToggledOpen":true,
+      "IsToggledOpen":false,
       "Name":"BASICS"
     },
     {
       "Chips":["IN-1","IN-4","IN-8","OUT-1","OUT-4","OUT-8"],
-      "IsToggledOpen":true,
+      "IsToggledOpen":false,
       "Name":"IN/OUT"
     },
     {
       "Chips":["1-4BIT","1-8BIT","4-8BIT","8-4BIT","8-1BIT","4-1BIT"],
-      "IsToggledOpen":true,
+      "IsToggledOpen":false,
       "Name":"MERGE/SPLIT"
     },
     {
       "Chips":["7-SEGMENT","DECIMAL-4","DECIMAL-8","DOT DISPLAY","RGB DISPLAY","LED"],
-      "IsToggledOpen":true,
+      "IsToggledOpen":false,
       "Name":"DISPLAY"
     },
     {
       "Chips":["BUS-1","BUS-4","BUS-8"],
-      "IsToggledOpen":true,
+      "IsToggledOpen":false,
       "Name":"BUS"
     },
     {
       "Chips":["REGISTER-4","REG-8"],
-      "IsToggledOpen":true,
+      "IsToggledOpen":false,
       "Name":"MEMORY"
     },
     {
       "Chips":["D-LATCH","FLIP-FLOP","OR-8","MEM-1","NOT-8","AND(8,1)","MUX-8","PC","BUF-8","ALU-8","DECODE-3","AND-3","CONTROL UNIT","TOGGLE","FLAGS","DISP-7","demo","7-SEGMENT DRIVER","DABBLE","LSB","LSHIFT-8","DOUBLE DABBLE","ALU","BUS BUFFER","MEM-256","REGISTER-8","XNOR","EQUALS-8","ADDER-4","DECODER-2","ADDER-8","ADDER","MEM-16","REGISTER-1","AND-8","RAM-256×8 (async)","ROM 256×16"],
-      "IsToggledOpen":true,
+      "IsToggledOpen":false,
       "Name":"KEEP"
     },
     {
-      "Chips":["WIP2","RAM-sync","CONST"],
+      "Chips":["WIP2","RAM-sync"],
+<<<<<<< HEAD
+      "IsToggledOpen":false,
+=======
       "IsToggledOpen":true,
+>>>>>>> parent of dbecdc9 (Merge pull request #8 from firecerne/constant)
       "Name":"TEST"
     },
     {
-      "Chips":["PULSE","TEST MergeSplit","BUZZER","#","BuzzTest","EEPROM 256×16","EEPROM_test","BUTTON","BUTTON_test","BUTTON_test2","DIPSWITCH","4sw","RAM-8"],
+      "Chips":["PULSE","TEST MergeSplit","BUZZER","RTC","#","BuzzTest"],
       "IsToggledOpen":true,
       "Name":"OTHER"
     }

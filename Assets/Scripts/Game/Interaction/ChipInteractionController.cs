@@ -50,7 +50,7 @@ namespace DLS.Game
 		public bool CanInteractWithPin => CanInteract;
 		public bool CanInteractWithPinStateDisplay => CanInteract && !IsCreatingWire && Project.ActiveProject.CanEditViewedChip;
 		public bool CanInteractWithPinHandle => CanInteractWithPinStateDisplay;
-		public bool CanInteractWithButton => CanInteract;
+
 
 		public ChipInteractionController(Project project)
 		{

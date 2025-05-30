@@ -92,21 +92,7 @@ namespace Seb.Vis
 			shapeDrawer.AddToLayer(data);
 		}
 
-        public static void Squircle(Vector2 centre, Vector2 size, float cornerRadius, Color col)
-        {
-            if (size.x == 0 || size.y == 0 || col.a == 0) return;
-			if (cornerRadius <= 0)
-			{
-				Quad(centre, size, col);
-				return;
-			}
-
-            ShapeData data = ShapeData.CreateSquircle(centre, size, cornerRadius, col, activeMaskMin, activeMaskMax);
-            shapeDrawer.AddToLayer(data);
-        }
-
-
-        public static void SatValQuad(Vector2 centre, Vector2 size, float hue)
+		public static void SatValQuad(Vector2 centre, Vector2 size, float hue)
 		{
 			if (size.x == 0 || size.y == 0) return;
 

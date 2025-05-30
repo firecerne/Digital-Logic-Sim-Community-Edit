@@ -441,11 +441,6 @@ namespace DLS.Graphics
 				bounds = DrawDisplay_LED(posWorld, scaleWorld, col);
 			}
 
-			else if (ChipTypeHelper.IsClickableDisplayType(display.DisplayType))
-			{
-				bounds = DrawClickableDisplay(display, posParent, parentScale, rootChip, sim);
-			}
-
 			display.LastDrawBounds = bounds;
 			return bounds;
 		}
@@ -587,118 +582,7 @@ namespace DLS.Graphics
 			return Bounds2D.CreateFromCentreAndSize(centre, Vector2.one * scale);
 		}
 
-		public static Bounds2D DrawClickableDisplay(DisplayInstance display, Vector2 posParent, float parentScale, SubChipInstance rootChip, SimChip sim = null)
-		{
-            Bounds2D bounds = Bounds2D.CreateEmpty();
-            Vector2 posLocal = display.Desc.Position;	
-            Vector2 posWorld = posParent + posLocal * parentScale;
-            float scaleWorld = display.Desc.Scale * parentScale;
-
-			bool inBounds = false;
-			bool clicked = false;
-
-			// Calls to draw functions for each clickable display -- must include isSelected == false in the mouse detection to work.
-			if (display.DisplayType == ChipType.Button)
-			{
-				(bounds, inBounds, clicked) = DrawInteractable_Button(posWorld, scaleWorld, sim);
-			}
-
-			else if (display.DisplayType == ChipType.Toggle)
-			{
-				(bounds, inBounds, clicked) = DrawInteractable_Toggle(posWorld, scaleWorld, sim);
-			}
-
-			if (inBounds)
-			{
-				InteractionState.NotifyElementUnderMouse(display);
-			}
-
-			rootChip.IsSelected = clicked ? false : rootChip.IsSelected;
-
-			display.LastDrawBounds = bounds;
-			return bounds;
-        }
-
-        public static (Bounds2D bounds, bool inBounds, bool clicked) DrawInteractable_Button(Vector2 centre, float scale, SimChip chipSource)
-        {
-            Bounds2D bounds = Bounds2D.CreateFromCentreAndSize(centre, Vector2.one * scale);
-			bool inBounds = false;
-            bool pressed = false;
-
-            const float buttonSize = 0.875f;
-            Color col = ActiveTheme.StateDisconnectedCol;
-
-            if (chipSource != null)
-            {
-				inBounds = bounds.PointInBounds(InputHelper.MousePosWorld);
-                pressed = inBounds && InputHelper.IsMouseHeld(MouseButton.Left) && controller.CanInteractWithButton;
-                uint displayColIndex = chipSource.InternalState[0];
-                col = GetStateColour(pressed, displayColIndex);
-                chipSource.OutputPins[0].State = (uint)(pressed ? 1 : 0);
-            }
-
-            Vector2 buttonDrawSize = Vector2.one * (scale * buttonSize);
-            Draw.Squircle(centre, Vector2.one * scale, 0.15f * scale, ActiveTheme.DevPinHandle);
-            Draw.Squircle(centre, buttonDrawSize, 0.15f * scale * buttonSize, col);
-
-            return (bounds, inBounds, pressed);
-        }
-
-        public static (Bounds2D bounds, bool inBounds, bool clicked) DrawInteractable_Toggle(Vector2 centre, float scale, SimChip chipSource)
-        {
-
-            Vector2 ratio = new Vector2(1f, 2f);
-            Bounds2D wholeBounds = Bounds2D.CreateFromCentreAndSize(centre, ratio * scale);
-
-            const float switchHorizontalDrawRatio = 0.875f;
-
-            bool inBounds = false;
-            bool gettingClicked = false;
-
-            int currentSwitchHeadPos = 1;
-            int nextSwitchHeadPos = 1;
-
-
-            const float toggleSize = 1f;
-            Color col = ActiveTheme.StateDisconnectedCol;
-
-            Vector2 toggleDrawSize = ratio * (scale * toggleSize);
-            Vector2 switchDrawSize = switchHorizontalDrawRatio * scale * toggleSize * Vector2.one;
-            Vector2 innerSwitchDrawSize = switchDrawSize * 0.775f;
-
-            float verticalOffset = (toggleDrawSize.y / 2 - (switchDrawSize.y / switchHorizontalDrawRatio) / 2);
-
-
-            if (chipSource != null)
-            {
-				bool currentState = (chipSource.InternalState[0] & 1) == 1 ? true : false;
-				currentSwitchHeadPos = currentState ? -1 : 1;
-                Bounds2D bounds = Bounds2D.CreateFromCentreAndSize(centre + Vector2.up * verticalOffset * currentSwitchHeadPos, switchDrawSize);
-                inBounds = bounds.PointInBounds(InputHelper.MousePosWorld);
-                gettingClicked = inBounds && InputHelper.IsMouseDownThisFrame(MouseButton.Left) && controller.CanInteractWithButton;
-				bool nextState = gettingClicked ? !currentState : currentState;
-                chipSource.OutputPins[0].State = (uint)(nextState ? 1 : 0);
-
-
-				nextSwitchHeadPos = nextState ? -1 : 1;
-
-				if (currentState != nextState) {
-					chipSource.InternalState[0] = (uint)(nextState ? 1 : 0);
-					Project.ActiveProject.NotifyToggleStateChanged(chipSource);
-				}
-            }
-            verticalOffset *= nextSwitchHeadPos;
-
-			Draw.Quad(centre, toggleDrawSize, col);
-			Draw.Quad(centre + Vector2.up * verticalOffset, switchDrawSize, ActiveTheme.BackgroundCol);
-			Draw.Quad(centre + Vector2.up * verticalOffset, innerSwitchDrawSize, ActiveTheme.DevPinHandleHighlighted);
-
-
-            return (wholeBounds, inBounds, gettingClicked);
-        }
-
-
-        public static void DrawDevPin(DevPinInstance devPin)
+		public static void DrawDevPin(DevPinInstance devPin)
 		{
 			if (devPin.BitCount == PinBitCount.Bit1)
 			{

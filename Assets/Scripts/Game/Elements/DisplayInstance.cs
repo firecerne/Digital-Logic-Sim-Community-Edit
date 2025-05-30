@@ -4,7 +4,7 @@ using Seb.Types;
 
 namespace DLS.Game
 {
-	public class DisplayInstance : IClickable
+	public class DisplayInstance
 	{
 		public List<DisplayInstance> ChildDisplays;
 		public DisplayDescription Desc;
