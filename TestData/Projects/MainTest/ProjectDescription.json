@@ -63,14 +63,7 @@
     "TEST MergeSplit",
     "#",
     "BuzzTest",
-<<<<<<< HEAD
     "RTCTest"
-=======
-    "EEPROM_test",
-    "BUTTON_test",
-    "BUTTON_test2",
-    "4sw"
->>>>>>> parent of dbecdc9 (Merge pull request #8 from firecerne/constant)
   ],
   "StarredList":[
     {
@@ -106,23 +99,7 @@
       "IsCollection":false
     },
     {
-<<<<<<< HEAD
       "Name":"RTCTest",
-=======
-      "Name":"EEPROM_test",
-      "IsCollection":false
-    },
-    {
-      "Name":"BUTTON_test",
-      "IsCollection":false
-    },
-    {
-      "Name":"BUTTON_test2",
-      "IsCollection":false
-    },
-    {
-      "Name":"4sw",
->>>>>>> parent of dbecdc9 (Merge pull request #8 from firecerne/constant)
       "IsCollection":false
     }
   ],
@@ -164,11 +141,7 @@
     },
     {
       "Chips":["WIP2","RAM-sync"],
-<<<<<<< HEAD
       "IsToggledOpen":false,
-=======
-      "IsToggledOpen":true,
->>>>>>> parent of dbecdc9 (Merge pull request #8 from firecerne/constant)
       "Name":"TEST"
     },
     {

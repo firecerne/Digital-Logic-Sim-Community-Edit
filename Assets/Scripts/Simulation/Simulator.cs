@@ -506,7 +506,6 @@ namespace DLS.Simulation
 					audioState.RegisterNote(freqIndex, (uint)volumeIndex);
 					break;
 				}
-<<<<<<< HEAD
 				case ChipType.RTC:
 				{
 					const uint ByteMask = 0b11111111;
@@ -517,8 +516,6 @@ namespace DLS.Simulation
 					chip.OutputPins[3].State = (ushort)(unixTime & ByteMask);
 					break;
 				}
-=======
->>>>>>> parent of dbecdc9 (Merge pull request #8 from firecerne/constant)
 				// ---- Bus types ----
 				default:
 				{

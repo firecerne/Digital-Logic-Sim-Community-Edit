@@ -184,12 +184,7 @@ namespace DLS.Graphics
 							else if (subChip.ChipType is ChipType.Pulse) activeContextMenuEntries = entries_builtinPulseChip;
 							else if (ChipTypeHelper.IsBusType(subChip.ChipType)) activeContextMenuEntries = entries_builtinBus;
 							else if (subChip.ChipType == ChipType.DisplayLED) activeContextMenuEntries = entries_builtinLED;
-<<<<<<< HEAD
 							else activeContextMenuEntries = entries_builtinSubchip;
-=======
-                            else if (subChip.ChipType == ChipType.Button) activeContextMenuEntries = entries_builtinButton;
-                            else activeContextMenuEntries = entries_builtinSubchip;
->>>>>>> parent of dbecdc9 (Merge pull request #8 from firecerne/constant)
 						}
 
 						Project.ActiveProject.controller.Select(interactionContext as IMoveable, false);

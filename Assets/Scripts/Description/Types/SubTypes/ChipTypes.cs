@@ -38,12 +38,6 @@ namespace DLS.Description
 
 		Key,
 
-<<<<<<< HEAD
-=======
-		Button,
-		Toggle,
-
->>>>>>> parent of dbecdc9 (Merge pull request #8 from firecerne/constant)
 		// ---- Buses ----
 		Bus_1Bit,
 		BusTerminus_1Bit,

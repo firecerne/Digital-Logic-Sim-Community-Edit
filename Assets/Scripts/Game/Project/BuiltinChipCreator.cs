@@ -138,37 +138,9 @@ namespace DLS.Game
 			return CreateBuiltinChipDescription(ChipType.Rom_256x16, size, col, inputPins, outputPins);
 		}
 
-<<<<<<< HEAD
 		static ChipDescription CreateInputKeyChip()
 		{
 			Color col = new(0.1f, 0.1f, 0.1f);
-=======
-        static ChipDescription CreateEEPROM_8()
-        {
-            PinDescription[] inputPins =
-            {
-                CreatePinDescription("ADDRESS", 0, PinBitCount.Bit8),
-				CreatePinDescription("WRITE B", 1, PinBitCount.Bit8),
-                CreatePinDescription("WRITE A", 2, PinBitCount.Bit8),
-                CreatePinDescription("WRITE", 3, PinBitCount.Bit1),
-				CreatePinDescription("CLOCK", 4, PinBitCount.Bit1)
-            };
-            PinDescription[] outputPins =
-            {
-                CreatePinDescription("OUT B", 5, PinBitCount.Bit8),
-                CreatePinDescription("OUT A", 6, PinBitCount.Bit8)
-            };
-
-            Color col = GetColor(new(0.25f, 0.35f, 0.5f));
-            Vector2 size = new(GridSize * 12, SubChipInstance.MinChipHeightForPins(inputPins, outputPins));
-
-            return CreateBuiltinChipDescription(ChipType.EEPROM_256x16, size, col, inputPins, outputPins);
-        }
-
-        static ChipDescription CreateInputKeyChip()
-		{
-			Color col = GetColor(new(0.1f, 0.1f, 0.1f));
->>>>>>> parent of dbecdc9 (Merge pull request #8 from firecerne/constant)
 			Vector2 size = new Vector2(GridSize, GridSize) * 3;
 
 			PinDescription[] outputPins = { CreatePinDescription("OUT", 0) };
