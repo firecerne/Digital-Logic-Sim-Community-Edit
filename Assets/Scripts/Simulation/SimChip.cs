@@ -26,6 +26,7 @@ namespace DLS.Simulation
 		public readonly bool IsBuiltin;
 		public SimPin[] InputPins = Array.Empty<SimPin>();
 		public int numConnectedInputs;
+		public readonly bool canBeCached; // True, if the chip can be cached. copied from ChipDescription
 		public bool shouldBeCached; // True, if the user specifically wanted this chip to be cached
 
 		public int numInputsReady;
@@ -52,6 +53,7 @@ namespace DLS.Simulation
 			ID = id;
 			Name = desc.Name;
 			ChipType = desc.ChipType;
+			canBeCached = desc.CanBeCached;
 			shouldBeCached = desc.ShouldBeCached;
 			IsBuiltin = ChipType != ChipType.Custom;
 

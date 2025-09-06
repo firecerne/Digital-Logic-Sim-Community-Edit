@@ -129,27 +129,44 @@ namespace DLS.Graphics
 			SimChip chip = Project.ActiveProject.ViewedChip.SimChip;
 			if (chip.IsCombinational())
 			{
-				int numberOfInputBits = chip.CalculateNumberOfInputBits();
-				if (numberOfInputBits <= SimChip.MAX_NUM_INPUT_BITS_WHEN_AUTO_CACHING)
+				if (chip.canBeCached)
 				{
-					UI.DrawText("This chip is being cached.", UIThemeLibrary.DefaultFont, UIThemeLibrary.FontSizeSmall, NextPos(), Anchor.TopLeft, Color.white);
-				}
-				else if (numberOfInputBits <= SimChip.MAX_NUM_INPUT_BITS_WHEN_USER_CACHING)
-				{
-					int shouldBeCachedNum = UI.WheelSelector(ID_CachingOptions, cachingOptions, NextPos(), new Vector2(pw, DrawSettings.ButtonHeight), theme.OptionsWheel, Anchor.TopLeft);
-					bool shouldBeCached = false;
-					if (shouldBeCachedNum == 1) shouldBeCached = true;
-					ChipSaveMenu.ActiveCustomizeDescription.ShouldBeCached = shouldBeCached;
-					UI.DrawText("WARNING: Caching chips with many", UIThemeLibrary.DefaultFont, UIThemeLibrary.FontSizeSmall, NextPos(), Anchor.TopLeft, Color.white);
-					UI.DrawText("input bits significantly", UIThemeLibrary.DefaultFont, UIThemeLibrary.FontSizeSmall, NextPos(), Anchor.TopLeft, Color.white);
-					UI.DrawText("increases the time required to", UIThemeLibrary.DefaultFont, UIThemeLibrary.FontSizeSmall, NextPos(), Anchor.TopLeft, Color.white);
-					UI.DrawText("create the cache and may also", UIThemeLibrary.DefaultFont, UIThemeLibrary.FontSizeSmall, NextPos(), Anchor.TopLeft, Color.white);
-					UI.DrawText("increase memory consumption!", UIThemeLibrary.DefaultFont, UIThemeLibrary.FontSizeSmall, NextPos(), Anchor.TopLeft, Color.white);
+					int numberOfInputBits = chip.CalculateNumberOfInputBits();
+					if (numberOfInputBits <= SimChip.MAX_NUM_INPUT_BITS_WHEN_AUTO_CACHING)
+					{
+						UI.DrawText("This chip is being cached.", UIThemeLibrary.DefaultFont,
+							UIThemeLibrary.FontSizeSmall, NextPos(), Anchor.TopLeft, Color.white);
+					}
+					else if (numberOfInputBits <= SimChip.MAX_NUM_INPUT_BITS_WHEN_USER_CACHING)
+					{
+						int shouldBeCachedNum = UI.WheelSelector(ID_CachingOptions, cachingOptions, NextPos(),
+							new Vector2(pw, DrawSettings.ButtonHeight), theme.OptionsWheel, Anchor.TopLeft);
+						bool shouldBeCached = false;
+						if (shouldBeCachedNum == 1) shouldBeCached = true;
+						ChipSaveMenu.ActiveCustomizeDescription.ShouldBeCached = shouldBeCached;
+						UI.DrawText("WARNING: Caching chips with many", UIThemeLibrary.DefaultFont,
+							UIThemeLibrary.FontSizeSmall, NextPos(), Anchor.TopLeft, Color.white);
+						UI.DrawText("input bits significantly", UIThemeLibrary.DefaultFont,
+							UIThemeLibrary.FontSizeSmall, NextPos(), Anchor.TopLeft, Color.white);
+						UI.DrawText("increases the time required to", UIThemeLibrary.DefaultFont,
+							UIThemeLibrary.FontSizeSmall, NextPos(), Anchor.TopLeft, Color.white);
+						UI.DrawText("create the cache and may also", UIThemeLibrary.DefaultFont,
+							UIThemeLibrary.FontSizeSmall, NextPos(), Anchor.TopLeft, Color.white);
+						UI.DrawText("increase memory consumption!", UIThemeLibrary.DefaultFont,
+							UIThemeLibrary.FontSizeSmall, NextPos(), Anchor.TopLeft, Color.white);
+					}
+					else
+					{
+						UI.DrawText("This chip has too many input", UIThemeLibrary.DefaultFont,
+							UIThemeLibrary.FontSizeSmall, NextPos(), Anchor.TopLeft, Color.white);
+						UI.DrawText("bits to be cached.", UIThemeLibrary.DefaultFont, UIThemeLibrary.FontSizeSmall,
+							NextPos(), Anchor.TopLeft, Color.white);
+					}
 				}
 				else
 				{
-					UI.DrawText("This chip has too many input", UIThemeLibrary.DefaultFont, UIThemeLibrary.FontSizeSmall, NextPos(), Anchor.TopLeft, Color.white);
-					UI.DrawText("bits to be cached.", UIThemeLibrary.DefaultFont, UIThemeLibrary.FontSizeSmall, NextPos(), Anchor.TopLeft, Color.white);
+					UI.DrawText("One or more chips", UIThemeLibrary.DefaultFont, UIThemeLibrary.FontSizeSmall, NextPos(), Anchor.TopLeft, Color.white);
+					UI.DrawText("can not be cached.", UIThemeLibrary.DefaultFont, UIThemeLibrary.FontSizeSmall, NextPos(), Anchor.TopLeft, Color.white);
 				}
 			}
 			else

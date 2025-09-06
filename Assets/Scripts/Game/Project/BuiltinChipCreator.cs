@@ -345,7 +345,7 @@ namespace DLS.Game
 				}
 			};
 
-            return CreateBuiltinChipDescription(ChipType.Button, size, col, null, outputPins, displays, NameDisplayLocation.Hidden);
+            return CreateBuiltinChipDescription(ChipType.Button, size, col, null, outputPins, displays, NameDisplayLocation.Hidden, canBeCached: false);
         }
 
         static ChipDescription CreateInputToggleChip()
@@ -365,7 +365,7 @@ namespace DLS.Game
                 }
             };
 
-            return CreateBuiltinChipDescription(ChipType.Toggle, size, col, null, outputPins, displays, NameDisplayLocation.Hidden);
+            return CreateBuiltinChipDescription(ChipType.Toggle, size, col, null, outputPins, displays, NameDisplayLocation.Hidden, canBeCached: false);
         }
 
 
@@ -558,7 +558,7 @@ namespace DLS.Game
 				}
 			};
 
-			return CreateBuiltinChipDescription(ChipType.DisplayLED, size, col, inputPins, null, displays, NameDisplayLocation.Hidden);
+			return CreateBuiltinChipDescription(ChipType.DisplayLED, size, col, inputPins, null, displays, NameDisplayLocation.Hidden, canBeCached: false);
 		}
 
 
@@ -572,7 +572,7 @@ namespace DLS.Game
 		}
 
 
-		static ChipDescription CreateBuiltinChipDescription(ChipType type, Vector2 size, Color col, PinDescription[] inputs, PinDescription[] outputs, DisplayDescription[] displays = null, NameDisplayLocation nameLoc = NameDisplayLocation.Centre, string name = "")
+		static ChipDescription CreateBuiltinChipDescription(ChipType type, Vector2 size, Color col, PinDescription[] inputs, PinDescription[] outputs, DisplayDescription[] displays = null, NameDisplayLocation nameLoc = NameDisplayLocation.Centre, string name = "", bool canBeCached = true)
 		{
 			if (!ChipTypeHelper.IsDevPin(type) && !ChipTypeHelper.IsMergeSplitChip(type) && !ChipTypeHelper.IsBusType(type)){name = ChipTypeHelper.GetName(type); }
 			
@@ -589,7 +589,8 @@ namespace DLS.Game
 				SubChips = Array.Empty<SubChipDescription>(),
 				Wires = Array.Empty<WireDescription>(),
 				Displays = displays,
-				ChipType = type
+				ChipType = type,
+				CanBeCached = canBeCached
 			};
 		}
 
