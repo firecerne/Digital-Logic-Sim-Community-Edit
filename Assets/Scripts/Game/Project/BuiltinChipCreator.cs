@@ -325,7 +325,7 @@ namespace DLS.Game
 
 			PinDescription[] outputPins = { CreatePinDescription("OUT", 0) };
 
-			return CreateBuiltinChipDescription(ChipType.Key, size, col, null, outputPins, null, NameDisplayLocation.Hidden);
+			return CreateBuiltinChipDescription(ChipType.Key, size, col, null, outputPins, null, NameDisplayLocation.Hidden, canBeCached: false);
 		}
 
         static ChipDescription CreateInputButtonChip()
