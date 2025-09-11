@@ -26,6 +26,7 @@ namespace DLS.Simulation
 		public readonly bool IsBuiltin;
 		public SimPin[] InputPins = Array.Empty<SimPin>();
 		public int numConnectedInputs;
+		public readonly bool canBeCached; // True, if the chip can be cached. copied from ChipDescription
 		public bool shouldBeCached; // True, if the user specifically wanted this chip to be cached
 
 		public int numInputsReady;
@@ -52,6 +53,7 @@ namespace DLS.Simulation
 			ID = id;
 			Name = desc.Name;
 			ChipType = desc.ChipType;
+			canBeCached = desc.CanBeCached;
 			shouldBeCached = desc.ShouldBeCached;
 			IsBuiltin = ChipType != ChipType.Custom;
 
@@ -130,32 +132,12 @@ namespace DLS.Simulation
 		// Returns true, when this chip is purely combinational / stateless. This is the case, when the outputs of this chip depend entirely on the inputs and on nothing else.
 		public bool IsCombinational()
 		{
-			// Handle built in chips
-			switch (ChipType)
-			{
-				case ChipType.Nand:
-				case ChipType.TriStateBuffer:
-				case ChipType.Detector:
-				case ChipType.Merge_Pin:
-				case ChipType.Split_Pin:
-				case ChipType.Constant_8Bit: // Not stateless, but state can't change inside sim.
-				case ChipType.Rom_256x16: // True for these as well.
-					return true;
-				case ChipType.Clock:
-				case ChipType.Pulse:
-				case ChipType.dev_Ram_8Bit:
-				case ChipType.SevenSegmentDisplay:
-				case ChipType.DisplayRGB:
-				case ChipType.DisplayRGBTouch:
-				case ChipType.DisplayDot:
-				case ChipType.DisplayLED:
-				case ChipType.Key:
-				case ChipType.Buzzer:
-				case ChipType.EEPROM_256x16:
-				case ChipType.RTC:
-				case ChipType.SPS:
-					return false;
-			}
+			// For builtin chips, they are combinational if they are not a
+			// special input/output and don't have a state that can change
+			// while being run. This must be determined by whoever is
+			// implementing the builtin chip and hard coded.
+			if(ChipType != ChipType.Custom)
+				return canBeCached;
 
 			// Chip isn't combinational, if any of the subChips inputPins has more than one connection
 			foreach (SimChip subChip in SubChips)
