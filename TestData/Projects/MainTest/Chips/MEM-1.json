@@ -3,6 +3,7 @@
   "Name": "MEM-1",
   "NameLocation": 0,
   "ChipType": 0,
+  "ShouldBeCached": false,
   "Size": {
     "x": 1.015,
     "y": 1.0
@@ -21,9 +22,11 @@
         "x":-6.875,
         "y":0.125
       },
-      "BitCount":1,
+      "BitCount":"1",
       "Colour":0,
-      "ValueDisplayMode":0
+      "ValueDisplayMode":0,
+      "face":1,
+      "LocalOffset":0.0
     },
     {
       "Name":"STORE",
@@ -32,9 +35,11 @@
         "x":-6.875,
         "y":-0.5
       },
-      "BitCount":1,
+      "BitCount":"1",
       "Colour":2,
-      "ValueDisplayMode":0
+      "ValueDisplayMode":0,
+      "face":1,
+      "LocalOffset":0.0
     },
     {
       "Name":"ROW",
@@ -43,9 +48,11 @@
         "x":-6.875,
         "y":-1.375
       },
-      "BitCount":1,
+      "BitCount":"1",
       "Colour":3,
-      "ValueDisplayMode":0
+      "ValueDisplayMode":0,
+      "face":1,
+      "LocalOffset":0.0
     },
     {
       "Name":"COLUMN",
@@ -54,9 +61,11 @@
         "x":-6.875,
         "y":-2.0
       },
-      "BitCount":1,
+      "BitCount":"1",
       "Colour":4,
-      "ValueDisplayMode":0
+      "ValueDisplayMode":0,
+      "face":1,
+      "LocalOffset":0.0
     }
   ],
   "OutputPins":[
@@ -67,9 +76,11 @@
         "x":4.125,
         "y":-0.1875
       },
-      "BitCount":1,
+      "BitCount":"1",
       "Colour":0,
-      "ValueDisplayMode":0
+      "ValueDisplayMode":0,
+      "face":1,
+      "LocalOffset":0.0
     }
   ],
   "SubChips":[
@@ -104,6 +115,17 @@
         "y":-0.625
       },
       "OutputPinColourInfo":[{"PinColour":2,"PinID":1580367471}],
+      "InternalData":null
+    },
+    {
+      "Name":"D-LATCH",
+      "ID":1447448711,
+      "Label":"",
+      "Position":{
+        "x":-0.6525,
+        "y":0.0
+      },
+      "OutputPinColourInfo":[{"PinColour":0,"PinID":1782940294}],
       "InternalData":null
     }
   ],
@@ -191,7 +213,50 @@
       "ConnectedWireIndex":-1,
       "ConnectedWireSegmentIndex":-1,
       "Points":[{"x":0.0,"y":0.0},{"x":-4.75,"y":-2.0},{"x":-4.75,"y":-1.625},{"x":0.0,"y":0.0}]
+    },
+    {
+      "SourcePinAddress":{
+        "PinID":1782940294,
+        "PinOwnerID":1447448711
+      },
+      "TargetPinAddress":{
+        "PinID":0,
+        "PinOwnerID":364195663
+      },
+      "ConnectionType":0,
+      "ConnectedWireIndex":-1,
+      "ConnectedWireSegmentIndex":-1,
+      "Points":[{"x":0.0,"y":0.0},{"x":0.0,"y":0.0}]
+    },
+    {
+      "SourcePinAddress":{
+        "PinID":1580367471,
+        "PinOwnerID":957057383
+      },
+      "TargetPinAddress":{
+        "PinID":1014456047,
+        "PinOwnerID":1447448711
+      },
+      "ConnectionType":0,
+      "ConnectedWireIndex":-1,
+      "ConnectedWireSegmentIndex":-1,
+      "Points":[{"x":0.0,"y":0.0},{"x":-1.57246,"y":-0.625},{"x":-1.57246,"y":-0.12721},{"x":0.0,"y":0.0}]
+    },
+    {
+      "SourcePinAddress":{
+        "PinID":0,
+        "PinOwnerID":1453644181
+      },
+      "TargetPinAddress":{
+        "PinID":2138385976,
+        "PinOwnerID":1447448711
+      },
+      "ConnectionType":0,
+      "ConnectedWireIndex":-1,
+      "ConnectedWireSegmentIndex":-1,
+      "Points":[{"x":0.0,"y":0.0},{"x":0.0,"y":0.0}]
     }
   ],
-  "Displays":[]
+  "Displays":[],
+  "HasCustomLayout": false
 }

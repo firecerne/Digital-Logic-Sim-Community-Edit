@@ -2,9 +2,9 @@
   "ProjectName": "MainTest",
   "DLSVersion_LastSaved": "2.1.6",
   "DLSVersion_EarliestCompatible": "2.0.0",
-  "DLSVersion_LastSavedModdedVersion": "1.1.1",
-  "CreationTime": "2025-03-14T18:23:30.404+01:00",
-  "LastSaveTime": "2025-08-05T23:04:14.047+02:00",
+  "DLSVersion_LastSavedModdedVersion": "1.1.2",
+  "CreationTime": "2025-03-14T10:23:30.404-07:00",
+  "LastSaveTime": "2025-10-10T22:39:42.889-07:00",
   "Prefs_MainPinNamesDisplayMode": 2,
   "Prefs_ChipPinNamesDisplayMode": 1,
   "Prefs_GridDisplayMode": 1,
@@ -14,9 +14,9 @@
   "Prefs_SimTargetStepsPerSecond": 15,
   "Prefs_SimStepsPerClockTick": 6,
   "Perfs_PinIndicators": 4,
-  "StepsRanSinceCreated": 105864423,
+  "StepsRanSinceCreated": 105870451,
   "TimeSpentSinceCreated": {
-    "StartFrom": "02:51:34.8349194"
+    "StartFrom": "02:58:17.0110064"
   },
   "AllCustomChipNames":[
     "AND",
@@ -68,7 +68,9 @@
     "TEST MergeSplit",
     "#",
     "BuzzTest",
-    "#AA"
+    "#AA",
+    "SR-LATCH",
+    "D-LATCH"
   ],
   "StarredList":[
     {
@@ -109,6 +111,14 @@
     },
     {
       "Name":"IndicatorTest",
+      "IsCollection":false
+    },
+    {
+      "Name":"SR-LATCH",
+      "IsCollection":false
+    },
+    {
+      "Name":"D-LATCH",
       "IsCollection":false
     }
   ],
