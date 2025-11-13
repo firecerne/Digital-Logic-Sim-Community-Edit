@@ -14,6 +14,8 @@ namespace DLS.Description
 		public string Name;
 		public NameDisplayLocation NameLocation;
 		public ChipType ChipType;
+		public bool CanBeCached;
+		public bool ShouldBeCached;
 		public Vector2 Size;
 		public Color Colour;
 		public PinDescription[] InputPins;

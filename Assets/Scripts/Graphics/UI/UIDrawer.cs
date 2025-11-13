@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using DLS.Game;
+using DLS.Simulation;
 using Seb.Vis.UI;
 
 namespace DLS.Graphics
@@ -64,6 +65,7 @@ namespace DLS.Graphics
 
 			if (menuToDraw != MenuType.ChipCustomization) BottomBarUI.DrawUI(project);
 
+			bool aMenuIsOpen = true;
 			if (menuToDraw == MenuType.ChipSave) ChipSaveMenu.DrawMenu();
 			else if (menuToDraw == MenuType.ChipLibrary) ChipLibraryMenu.DrawMenu();
 			else if (menuToDraw == MenuType.ChipCustomization) ChipCustomizationMenu.DrawMenu();
@@ -86,7 +88,12 @@ namespace DLS.Graphics
 				bool showSimPausedBanner = project.simPaused;
 				if (showSimPausedBanner) SimPausedUI.DrawPausedBanner();
 				if (project.chipViewStack.Count > 1) ViewedChipsBar.DrawViewedChipsBanner(project, showSimPausedBanner);
+				if (SimChip.isCreatingACache) CreateCacheUI.DrawCreatingCacheInfo();
+				aMenuIsOpen = false;
 			}
+			// Cancel current caching process when a menu gets opened
+			if(aMenuIsOpen)
+				SimChip.AbortCache();
 
 			ContextMenu.Update();
 		}
@@ -112,6 +119,7 @@ namespace DLS.Graphics
 				else if (ActiveMenu == MenuType.ChipLabelPopup) ChipLabelMenu.OnMenuOpened();
 				else if (ActiveMenu == MenuType.NoteTextPopup) NoteTextMenu.OnMenuOpened();
 				else if (ActiveMenu == MenuType.PulseEdit) PulseEditMenu.OnMenuOpened();
+				else if (ActiveMenu == MenuType.ProjectStats) ProjectStatsMenu.OnMenuOpened();
                 else if (ActiveMenu == MenuType.ConstantEdit) ConstantEditMenu.OnMenuOpened();
 				else if (ActiveMenu == MenuType.SpecialChipMaker) SpecialChipMakerMenu.OnMenuOpened();
 
