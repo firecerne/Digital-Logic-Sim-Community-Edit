@@ -77,6 +77,7 @@ namespace DLS.SaveSystem
 			SubChipDescription[] subchips = chip.GetSubchips().Select(CreateSubChipDescription).ToArray();
 			Vector2 minChipsSize = SubChipInstance.CalculateMinChipSize(inputPins, outputPins, name);
 			size = Vector2.Max(minChipsSize, size);
+			NoteDescription[] notes = chip.GetNotes().Select(CreateNoteDescription).ToArray();
 
 			UpdateWireIndicesForDescriptionCreation(chip);
 
@@ -94,6 +95,7 @@ namespace DLS.SaveSystem
 				InputPins = inputPins,
 				OutputPins = outputPins,
 				Wires = chip.Wires.Select(CreateWireDescription).ToArray(),
+				Notes = notes,
 				Displays = displays,
 				ChipType = ChipType.Custom,
 				HasCustomLayout = hasSavedDesc ? descOld.HasCustomLayout : false
