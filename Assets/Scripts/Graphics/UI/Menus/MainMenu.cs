@@ -83,7 +83,7 @@ namespace DLS.Graphics
 		{
 			Simulator.UpdateInPausedState();
 			
-			if (KeyboardShortcuts.CancelShortcutTriggered && activePopup == PopupKind.None)
+			if (KeyboardShortcuts.CancelShortcutTriggered() && activePopup == PopupKind.None)
 			{
 				BackToMain();
 			}
@@ -148,18 +148,18 @@ namespace DLS.Graphics
 
 			int buttonIndex = UI.VerticalButtonGroup(menuButtonNames, theme.MainMenuButtonTheme, UI.Centre + Vector2.up * 6, new Vector2(buttonWidth, 0), false, true, 1);
 
-			if (buttonIndex == 0 || KeyboardShortcuts.MainMenu_NewProjectShortcutTriggered) // New project
+			if (buttonIndex == 0 || KeyboardShortcuts.MainMenu_NewProjectShortcutTriggered()) // New project
 			{
 				RefreshLoadedProjects();
 				activePopup = PopupKind.NamePopup_NewProject;
 			}
-			else if (buttonIndex == 1 || KeyboardShortcuts.MainMenu_OpenProjectShortcutTriggered) // Load project
+			else if (buttonIndex == 1 || KeyboardShortcuts.MainMenu_OpenProjectShortcutTriggered()) // Load project
 			{
 				RefreshLoadedProjects();
 				selectedProjectIndex = -1;
 				activeMenuScreen = MenuScreen.LoadProject;
 			}
-			else if (buttonIndex == 2 || KeyboardShortcuts.MainMenu_SettingsShortcutTriggered) // Settings
+			else if (buttonIndex == 2 || KeyboardShortcuts.MainMenu_SettingsShortcutTriggered()) // Settings
 			{
 				EditedAppSettings = Main.ActiveAppSettings;
 				activeMenuScreen = MenuScreen.Settings;
@@ -169,7 +169,7 @@ namespace DLS.Graphics
 			{
 				activeMenuScreen = MenuScreen.About;
 			}
-			else if (buttonIndex == 4 || KeyboardShortcuts.MainMenu_QuitShortcutTriggered) // Quit
+			else if (buttonIndex == 4 || KeyboardShortcuts.MainMenu_QuitShortcutTriggered()) // Quit
 			{
 				Quit();
 			}
@@ -392,13 +392,13 @@ namespace DLS.Graphics
 				bool cancelButton = UI.Button("CANCEL", theme.MainMenuButtonTheme, layoutCancel.centre, new Vector2(layoutCancel.size.x, 0), true, false, true);
 				bool confirmButton = UI.Button("CONFIRM", theme.MainMenuButtonTheme, layoutConfirm.centre, new Vector2(layoutConfirm.size.x, 0), canCreateProject, false, true);
 
-				if (cancelButton || KeyboardShortcuts.CancelShortcutTriggered)
+				if (cancelButton || KeyboardShortcuts.CancelShortcutTriggered())
 				{
 					state.ClearText();
 					activePopup = PopupKind.None;
 				}
 
-				if (confirmButton || KeyboardShortcuts.ConfirmShortcutTriggered)
+				if (confirmButton || KeyboardShortcuts.ConfirmShortcutTriggered())
 				{
 					state.ClearText();
 					PopupKind kind = activePopup;

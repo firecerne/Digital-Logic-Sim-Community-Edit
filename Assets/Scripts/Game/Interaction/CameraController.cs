@@ -59,7 +59,7 @@ namespace DLS.Game
 			}
 			else
 			{
-				if (KeyboardShortcuts.ResetCameraShortcutTriggered)
+				if (KeyboardShortcuts.ResetCameraShortcutTriggered())
 				{
 					chipViewStateLookup.Remove(Project.ActiveProject.ViewedChip.ChipName);
 				}

@@ -130,7 +130,7 @@ namespace DLS.Graphics
 			}
 
 			// Exit (confirm/cancel)
-			bool cancel = KeyboardShortcuts.CancelShortcutTriggered || InputHelper.IsMouseDownThisFrame(MouseButton.Right);
+			bool cancel = KeyboardShortcuts.CancelShortcutTriggered() || InputHelper.IsMouseDownThisFrame(MouseButton.Right);
 
 			if (cancel)
 			{
@@ -173,7 +173,7 @@ namespace DLS.Graphics
 				SelectedDisplay.Desc.Position = snap;
 			}
 
-			bool cancelMovement = KeyboardShortcuts.CancelShortcutTriggered || InputHelper.IsMouseDownThisFrame(MouseButton.Right);
+			bool cancelMovement = KeyboardShortcuts.CancelShortcutTriggered() || InputHelper.IsMouseDownThisFrame(MouseButton.Right);
 			bool delete = InputHelper.IsKeyDownThisFrame(KeyCode.Backspace) || InputHelper.IsKeyDownThisFrame(KeyCode.Delete);
 
 			if (cancelMovement || delete)

@@ -137,8 +137,8 @@ namespace DLS.Graphics
 
 			if (useKeyboardShortcuts)
 			{
-				if (canCancel && KeyboardShortcuts.CancelShortcutTriggered) buttonIndex = CancelIndex;
-				if (canConfirm && KeyboardShortcuts.ConfirmShortcutTriggered) buttonIndex = ConfirmIndex;
+				if (canCancel && KeyboardShortcuts.CancelShortcutTriggered()) buttonIndex = CancelIndex;
+				if (canConfirm && KeyboardShortcuts.ConfirmShortcutTriggered()) buttonIndex = ConfirmIndex;
 			}
 
 			return buttonIndex switch

@@ -75,8 +75,8 @@ namespace DLS.Graphics
 				MenuHelper.DrawReservedMenuPanel(panelID, UI.GetCurrentBoundsScope());
 
 				// Keyboard shortcuts and UI input
-				if (KeyboardShortcuts.CancelShortcutTriggered || buttonIndex == 0) Cancel();
-				else if (KeyboardShortcuts.ConfirmShortcutTriggered || buttonIndex == 1) Confirm(newName);
+				if (KeyboardShortcuts.CancelShortcutTriggered() || buttonIndex == 0) Cancel();
+				else if (KeyboardShortcuts.ConfirmShortcutTriggered() || buttonIndex == 1) Confirm(newName);
 			}
 		}
 

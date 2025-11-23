@@ -103,7 +103,7 @@ namespace DLS.Graphics
 					UIDrawer.SetActiveMenu(UIDrawer.MenuType.None);
 				}
 
-				if (KeyboardShortcuts.CancelShortcutTriggered)
+				if (KeyboardShortcuts.CancelShortcutTriggered())
 				{
 					UIDrawer.SetActiveMenu(UIDrawer.MenuType.None);
 				}
@@ -324,7 +324,7 @@ namespace DLS.Graphics
 						activeCollection = null;
 					}
 				}
-				else if (KeyboardShortcuts.CancelShortcutTriggered || (InputHelper.IsAnyMouseButtonDownThisFrame_IgnoreConsumed() && Time.frameCount != collectionInteractFrame) || UIDrawer.ActiveMenu != UIDrawer.MenuType.None)
+				else if (KeyboardShortcuts.CancelShortcutTriggered() || (InputHelper.IsAnyMouseButtonDownThisFrame_IgnoreConsumed() && Time.frameCount != collectionInteractFrame) || UIDrawer.ActiveMenu != UIDrawer.MenuType.None)
 				{
 					activeCollection = null;
 				}
@@ -416,15 +416,15 @@ namespace DLS.Graphics
 		{
 			if (MenuButtonsAndShortcutsEnabled)
 			{
-				if (KeyboardShortcuts.CreateNewChipShortcutTriggered) CreateNewChip();
-				if (KeyboardShortcuts.SaveShortcutTriggered) OpenSaveMenu();
-				if (KeyboardShortcuts.LibraryShortcutTriggered) OpenLibraryMenu();
+				if (KeyboardShortcuts.CreateNewChipShortcutTriggered()) CreateNewChip();
+				if (KeyboardShortcuts.SaveShortcutTriggered()) OpenSaveMenu();
+				if (KeyboardShortcuts.LibraryShortcutTriggered()) OpenLibraryMenu();
 			}
 
-			if (KeyboardShortcuts.StatsShortcutTriggered) OpenStatsMenu();
-			if (KeyboardShortcuts.PreferencesShortcutTriggered) OpenPreferencesMenu();
-			if (KeyboardShortcuts.QuitToMainMenuShortcutTriggered) ExitToMainMenu();
-			if (KeyboardShortcuts.SpecialChipsShortcutTriggered) OpenAddSpecialMenu();
+			if (KeyboardShortcuts.StatsShortcutTriggered()) OpenStatsMenu();
+			if (KeyboardShortcuts.PreferencesShortcutTriggered()) OpenPreferencesMenu();
+			if (KeyboardShortcuts.QuitToMainMenuShortcutTriggered()) ExitToMainMenu();
+			if (KeyboardShortcuts.SpecialChipsShortcutTriggered()) OpenAddSpecialMenu();
 		}
 
 		public static void Reset()

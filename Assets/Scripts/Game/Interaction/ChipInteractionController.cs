@@ -187,19 +187,19 @@ namespace DLS.Game
 			// Ignore shortcuts if don't have control
 			if (!HasControl) return;
 
-			if (KeyboardShortcuts.UndoShortcutTriggered) ActiveDevChip.UndoController.TryUndo();
-			else if (KeyboardShortcuts.RedoShortcutTriggered) ActiveDevChip.UndoController.TryRedo();
+			if (KeyboardShortcuts.UndoShortcutTriggered()) ActiveDevChip.UndoController.TryUndo();
+			else if (KeyboardShortcuts.RedoShortcutTriggered()) ActiveDevChip.UndoController.TryRedo();
 
 
 			if (!KeyboardShortcuts.StraightLineModeHeld) straightLineMoveState = StraightLineMoveState.None;
 
-			if (KeyboardShortcuts.SearchShortcutTriggered)
+			if (KeyboardShortcuts.SearchShortcutTriggered())
 			{
 				UIDrawer.SetActiveMenu(UIDrawer.MenuType.Search);
 			}
 
 
-			if (KeyboardShortcuts.DuplicateShortcutTriggered)
+			if (KeyboardShortcuts.DuplicateShortcutTriggered())
 			{
 				if (SelectedElements.Count > 0 && !IsPlacingOrMovingElementOrCreatingWire)
 				{
@@ -207,7 +207,7 @@ namespace DLS.Game
 				}
 			}
 
-			if (KeyboardShortcuts.DeleteShortcutTriggered)
+			if (KeyboardShortcuts.DeleteShortcutTriggered())
 			{
 				if (IsCreatingWire)
 				{
@@ -223,12 +223,12 @@ namespace DLS.Game
 				}
 			}
 
-			if (KeyboardShortcuts.ConfirmShortcutTriggered)
+			if (KeyboardShortcuts.ConfirmShortcutTriggered())
 			{
 				ExitWireEditMode();
 			}
 
-			if (KeyboardShortcuts.CancelShortcutTriggered)
+			if (KeyboardShortcuts.CancelShortcutTriggered())
 			{
 				CancelEverything();
 			}

@@ -229,13 +229,13 @@ namespace DLS.Graphics
 			bool inPrefsMenu = UIDrawer.ActiveMenu == UIDrawer.MenuType.Preferences;
 			bool anyChange = false;
 
-			if (KeyboardShortcuts.ToggleGridShortcutTriggered)
+			if (KeyboardShortcuts.ToggleGridShortcutTriggered())
 			{
 				Project.ActiveProject.ToggleGridDisplay();
 				anyChange = true;
 			}
 
-			if (KeyboardShortcuts.SimPauseToggleShortcutTriggered)
+			if (KeyboardShortcuts.SimPauseToggleShortcutTriggered())
 			{
 				Project.ActiveProject.description.Prefs_SimPaused = !Project.ActiveProject.description.Prefs_SimPaused;
 				anyChange = true;
