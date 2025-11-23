@@ -169,8 +169,18 @@ namespace DLS.Graphics
 				result += shortcut.KeyCode.ToString();
 			}
 
-
 			return result;
+		}
+
+		public static string PadWithSpacesAndInsertColorString(string firstString, string colorstring, string secondString, int length) //19 for bottom bar ui
+		{
+			string resultString = firstString;
+			int paddingAmount = length - (secondString.Length + firstString.Length);
+			if (paddingAmount <=0) { resultString += colorstring + secondString; return resultString; }
+			string paddingString = "";
+			for (int i = 0; i < paddingAmount; i++) { paddingString += " "; }
+			resultString += paddingString + colorstring + secondString;
+			return resultString;
 		}
 	}
 }

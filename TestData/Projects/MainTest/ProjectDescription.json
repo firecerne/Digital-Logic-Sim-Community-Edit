@@ -4,7 +4,7 @@
   "DLSVersion_EarliestCompatible": "2.0.0",
   "DLSVersion_LastSavedModdedVersion": "1.1.2",
   "CreationTime": "2025-03-14T18:23:30.404+01:00",
-  "LastSaveTime": "2025-11-23T15:15:40.519+01:00",
+  "LastSaveTime": "2025-11-23T15:40:24.398+01:00",
   "Prefs_MainPinNamesDisplayMode": 2,
   "Prefs_ChipPinNamesDisplayMode": 1,
   "Prefs_GridDisplayMode": 1,
@@ -14,9 +14,9 @@
   "Prefs_SimTargetStepsPerSecond": 600000000,
   "Prefs_SimStepsPerClockTick": 1,
   "Perfs_PinIndicators": 4,
-  "StepsRanSinceCreated": 179093099,
+  "StepsRanSinceCreated": 536991573,
   "TimeSpentSinceCreated": {
-    "StartFrom": "03:36:07.6468830"
+    "StartFrom": "03:37:18.9703993"
   },
   "AllCustomChipNames":[
     "AND",

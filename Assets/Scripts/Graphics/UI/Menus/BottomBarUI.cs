@@ -19,15 +19,23 @@ namespace DLS.Graphics
 		const string shortcutTextCol = "<color=#666666ff>";
 
 		static string[] menuButtonNames => new string[]{
-			$"NEW CHIP     {shortcutTextCol + MenuHelper.GetStringRepresentationOfShortcut(Main.ActiveShortcutSettings.CreateNewChipShortcutTriggered)}",
-			$"SAVE CHIP    {shortcutTextCol + MenuHelper.GetStringRepresentationOfShortcut(Main.ActiveShortcutSettings.SaveShortcutTriggered)}",
-			$"FIND CHIP    {shortcutTextCol + MenuHelper.GetStringRepresentationOfShortcut(Main.ActiveShortcutSettings.SearchShortcutTriggered)}",
-			$"ADD SPECIAL  {shortcutTextCol + MenuHelper.GetStringRepresentationOfShortcut(Main.ActiveShortcutSettings.SpecialChipsShortcutTriggered)}",
-			$"LIBRARY      {shortcutTextCol + MenuHelper.GetStringRepresentationOfShortcut(Main.ActiveShortcutSettings.LibraryShortcutTriggered)}",
-			$"STATS        {shortcutTextCol + MenuHelper.GetStringRepresentationOfShortcut(Main.ActiveShortcutSettings.StatsShortcutTriggered)}", // Ctrl+'T' from the T in Stats
-			$"PREFS        {shortcutTextCol + MenuHelper.GetStringRepresentationOfShortcut(Main.ActiveShortcutSettings.PreferencesShortcutTriggered)}",
-			$"QUIT         {shortcutTextCol + MenuHelper.GetStringRepresentationOfShortcut(Main.ActiveShortcutSettings.QuitToMainMenuShortcutTriggered)}"
-		};
+			MenuHelper.PadWithSpacesAndInsertColorString("NEW CHIP",shortcutTextCol,
+				MenuHelper.GetStringRepresentationOfShortcut(Main.ActiveShortcutSettings.CreateNewChipShortcutTriggered), 19),
+			MenuHelper.PadWithSpacesAndInsertColorString("SAVE CHIP", shortcutTextCol,
+				MenuHelper.GetStringRepresentationOfShortcut(Main.ActiveShortcutSettings.SaveShortcutTriggered), 19),
+            MenuHelper.PadWithSpacesAndInsertColorString("FIND CHIP", shortcutTextCol,
+                MenuHelper.GetStringRepresentationOfShortcut(Main.ActiveShortcutSettings.SearchShortcutTriggered), 19),
+            MenuHelper.PadWithSpacesAndInsertColorString("ADD SPECIAL", shortcutTextCol,
+                MenuHelper.GetStringRepresentationOfShortcut(Main.ActiveShortcutSettings.SpecialChipsShortcutTriggered), 19),
+            MenuHelper.PadWithSpacesAndInsertColorString("LIBRARY", shortcutTextCol,
+                MenuHelper.GetStringRepresentationOfShortcut(Main.ActiveShortcutSettings.LibraryShortcutTriggered), 19),
+            MenuHelper.PadWithSpacesAndInsertColorString("STATS", shortcutTextCol,
+                MenuHelper.GetStringRepresentationOfShortcut(Main.ActiveShortcutSettings.StatsShortcutTriggered), 19),
+			MenuHelper.PadWithSpacesAndInsertColorString("PREFS", shortcutTextCol,
+                MenuHelper.GetStringRepresentationOfShortcut(Main.ActiveShortcutSettings.PreferencesShortcutTriggered), 19),
+            MenuHelper.PadWithSpacesAndInsertColorString("QUIT", shortcutTextCol,
+                MenuHelper.GetStringRepresentationOfShortcut(Main.ActiveShortcutSettings.QuitToMainMenuShortcutTriggered), 19),
+        };
 
 		const int NewChipButtonIndex = 0;
 		const int SaveChipButtonIndex = 1;
