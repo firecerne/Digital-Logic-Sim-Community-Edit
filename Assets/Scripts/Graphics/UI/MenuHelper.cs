@@ -1,4 +1,5 @@
 using System;
+using DLS.Description;
 using DLS.Game;
 using Seb.Helpers;
 using Seb.Types;
@@ -147,6 +148,29 @@ namespace DLS.Graphics
 				ConfirmIndex => CancelConfirmResult.Confirm,
 				_ => CancelConfirmResult.None
 			};
+		}
+
+		public static string GetStringRepresentationOfShortcut(Shortcut shortcut)
+		{
+			string result = string.Empty;
+
+			if(shortcut.Modifier != ShortcutModifier.None)
+			{
+				result = (new string[] {"", "Ctrl", "Shift", "Alt", "Ctrl+Shift", "Ctrl+Shift+Alt"})[(int)shortcut.Modifier];
+			}
+
+			if(shortcut.Modifier != ShortcutModifier.None && shortcut.KeyCode != KeyCode.None)
+			{
+				result += "+";
+			}
+
+			if( shortcut.KeyCode != KeyCode.None)
+			{
+				result += shortcut.KeyCode.ToString();
+			}
+
+
+			return result;
 		}
 	}
 }

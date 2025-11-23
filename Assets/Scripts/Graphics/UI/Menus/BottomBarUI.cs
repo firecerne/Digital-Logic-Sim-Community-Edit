@@ -18,16 +18,15 @@ namespace DLS.Graphics
 
 		const string shortcutTextCol = "<color=#666666ff>";
 
-		static readonly string[] menuButtonNames =
-		{
-			$"NEW CHIP     {shortcutTextCol}Ctrl+N",
-			$"SAVE CHIP    {shortcutTextCol}Ctrl+S",
-			$"FIND CHIP    {shortcutTextCol}Ctrl+F",
-			$"ADD SPECIAL  {shortcutTextCol}Ctrl+B",
-			$"LIBRARY      {shortcutTextCol}Ctrl+L",
-			$"STATS        {shortcutTextCol}Ctrl+T", // Ctrl+'T' from the T in Stats
-			$"PREFS        {shortcutTextCol}Ctrl+P",
-			$"QUIT         {shortcutTextCol}Ctrl+Q"
+		static string[] menuButtonNames => new string[]{
+			$"NEW CHIP     {shortcutTextCol + MenuHelper.GetStringRepresentationOfShortcut(Main.ActiveShortcutSettings.CreateNewChipShortcutTriggered)}",
+			$"SAVE CHIP    {shortcutTextCol + MenuHelper.GetStringRepresentationOfShortcut(Main.ActiveShortcutSettings.SaveShortcutTriggered)}",
+			$"FIND CHIP    {shortcutTextCol + MenuHelper.GetStringRepresentationOfShortcut(Main.ActiveShortcutSettings.SearchShortcutTriggered)}",
+			$"ADD SPECIAL  {shortcutTextCol + MenuHelper.GetStringRepresentationOfShortcut(Main.ActiveShortcutSettings.SpecialChipsShortcutTriggered)}",
+			$"LIBRARY      {shortcutTextCol + MenuHelper.GetStringRepresentationOfShortcut(Main.ActiveShortcutSettings.LibraryShortcutTriggered)}",
+			$"STATS        {shortcutTextCol + MenuHelper.GetStringRepresentationOfShortcut(Main.ActiveShortcutSettings.StatsShortcutTriggered)}", // Ctrl+'T' from the T in Stats
+			$"PREFS        {shortcutTextCol + MenuHelper.GetStringRepresentationOfShortcut(Main.ActiveShortcutSettings.PreferencesShortcutTriggered)}",
+			$"QUIT         {shortcutTextCol + MenuHelper.GetStringRepresentationOfShortcut(Main.ActiveShortcutSettings.QuitToMainMenuShortcutTriggered)}"
 		};
 
 		const int NewChipButtonIndex = 0;
