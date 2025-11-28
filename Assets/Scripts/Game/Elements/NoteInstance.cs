@@ -3,8 +3,8 @@ using DLS.Graphics;
 using Seb.Helpers;
 using Seb.Types;
 using Seb.Vis;
+using Seb.Vis.UI;
 using UnityEngine;
-using static DLS.Graphics.DrawSettings;
 using DLS.Description;
 
 
@@ -78,7 +78,7 @@ namespace DLS.Game
         {
             Vector2 minSize = new Vector2(2f, 2f);
             Size = minSize;
-            Vector2 textSize = Draw.CalculateTextBoundsSize(Text, FontSizeNoteText, DrawSettings.ActiveUITheme.FontBold);
+            Vector2 textSize = Draw.CalculateTextBoundsSize(Text, UIThemeLibrary.FontSizeDefault, DrawSettings.ActiveUITheme.FontBold);
             if (textSize.x > minSize.x)
             {
                 Size = new Vector2(textSize.x + 1f, Size.y);
