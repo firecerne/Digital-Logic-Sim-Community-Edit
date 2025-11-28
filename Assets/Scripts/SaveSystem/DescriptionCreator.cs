@@ -77,7 +77,7 @@ namespace DLS.SaveSystem
 			SubChipDescription[] subchips = chip.GetSubchips().Select(CreateSubChipDescription).ToArray();
 			Vector2 minChipsSize = SubChipInstance.CalculateMinChipSize(inputPins, outputPins, name);
 			size = Vector2.Max(minChipsSize, size);
-
+			NoteDescription[] notes = chip.GetNotes().Select(CreateNoteDescription).ToArray();
 			UpdateWireIndicesForDescriptionCreation(chip);
 
 			// Create and return the chip description
@@ -94,6 +94,7 @@ namespace DLS.SaveSystem
 				InputPins = inputPins,
 				OutputPins = outputPins,
 				Wires = chip.Wires.Select(CreateWireDescription).ToArray(),
+				Notes = notes,
 				Displays = displays,
 				ChipType = ChipType.Custom,
 				HasCustomLayout = hasSavedDesc ? descOld.HasCustomLayout : false
@@ -119,6 +120,22 @@ namespace DLS.SaveSystem
 				(uint[])subChip.InternalData?.Clone()
 			);
 		}
+
+		public static NoteDescription CreateNoteDescription(NoteInstance note) =>
+			new(
+				note.ID,
+				note.Colour,
+				note.Text,
+				note.Position
+			);
+
+		public static NoteDescription CreateNoteDescriptionForPlacement(int id, NoteColour colour, string text, Vector2 pos) =>
+			new(
+				id,
+				colour,
+				text,
+				pos
+			);
 
 		public static SubChipDescription CreateBuiltinSubChipDescriptionForPlacement(ChipType type, string name, int id, Vector2 position)
 		{

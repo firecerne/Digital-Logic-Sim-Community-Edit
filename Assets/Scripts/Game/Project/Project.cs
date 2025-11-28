@@ -349,6 +349,25 @@ namespace DLS.Game
 
         }
 
+		public void CreateBlankNote(Vector2 position, string text)
+		{
+			// Get all possible values of the NoteColour enum
+			Array colours = Enum.GetValues(typeof(NoteColour));
+
+			// Select a random color
+			NoteColour randomColour = (NoteColour)colours.GetValue(UnityEngine.Random.Range(0, colours.Length));
+
+			// Create the note with the random color
+			NoteDescription noteDesc = new NoteDescription(
+				IDGenerator.GenerateNewElementID(editModeChip),
+				randomColour,
+				text,
+				position
+			);
+
+			controller.StartPlacingNote(noteDesc);
+ 		}
+		
         public void DeleteChip(string chipToDeleteName)
 		{
 			// If the current chip only contains the deleted chip directly as a subchip, it will be removed from the sim and everything is fine.
