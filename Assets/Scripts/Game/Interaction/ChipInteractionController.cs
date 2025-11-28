@@ -119,6 +119,17 @@ namespace DLS.Game
 			DeleteElements(new List<IMoveable>(new[] { element }));
 		}
 
+		public void Delete(IMoveable element, bool clearSelection = true, bool recordUndo = true)
+		{
+			if (!HasControl) return;
+			if (recordUndo) ActiveDevChip.UndoController.RecordDeleteElements(new List<IMoveable>(new[] { element }));
+			if (element is SubChipInstance subChip) ActiveDevChip.DeleteSubChip(subChip);
+			if (element is NoteInstance noteInstance) ActiveDevChip.DeleteNote(noteInstance);
+			else if (element is DevPinInstance devPin) ActiveDevChip.DeleteDevPin(devPin);
+
+			if (clearSelection) SelectedElements.Clear();
+ 		}
+
 		void DeleteElements(List<IMoveable> elements, bool clearSelection = true)
 		{
 			if (!HasControl) return;
@@ -129,6 +140,7 @@ namespace DLS.Game
 			{
 				if (element is SubChipInstance subChip) ActiveDevChip.DeleteSubChip(subChip);
 				else if (element is DevPinInstance devPin) ActiveDevChip.DeleteDevPin(devPin);
+				else if (element is NoteInstance note) ActiveDevChip.DeleteNote(note);
 			}
 
 			if (clearSelection) SelectedElements.Clear();
@@ -601,6 +613,7 @@ namespace DLS.Game
 					ActiveDevChip.AddNewSubChip(subchip, false);
 				}
 				else if (elementToPlace is DevPinInstance devPin) ActiveDevChip.AddNewDevPin(devPin, false);
+				else if (elementToPlace is NoteInstance note) ActiveDevChip.AddNote(note, false);
 			}
 
 			foreach (WireInstance wire in DuplicatedWires)
@@ -939,6 +952,49 @@ namespace DLS.Game
 			}
 		}
 
+		public void StartPlacingNote(NoteDescription noteDescription)
+		{
+			StartPlacingNote(noteDescription, InputHelper.MousePosWorld, false);
+		}
+
+		public IMoveable StartPlacingNote(NoteDescription noteDescription, Vector2 position, bool isDuplicating)
+		{
+			newElementsAreDuplicatedElements = isDuplicating;
+
+			if (!isPlacingNewElements)
+			{
+				CancelEverything();
+				isPlacingNewElements = true;
+				hasExittedMultiModeSincePlacementStart = false;
+				StartMovingSelectedItems();
+			}
+
+			IMoveable elementToPlace;
+			int instanceID = IDGenerator.GenerateNewElementID(ActiveDevChip);
+
+			NoteDescription noteDesc = DescriptionCreator.CreateNoteDescriptionForPlacement(instanceID, noteDescription.Colour, noteDescription.Text, position);
+			elementToPlace = new NoteInstance(noteDesc);
+
+			// If placing multiple elements simultaneously, place the new element below the previous one
+			// (unless is duplicating elements, in which case their relative positions should be preserved)
+			if (SelectedElements.Count > 0 && !isDuplicating)
+			{
+				float spacing = (elementToPlace.SelectionBoundingBox.Size.y + SelectedElements[^1].SelectionBoundingBox.Size.y) / 2;
+				elementToPlace.MoveStartPosition = SelectedElements[^1].MoveStartPosition + Vector2.down * spacing;
+				elementToPlace.HasReferencePointForStraightLineMovement = false;
+			}
+			else
+			{
+				moveElementMouseStartPos = InputHelper.MousePosWorld + elementToPlace.SelectionBoundingBox.Size / 2; ;
+				elementToPlace.MoveStartPosition = position;
+				elementToPlace.StraightLineReferencePoint = position;
+				elementToPlace.HasReferencePointForStraightLineMovement = isDuplicating;
+			}
+
+			Select(elementToPlace);
+			return elementToPlace;
+		}
+
 		IMoveable CreateElementFromChipDescription(ChipDescription chipDescription)
 		{
 			IMoveable elementToPlace;
@@ -974,6 +1030,11 @@ namespace DLS.Game
 				PinDescription pinDesc = DescriptionCreator.CreatePinDescription(devPinSrc);
 				pinDesc.ID = instanceID;
 				element = new DevPinInstance(pinDesc, devPinSrc.IsInputPin);
+			}
+			else if (duplicationSource is NoteInstance noteSrc)
+			{
+				NoteDescription noteDesc = DescriptionCreator.CreateNoteDescriptionForPlacement(instanceID, noteSrc.Colour, noteSrc.Description.Text, noteSrc.Position);
+				element = new NoteInstance(noteDesc);
 			}
 			else
 			{

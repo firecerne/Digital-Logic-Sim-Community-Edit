@@ -27,6 +27,7 @@ namespace DLS.Graphics
 			$"LIBRARY      {shortcutTextCol}Ctrl+L",
 			$"STATS        {shortcutTextCol}Ctrl+T", // Ctrl+'T' from the T in Stats
 			$"PREFS        {shortcutTextCol}Ctrl+P",
+			$"NEW NOTE",
 			$"QUIT         {shortcutTextCol}Ctrl+Q"
 		};
 
@@ -37,7 +38,8 @@ namespace DLS.Graphics
 		const int LibraryButtonIndex = 4;
 		const int StatsButtonIndex = 5;
 		const int OptionsButtonIndex = 6;
-		const int QuitButtonIndex = 7;
+		const int NewNoteButtonIndex = 7;
+		const int QuitButtonIndex = 8;
 
 		// ---- State ----
 		static float scrollX;
@@ -118,6 +120,7 @@ namespace DLS.Graphics
 				else if (i == LibraryButtonIndex) OpenLibraryMenu();
 				else if (i == StatsButtonIndex) OpenStatsMenu();
 				else if (i == OptionsButtonIndex) OpenPreferencesMenu();
+				else if (i == NewNoteButtonIndex) CreateNewNote();
 				else if (i == QuitButtonIndex) ExitToMainMenu();
 			}
 		}
@@ -410,6 +413,11 @@ namespace DLS.Graphics
 					Project.ActiveProject.CreateBlankDevChip();
 				}
 			}
+		}
+
+		static void CreateNewNote()
+		{
+			Project.ActiveProject.CreateBlankNote(Vector2.zero, "Text");
 		}
 
 		static void HandleKeyboardShortcuts()

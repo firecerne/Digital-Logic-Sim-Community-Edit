@@ -30,6 +30,7 @@ namespace Seb.Vis.UI
 		static readonly Dictionary<UIHandle, ColourPickerState> colPickerStates = new();
 		static readonly Dictionary<UIHandle, ScrollBarState> scrollbarStates = new();
 		static readonly Dictionary<UIHandle, WheelSelectorState> wheelSelectorStates = new();
+		static readonly Dictionary<UIHandle, TextAreaState> textAreaStates = new();
 		static readonly Dictionary<UIHandle, bool> checkBoxStates = new();
 
 
@@ -1125,6 +1126,8 @@ namespace Seb.Vis.UI
 
 		public static WheelSelectorState GetWheelSelectorState(UIHandle id) => GetOrCreateState(id, wheelSelectorStates);
 
+		public static TextAreaState GetTextAreaState(UIHandle id) => GetOrCreateState(id, textAreaStates);
+
 		public static void ResetAllStates()
 		{
 			inputFieldStates.Clear();
@@ -1132,6 +1135,7 @@ namespace Seb.Vis.UI
 			buttonStates.Clear();
 			scrollbarStates.Clear();
 			wheelSelectorStates.Clear();
+			textAreaStates.Clear();
 		}
 
 		public static void OverridePreviousBounds(Bounds2D bounds)
@@ -1242,4 +1246,332 @@ namespace Seb.Vis.UI
 			}
 		}
 	}
+
+	public static TextAreaState TextArea(UIHandle id, InputFieldTheme theme, Vector2 pos, Vector2 size, string defaultText, Anchor anchor, float textPad, Func<string, bool> validation = null, bool forceFocus = false)
+	{
+		TextAreaState state = GetTextAreaState(id);
+
+		Vector2 centre = CalculateCentre(pos, size, anchor);
+		(Vector2 centre_ss, Vector2 size_ss) ss = UIToScreenSpace(centre, size);
+
+		if (IsRendering)
+		{
+			static bool CanTrigger(ref InputFieldState.TriggerState triggerState, KeyCode key)
+			{
+				if (InputHelper.IsKeyDownThisFrame(key)) triggerState.lastManualTime = Time.time;
+
+				if (InputHelper.IsKeyDownThisFrame(key) || (InputHelper.IsKeyHeld(key) && CanAutoTrigger(triggerState)))
+				{
+					triggerState.lastAutoTiggerTime = Time.time;
+					return true;
+				}
+
+				return false;
+			}
+
+			static bool CanAutoTrigger(InputFieldState.TriggerState triggerState)
+			{
+				const float autoTriggerStartDelay = 0.5f;
+				const float autoTriggerRepeatDelay = 0.04f;
+				bool initialDelayOver = Time.time - triggerState.lastManualTime > autoTriggerStartDelay;
+				bool canRepeat = Time.time - triggerState.lastAutoTiggerTime > autoTriggerRepeatDelay;
+				return initialDelayOver && canRepeat;
+			}
+
+			// Draw background
+			Draw.Quad(ss.centre, ss.size, theme.bgCol);
+
+			bool mouseInBounds = InputHelper.MouseInBounds_ScreenSpace(ss.centre, ss.size);
+
+			Vector2 textTopLeft_ss = ss.centre + new Vector2(-ss.size.x / 2 + textPad * scale, ss.size.y / 2 - textPad * scale);
+			float lineHeight = Draw.CalculateTextBoundsSize("M".AsSpan(), theme.fontSize, theme.font).y * scale;
+
+			// Build wrapped lines
+			float maxLineWidthUI = Mathf.Max(0.001f, size.x - textPad * 2);
+			List<string> lines = new();
+			List<List<int>> linesRawIndex = new();
+			BuildWrappedLines(state.text, maxLineWidthUI, theme, out lines, out linesRawIndex);
+
+			float contentHeight = lines.Count * lineHeight;
+			state.scrollY = Mathf.Clamp(state.scrollY, 0, Mathf.Max(0, contentHeight - ss.size.y + textPad * scale * 2));
+
+			// Mouse down
+			if (InputHelper.IsMouseDownThisFrame(MouseButton.Left))
+			{
+				state.SetFocus(mouseInBounds || forceFocus);
+				state.isMouseDownInBounds = mouseInBounds;
+				if (mouseInBounds)
+				{
+					Vector2 m = InputHelper.MousePos;
+					float localY = (textTopLeft_ss.y + state.scrollY) - m.y;
+					int lineIndex = Mathf.Clamp((int)(localY / lineHeight), 0, Mathf.Max(0, lines.Count - 1));
+					string line = lines[lineIndex];
+					List<int> rawMap = linesRawIndex[lineIndex];
+					int charIndexInLine = 0;
+					for (int i = 0; i <= line.Length; i++)
+					{
+						float w = Draw.CalculateTextBoundsSize(line.AsSpan(0, i), theme.fontSize, theme.font).x * scale;
+						float charLeft = textTopLeft_ss.x + w;
+						if (m.x < charLeft + (i < line.Length ? Draw.CalculateTextBoundsSize(line.AsSpan(i,1), theme.fontSize, theme.font).x * scale * 0.5f : 0))
+						{
+							charIndexInLine = i; break;
+						}
+						if (i == line.Length) charIndexInLine = line.Length;
+					}
+					int newRawIndex = charIndexInLine == 0 ? (rawMap.Count > 0 ? rawMap[0] : 0) : rawMap[Mathf.Clamp(charIndexInLine - 1, 0, rawMap.Count - 1)] + 1;
+					newRawIndex = Mathf.Clamp(newRawIndex, 0, state.text.Length);
+					state.SetCursorIndex(newRawIndex, InputHelper.ShiftIsHeld);
+					state.desiredColumn = charIndexInLine;
+				}
+			}
+
+			// Drag select
+			if (state.focused && InputHelper.IsMouseHeld(MouseButton.Left) && state.isMouseDownInBounds)
+			{
+				Vector2 m = InputHelper.MousePos;
+				float localY = (textTopLeft_ss.y + state.scrollY) - m.y;
+				int lineIndex = Mathf.Clamp((int)(localY / lineHeight), 0, Mathf.Max(0, lines.Count - 1));
+				string line = lines[lineIndex];
+				List<int> rawMap = linesRawIndex[lineIndex];
+				int charIndexInLine = 0;
+				for (int i = 0; i <= line.Length; i++)
+				{
+					float w = Draw.CalculateTextBoundsSize(line.AsSpan(0, i), theme.fontSize, theme.font).x * scale;
+					float charLeft = textTopLeft_ss.x + w;
+					if (m.x < charLeft + (i < line.Length ? Draw.CalculateTextBoundsSize(line.AsSpan(i,1), theme.fontSize, theme.font).x * scale * 0.5f : 0))
+					{
+						charIndexInLine = i; break;
+					}
+					if (i == line.Length) charIndexInLine = line.Length;
+				}
+				int newRawIndex = charIndexInLine == 0 ? (rawMap.Count > 0 ? rawMap[0] : 0) : rawMap[Mathf.Clamp(charIndexInLine - 1, 0, rawMap.Count - 1)] + 1;
+				newRawIndex = Mathf.Clamp(newRawIndex, 0, state.text.Length);
+				state.SetCursorIndex(newRawIndex, true);
+			}
+
+			if (forceFocus && !state.focused) state.SetFocus(true);
+
+			if (state.focused)
+			{
+				foreach (char c in InputHelper.InputStringThisFrame)
+				{
+					bool invalidChar = char.IsControl(c) && c != '\n' || char.IsSurrogate(c) || char.GetUnicodeCategory(c) == System.Globalization.UnicodeCategory.Format || char.GetUnicodeCategory(c) == System.Globalization.UnicodeCategory.PrivateUse;
+					if (invalidChar) continue;
+					state.TryInsertText(c + "", validation);
+				}
+
+				if (InputHelper.IsKeyDownThisFrame(KeyCode.Return) || InputHelper.IsKeyDownThisFrame(KeyCode.KeypadEnter)) state.TryInsertText("\n", validation);
+				if (InputHelper.CtrlIsHeld && InputHelper.IsKeyDownThisFrame(KeyCode.V)) state.TryInsertText(InputHelper.GetClipboardContents(), validation);
+
+				if (CanTrigger(ref state.backspaceTrigger, KeyCode.Backspace))
+				{
+					int charDeleteCount = InputHelper.CtrlIsHeld ? state.text.Length : 1;
+					for (int i = 0; i < charDeleteCount; i++) state.Delete(true, validation);
+				}
+				else if (CanTrigger(ref state.deleteTrigger, KeyCode.Delete)) state.Delete(false, validation);
+
+				bool select = InputHelper.ShiftIsHeld;
+				if (CanTrigger(ref state.arrowKeyTrigger, KeyCode.LeftArrow)) state.DecrementCursor(select);
+				if (CanTrigger(ref state.arrowKeyTrigger, KeyCode.RightArrow)) state.IncrementCursor(select);
+
+				if (InputHelper.IsKeyDownThisFrame(KeyCode.UpArrow) || InputHelper.IsKeyDownThisFrame(KeyCode.DownArrow))
+				{
+					(int lineIdx, int col) = FindLineAndColumnFromRawIndex(linesRawIndex, state.cursorBeforeCharIndex);
+					if (InputHelper.IsKeyDownThisFrame(KeyCode.UpArrow))
+					{
+						if (lineIdx > 0)
+						{
+							int targetLine = lineIdx - 1;
+							int targetCol = Mathf.Min(state.desiredColumn > 0 ? state.desiredColumn : col, lines[targetLine].Length);
+							int raw = targetCol == 0 ? (linesRawIndex[targetLine].Count > 0 ? linesRawIndex[targetLine][0] : state.text.Length) : linesRawIndex[targetLine][Mathf.Clamp(targetCol - 1, 0, linesRawIndex[targetLine].Count - 1)] + 1;
+							state.SetCursorIndex(raw, select);
+						}
+					}
+					else
+					{
+						if (lineIdx < lines.Count - 1)
+						{
+							int targetLine = lineIdx + 1;
+							int targetCol = Mathf.Min(state.desiredColumn > 0 ? state.desiredColumn : col, lines[targetLine].Length);
+							int raw = targetCol == 0 ? (linesRawIndex[targetLine].Count > 0 ? linesRawIndex[targetLine][0] : state.text.Length) : linesRawIndex[targetLine][Mathf.Clamp(targetCol - 1, 0, linesRawIndex[targetLine].Count - 1)] + 1;
+							state.SetCursorIndex(raw, select);
+						}
+					}
+					state.desiredColumn = col;
+				}
+
+				bool copyTriggered = InputHelper.CtrlIsHeld && InputHelper.IsKeyDownThisFrame(KeyCode.C);
+				bool cutTriggered = InputHelper.CtrlIsHeld && InputHelper.IsKeyDownThisFrame(KeyCode.X);
+				if (copyTriggered || cutTriggered)
+				{
+					string copyText = state.text;
+					if (state.isSelecting) copyText = state.text.AsSpan(state.SelectionMinIndex, state.SelectionMaxIndex - state.SelectionMinIndex).ToString();
+					InputHelper.CopyToClipboard(copyText);
+
+					if (cutTriggered)
+					{
+						if (state.isSelecting) state.Delete(true, validation);
+						else state.ClearText();
+					}
+				}
+
+				if (InputHelper.CtrlIsHeld && InputHelper.IsKeyDownThisFrame(KeyCode.A)) state.SelectAll();
+			}
+
+			if (mouseInBounds)
+			{
+				const float scrollSensitivity = 20f;
+				state.scrollY += InputHelper.MouseScrollDelta.y * -scrollSensitivity;
+				state.scrollY = Mathf.Clamp(state.scrollY, 0, Mathf.Max(0, contentHeight - ss.size.y + textPad * scale * 2));
+			}
+
+			using (CreateMaskScope(centre, size))
+			{
+				for (int i = 0; i < lines.Count; i++)
+				{
+					string line = lines[i];
+					Vector2 linePos_ss = new(textTopLeft_ss.x, textTopLeft_ss.y - (i * lineHeight) - lineHeight / 2 + state.scrollY);
+					Draw.Text(theme.font, line, theme.fontSize * scale, linePos_ss, Anchor.TextCentreLeft, theme.textCol);
+
+					if (state.isSelecting)
+					{
+						int selMin = state.SelectionMinIndex;
+						int selMax = state.SelectionMaxIndex;
+						List<int> map = linesRawIndex[i];
+						if (map.Count > 0)
+						{
+							int lineRawStart = map[0];
+							int lineRawEnd = map[^1] + 1;
+							int localSelMin = Mathf.Clamp(selMin - lineRawStart, 0, lineRawEnd - lineRawStart);
+							int localSelMax = Mathf.Clamp(selMax - lineRawStart, 0, lineRawEnd - lineRawStart);
+							if (localSelMax > localSelMin)
+							{
+								float startX = textTopLeft_ss.x + Draw.CalculateTextBoundsSize(line.AsSpan(0, localSelMin), theme.fontSize, theme.font).x * scale;
+								float endX = textTopLeft_ss.x + Draw.CalculateTextBoundsSize(line.AsSpan(0, localSelMax), theme.fontSize, theme.font).x * scale;
+								Vector2 c = new((endX + startX) / 2, linePos_ss.y);
+								Vector2 s = new(endX - startX, lineHeight);
+								Draw.Quad(c, s, new Color(0.2f, 0.6f, 1, 0.5f));
+							}
+						}
+					}
+
+					if (state.focused)
+					{
+						(int caretLine, int caretCol) = FindLineAndColumnFromRawIndex(linesRawIndex, state.cursorBeforeCharIndex);
+						if (caretLine == i)
+						{
+							float caretX = textTopLeft_ss.x + Draw.CalculateTextBoundsSize(line.AsSpan(0, caretCol), theme.fontSize, theme.font).x * scale;
+							const float blinkDuration = 0.5f;
+							if ((int)((Time.time - state.lastInputTime) / blinkDuration) % 2 == 0)
+							{
+								Vector2 caretSize = new(0.125f * theme.fontSize * scale, lineHeight);
+								Draw.Quad(new Vector2(caretX, linePos_ss.y), caretSize, theme.textCol);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		OnFinishedDrawingUIElement(centre, size);
+		return state;
+
+		static void BuildWrappedLines(string raw, float maxLineWidthUI, InputFieldTheme theme, out List<string> outLines, out List<List<int>> outMap)
+		{
+			outLines = new();
+			outMap = new();
+
+			int i = 0;
+			while (i < raw.Length)
+			{
+				if (raw[i] == '\n')
+				{
+					outLines.Add(string.Empty);
+					outMap.Add(new List<int>());
+					i++; continue;
+				}
+
+				StringBuilder lineSb = new();
+				List<int> lineMap = new();
+
+				while (i < raw.Length && raw[i] != '\n')
+				{
+					int wordStart = i;
+					while (i < raw.Length && raw[i] != ' ' && raw[i] != '\n') i++;
+					int wordEnd = i;
+					int wordLen = wordEnd - wordStart;
+					string word = raw.Substring(wordStart, wordLen);
+
+					if (i < raw.Length && raw[i] == ' ')
+					{
+						word += ' ';
+						i++;
+					}
+
+					float currWidth = Draw.CalculateTextBoundsSize(lineSb.ToString().AsSpan(), theme.fontSize, theme.font).x;
+					float wordWidth = Draw.CalculateTextBoundsSize(word.AsSpan(), theme.fontSize, theme.font).x;
+
+					if (lineSb.Length == 0 && wordWidth > maxLineWidthUI)
+					{
+						int idx = 0;
+						while (idx < word.Length)
+						{
+							int take = 0;
+							for (int k = idx; k < word.Length; k++)
+							{
+								float w = Draw.CalculateTextBoundsSize(word.AsSpan(idx, k - idx + 1), theme.fontSize, theme.font).x;
+								if (w <= maxLineWidthUI) take = k - idx + 1; else break;
+							}
+							if (take == 0) take = 1;
+							string part = word.Substring(idx, take);
+							for (int p = 0; p < part.Length; p++) lineMap.Add(wordStart + idx + p);
+							lineSb.Append(part);
+							outLines.Add(lineSb.ToString());
+							outMap.Add(new List<int>(lineMap));
+							lineSb.Clear();
+							lineMap.Clear();
+							idx += take;
+						}
+					}
+					else if (currWidth + wordWidth <= maxLineWidthUI)
+					{
+						for (int p = 0; p < word.Length; p++) lineMap.Add(wordStart + p);
+						lineSb.Append(word);
+					}
+					else
+					{
+						outLines.Add(lineSb.ToString());
+						outMap.Add(new List<int>(lineMap));
+						lineSb.Clear();
+						lineMap.Clear();
+						for (int p = 0; p < word.Length; p++) lineMap.Add(wordStart + p);
+						lineSb.Append(word);
+					}
+				}
+
+				outLines.Add(lineSb.ToString());
+				outMap.Add(lineMap);
+			}
+		}
+
+		static (int line, int col) FindLineAndColumnFromRawIndex(List<List<int>> maps, int rawIndex)
+		{
+			for (int li = 0; li < maps.Count; li++)
+			{
+				List<int> map = maps[li];
+				if (map.Count == 0)
+				{
+					if (rawIndex == 0) return (li, 0);
+					continue;
+				}
+				int lineStart = map[0];
+				int lineEnd = map[^1] + 1;
+				if (rawIndex >= lineStart && rawIndex <= lineEnd)
+				{
+					int col = Mathf.Clamp(rawIndex - lineStart, 0, map.Count);
+					return (li, col);
+				}
+			}
+			return (maps.Count - 1, maps.Count > 0 ? maps[^1].Count : 0);
+		}
 }
