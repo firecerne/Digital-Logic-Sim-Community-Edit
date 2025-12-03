@@ -61,7 +61,7 @@ namespace DLS.Game
 
         public static void LoadShortcutSettings(ShortcutSettings shortcutSettings)
 		{
-			LoadShortcut(out MainMenu_NewProjectShortcutTriggered, shortcutSettings.MainMenu_NewProjectShortcutTriggered);
+            LoadShortcut(out MainMenu_NewProjectShortcutTriggered, shortcutSettings.MainMenu_NewProjectShortcutTriggered);
             LoadShortcut(out MainMenu_OpenProjectShortcutTriggered, shortcutSettings.MainMenu_OpenProjectShortcutTriggered);
             LoadShortcut(out MainMenu_SettingsShortcutTriggered, shortcutSettings.MainMenu_SettingsShortcutTriggered);
             LoadShortcut(out MainMenu_QuitShortcutTriggered, shortcutSettings.MainMenu_QuitShortcutTriggered);
@@ -92,6 +92,7 @@ namespace DLS.Game
 
         public static void LoadShortcut(out Func<bool> shortcutFunction, Shortcut shortcut)
 		{
+			shortcutFunction = () => false;
 			if (shortcut.ForbiddenModifier == ShortcutModifier.None && shortcut.AlternativeKeyCode == KeyCode.None && shortcut.AlternativeModifier == ShortcutModifier.None)
 			{
 				LoadSimpleShortcut(out shortcutFunction, shortcut);
@@ -109,8 +110,8 @@ namespace DLS.Game
 		static void LoadComplexShortcut(out Func<bool> shortcutFunction, Shortcut shortcut)
 		{
 			Func<bool> modifier = GetFuncFromShortcutModifier(shortcut.Modifier);
-			Func<bool> alternativeModifier = GetFuncFromShortcutModifier(shortcut.AlternativeModifier);
-			Func<bool> forbiddenModifier = GetFuncFromShortcutModifier(shortcut.ForbiddenModifier);
+			Func<bool> alternativeModifier = GetFuncFromShortcutModifier(shortcut.AlternativeModifier, false);
+			Func<bool> forbiddenModifier = GetFuncFromShortcutModifier(shortcut.ForbiddenModifier, false);
 			Func<bool> keys = () => InputHelper.IsKeyDownThisFrame(shortcut.KeyCode) && 
 			(shortcut.AlternativeKeyCode == KeyCode.None ? true : InputHelper.IsKeyDownThisFrame(shortcut.AlternativeKeyCode));
 

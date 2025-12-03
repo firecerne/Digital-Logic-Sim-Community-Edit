@@ -69,7 +69,7 @@ namespace DLS.Description
             };
     }
 
-    public struct Shortcut
+    public class Shortcut
     {
         public ShortcutModifier Modifier;
         public KeyCode KeyCode;
@@ -85,6 +85,19 @@ namespace DLS.Description
             AlternativeModifier = alternativeMod;
             AlternativeKeyCode = alternativeKey;
             ForbiddenModifier = forbiddenMod;
+        }
+
+        public void Reassign(Shortcut shortcut)
+        {
+            Modifier = shortcut.Modifier;
+            KeyCode = shortcut.KeyCode;
+            AlternativeModifier = shortcut.AlternativeModifier;
+            AlternativeKeyCode = shortcut.AlternativeKeyCode;
+            ForbiddenModifier = shortcut.ForbiddenModifier;
+        }
+
+        public Shortcut Copy() {
+            return new Shortcut(Modifier, KeyCode, AlternativeModifier, AlternativeKeyCode, ForbiddenModifier);
         }
     }
 
