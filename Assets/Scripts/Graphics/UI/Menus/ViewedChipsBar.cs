@@ -26,7 +26,7 @@ namespace DLS.Graphics
 			Vector2 buttonCentreRight = new(UI.Width - pad, pos.y);
 			bool backButtonPressed = UI.Button("Back", ActiveUITheme.ChipButton, buttonCentreRight, buttonSize, true, false, false, Anchor.CentreRight);
 
-			if (backButtonPressed || KeyboardShortcuts.CancelShortcutTriggered)
+			if (backButtonPressed || KeyboardShortcuts.CancelShortcutTriggered())
 			{
 				project.ReturnToPreviousViewedChip();
 			}

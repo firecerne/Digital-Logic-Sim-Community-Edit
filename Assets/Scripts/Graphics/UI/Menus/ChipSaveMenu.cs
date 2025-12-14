@@ -76,9 +76,9 @@ namespace DLS.Graphics
 				ButtonGroupInteractStates[SaveAsButtonIndex] = saveButtonEnabled;
 				string[] buttonGroupNames = renaming ? CancelRenameSaveButtonNames : CancelSaveButtonNames;
 				int buttonIndex = UI.HorizontalButtonGroup(buttonGroupNames, ButtonGroupInteractStates, theme.ButtonTheme, buttonTopLeft, UI.PrevBounds.Width, DrawSettings.DefaultButtonSpacing, 0, Anchor.TopLeft);
-				bool confirmShortcut = !renaming && KeyboardShortcuts.ConfirmShortcutTriggered;
+				bool confirmShortcut = !renaming && KeyboardShortcuts.ConfirmShortcutTriggered();
 
-				if (buttonIndex == CancelButtonIndex || KeyboardShortcuts.CancelShortcutTriggered)
+				if (buttonIndex == CancelButtonIndex || KeyboardShortcuts.CancelShortcutTriggered())
 				{
 					Cancel();
 				}

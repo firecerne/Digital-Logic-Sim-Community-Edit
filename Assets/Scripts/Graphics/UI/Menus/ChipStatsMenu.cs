@@ -93,7 +93,7 @@ namespace DLS.Graphics
 					UIDrawer.SetActiveMenu(UIDrawer.MenuType.None);
 			}
 
-            if (KeyboardShortcuts.CancelShortcutTriggered)
+            if (KeyboardShortcuts.CancelShortcutTriggered())
             {
                 UIDrawer.SetActiveMenu(UIDrawer.MenuType.None);
             }

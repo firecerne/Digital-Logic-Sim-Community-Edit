@@ -54,7 +54,7 @@ namespace DLS.Graphics
 			}
 
 			// ---- keyboard shortcuts ----
-			if (KeyboardShortcuts.ConfirmShortcutTriggered)
+			if (KeyboardShortcuts.ConfirmShortcutTriggered())
 			{
 				foreach (string chipName in filteredChipNames)
 				{
@@ -73,7 +73,7 @@ namespace DLS.Graphics
 					}
 				}
 			}
-			else if (KeyboardShortcuts.CancelShortcutTriggered || (KeyboardShortcuts.SearchShortcutTriggered && Time.frameCount > menuOpenedFrame))
+			else if (KeyboardShortcuts.CancelShortcutTriggered() || (KeyboardShortcuts.SearchShortcutTriggered() && Time.frameCount > menuOpenedFrame))
 			{
 				UIDrawer.SetActiveMenu(UIDrawer.MenuType.None);
 			}

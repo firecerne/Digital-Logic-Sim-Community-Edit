@@ -14,6 +14,12 @@ namespace DLS.SaveSystem
 			WriteToFile(data, SavePaths.AppSettingsPath);
 		}
 
+		public static void SaveShortcutSettings(ShortcutSettings shortcutSettings)
+		{
+			string data = Serializer.SerializeShortcutSettings(shortcutSettings);
+			WriteToFile(data,SavePaths.ShortcutSettingsPath);
+		}
+
 		public static void SaveProjectDescription(ProjectDescription projectDescription)
 		{
 			projectDescription.LastSaveTime = DateTime.Now;
