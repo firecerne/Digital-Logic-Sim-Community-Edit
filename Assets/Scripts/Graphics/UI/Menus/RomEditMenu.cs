@@ -56,7 +56,7 @@ namespace DLS.Graphics
 			if (focusedRowIndex >= 0)
 			{
 				// Focus next/prev field with keyboard shortcuts
-				bool changeLine = KeyboardShortcuts.ConfirmShortcutTriggered || InputHelper.IsKeyDownThisFrame(KeyCode.Tab);
+				bool changeLine = KeyboardShortcuts.ConfirmShortcutTriggered() || InputHelper.IsKeyDownThisFrame(KeyCode.Tab);
 
 				if (changeLine)
 				{
@@ -99,7 +99,7 @@ namespace DLS.Graphics
 				else if (copyPasteButtonIndex == 1) PasteAll();
 				else if (clearAll) ClearAll();
 
-				if (result == MenuHelper.CancelConfirmResult.Cancel || KeyboardShortcuts.CancelShortcutTriggered)
+				if (result == MenuHelper.CancelConfirmResult.Cancel || KeyboardShortcuts.CancelShortcutTriggered())
 				{
 					UIDrawer.SetActiveMenu(UIDrawer.MenuType.None);
 				}

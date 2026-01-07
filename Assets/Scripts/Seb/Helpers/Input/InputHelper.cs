@@ -296,6 +296,9 @@ namespace Seb.Helpers
 		};
 
 
+		static int[] keycodes = GetKeyCodeValues();
+		static bool[] keysPressed;
+
 		public static Camera WorldCam
 		{
 			get
@@ -447,6 +450,25 @@ namespace Seb.Helpers
 			return InputSource.IsMouseUpThisFrame(button);
 		}
 
+		public static void TickPreciseKeyLogging() // Only tick when necessary (for exemple, controls screen)
+		{
+			for (int i = 0; i < keycodes.Length; i++)
+			{
+				keysPressed[i] = Input.GetKey((KeyCode)keycodes[i]);
+			}
+		}
+
+		public static KeyCode GetFirstValidKeyCodePressed() // returns the first valid keycode pressed in the order provided in the enum
+		{
+			KeyCode pressed = KeyCode.None;
+			for(int i = 0; i < keysPressed.Length; ++i)
+			{
+				if (keysPressed[i]) { pressed = (KeyCode)keycodes[i]; break; }
+			}
+			return pressed;
+		}
+
+
 		public static void CopyToClipboard(string s) => GUIUtility.systemCopyBuffer = s;
 		public static string GetClipboardContents() => GUIUtility.systemCopyBuffer;
 
@@ -459,6 +481,38 @@ namespace Seb.Helpers
 			rightMouseDownConsumeFrame = -1;
 			middleMouseDownConsumeFrame = -1;
 			InputSource = new UnityInputSource();
+		}
+
+		static int[] GetKeyCodeValues()
+		{
+			int[] keys = (int[])System.Enum.GetValues(typeof(KeyCode));
+			int keyCount = 0;
+
+			for (int i = 0; i < keys.Length; i++) {
+				if (!(keys[i] >= 323 & keys[i] <= 509)) // removes unwanted mouse and joystick values (keeps only keyboard)
+				{
+					keyCount++;
+				}
+			}
+
+			int[] validKeys = new int[keyCount];
+			int j = 0;
+            for (int i = 0; i < keys.Length; i++)
+            {
+                if (!(keys[i] >= 323 & keys[i] <= 509)) // removes unwanted mouse and joystick values (keeps only keyboard)
+                {
+					validKeys[j] = keys[i];
+					j++;
+                }
+            }
+
+			return validKeys;
+        }
+
+		public static void InitiatePreciseKeyLogging()
+		{
+			keycodes = GetKeyCodeValues();
+			keysPressed = new bool[keycodes.Length];
 		}
 	}
 }

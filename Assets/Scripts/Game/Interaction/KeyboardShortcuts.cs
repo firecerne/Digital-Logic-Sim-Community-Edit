@@ -1,3 +1,5 @@
+using System;
+using DLS.Description;
 using Seb.Helpers;
 using UnityEngine;
 
@@ -6,41 +8,37 @@ namespace DLS.Game
 	public static class KeyboardShortcuts
 	{
 		// ---- Main Menu shortcuts
-		public static bool MainMenu_NewProjectShortcutTriggered => CtrlShortcutTriggered(KeyCode.N);
-		public static bool MainMenu_OpenProjectShortcutTriggered => CtrlShortcutTriggered(KeyCode.O);
-		public static bool MainMenu_SettingsShortcutTriggered => CtrlShortcutTriggered(KeyCode.S);
-		public static bool MainMenu_QuitShortcutTriggered => CtrlShortcutTriggered(KeyCode.Q);
+		public static Func<bool> MainMenu_NewProjectShortcutTriggered;
+		public static Func<bool> MainMenu_OpenProjectShortcutTriggered;
+		public static Func<bool> MainMenu_SettingsShortcutTriggered;
+		public static Func<bool> MainMenu_QuitShortcutTriggered;
 
 		// ---- Bottom Bar Menu shortcuts ----
-		public static bool SaveShortcutTriggered => CtrlShortcutTriggered(KeyCode.S);
-		public static bool LibraryShortcutTriggered => CtrlShortcutTriggered(KeyCode.L);
-		public static bool PreferencesShortcutTriggered => CtrlShortcutTriggered(KeyCode.P);
-		public static bool StatsShortcutTriggered => CtrlShortcutTriggered(KeyCode.T);
-		public static bool CreateNewChipShortcutTriggered => CtrlShortcutTriggered(KeyCode.N);
-		public static bool QuitToMainMenuShortcutTriggered => CtrlShortcutTriggered(KeyCode.Q);
-		public static bool SearchShortcutTriggered => CtrlShortcutTriggered(KeyCode.F);
-		public static bool SpecialChipsShortcutTriggered => CtrlShortcutTriggered(KeyCode.B);
+		public static Func<bool> SaveShortcutTriggered;
+		public static Func<bool> LibraryShortcutTriggered;
+		public static Func<bool> PreferencesShortcutTriggered;
+		public static Func<bool> StatsShortcutTriggered;
+		public static Func<bool> CreateNewChipShortcutTriggered;
+		public static Func<bool> QuitToMainMenuShortcutTriggered;
+		public static Func<bool> SearchShortcutTriggered;
+		public static Func<bool> SpecialChipsShortcutTriggered;
 
 		// ---- Misc shortcuts ----
-		public static bool DuplicateShortcutTriggered => MultiModeHeld && InputHelper.IsKeyDownThisFrame(KeyCode.D);
-		public static bool ToggleGridShortcutTriggered => CtrlShortcutTriggered(KeyCode.G);
-		public static bool ResetCameraShortcutTriggered => CtrlShortcutTriggered(KeyCode.R);
-		public static bool UndoShortcutTriggered => CtrlShortcutTriggered(KeyCode.Z);
-		public static bool RedoShortcutTriggered => CtrlShiftShortcutTriggered(KeyCode.Z) || CtrlShortcutTriggered(KeyCode.Y); // Added Ctrl+Y for redo as well
-
-		public static bool ModifierKeysOffToggleTriggered => RightAltShortcutTriggered(KeyCode.F12);
-
-
+		public static Func<bool> DuplicateShortcutTriggered;
+		public static Func<bool> ToggleGridShortcutTriggered;
+		public static Func<bool> ResetCameraShortcutTriggered;
+		public static Func<bool> UndoShortcutTriggered;
+		public static Func<bool> RedoShortcutTriggered;
 
 		// ---- Single key shortcuts ----
-		public static bool CancelShortcutTriggered => InputHelper.IsKeyDownThisFrame(KeyCode.Escape);
-		public static bool ConfirmShortcutTriggered => InputHelper.IsKeyDownThisFrame(KeyCode.Return) || InputHelper.IsKeyDownThisFrame(KeyCode.KeypadEnter);
-		public static bool DeleteShortcutTriggered => InputHelper.IsKeyDownThisFrame(KeyCode.Backspace) || InputHelper.IsKeyDownThisFrame(KeyCode.Delete);
-		public static bool SimNextStepShortcutTriggered => InputHelper.IsKeyDownThisFrame(KeyCode.Space) && !InputHelper.CtrlIsHeld;
-		public static bool SimPauseToggleShortcutTriggered => CtrlShortcutTriggered(KeyCode.Space);
+		public static Func<bool> CancelShortcutTriggered;
+		public static Func<bool> ConfirmShortcutTriggered;
+		public static Func<bool> DeleteShortcutTriggered;
+		public static Func<bool> SimNextStepShortcutTriggered;
+		public static Func<bool> SimPauseToggleShortcutTriggered;
 
 		// ---- Dev shortcuts ----
-		public static bool OpenSaveDataFolderShortcutTriggered => InputHelper.IsKeyDownThisFrame(KeyCode.O) && InputHelper.CtrlIsHeld && InputHelper.ShiftIsHeld && InputHelper.AltIsHeld;
+		public static Func<bool> OpenSaveDataFolderShortcutTriggered;
 
 		// ---- Modifiers ----
 		public static bool SnapModeHeld => InputHelper.CtrlIsHeld;
@@ -53,11 +51,93 @@ namespace DLS.Game
 		public static bool TakeFirstFromCollectionModifierHeld => InputHelper.CtrlIsHeld || InputHelper.AltIsHeld || InputHelper.ShiftIsHeld;
 
 		// ---- Helpers ----
-		static bool CtrlShortcutTriggered(KeyCode key) => !InputHelper.ModifierKeysOff && InputHelper.IsKeyDownThisFrame(key) && InputHelper.CtrlIsHeld && !(InputHelper.AltIsHeld || InputHelper.ShiftIsHeld);
-		static bool CtrlShiftShortcutTriggered(KeyCode key) => !InputHelper.ModifierKeysOff && InputHelper.IsKeyDownThisFrame(key) && InputHelper.CtrlIsHeld && InputHelper.ShiftIsHeld && !(InputHelper.AltIsHeld);
+		public static bool CtrlShortcutTriggered(KeyCode key) => InputHelper.IsKeyDownThisFrame(key) && InputHelper.CtrlIsHeld && !(InputHelper.AltIsHeld || InputHelper.ShiftIsHeld);
+        public static bool CtrlShiftShortcutTriggered(KeyCode key) => InputHelper.IsKeyDownThisFrame(key) && InputHelper.CtrlIsHeld && InputHelper.ShiftIsHeld && !(InputHelper.AltIsHeld);
+        public static bool ShiftShortcutTriggered(KeyCode key) => InputHelper.IsKeyDownThisFrame(key) && InputHelper.ShiftIsHeld && !(InputHelper.AltIsHeld || InputHelper.CtrlIsHeld);
+		public static bool AltShortcutTriggered(KeyCode key) => InputHelper.IsKeyDownThisFrame(key) && InputHelper.AltIsHeld && !(InputHelper.CtrlIsHeld || InputHelper.ShiftIsHeld);
+		static bool RightAltShortcutTriggered(KeyCode key) => InputHelper.IsKeyDownThisFrame(key) && InputHelper.IsKeyHeld(KeyCode.RightAlt) && !(InputHelper.CtrlIsHeld || InputHelper.ShiftIsHeld); // Right Alt and key pressed only
+		public static bool CtrlShiftAltShortcutTriggered(KeyCode key) => InputHelper.IsKeyDownThisFrame(key) && InputHelper.CtrlIsHeld && InputHelper.AltIsHeld && InputHelper.ShiftIsHeld;
 
-		static bool RightAltShortcutTriggered(KeyCode key) => InputHelper.IsKeyDownThisFrame(key) && InputHelper.IsKeyHeld(KeyCode.RightAlt) && !(InputHelper.CtrlIsHeld || InputHelper.ShiftIsHeld); // Right Alt pressed only
 
-		static bool ShiftShortcutTriggered(KeyCode key) => !InputHelper.ModifierKeysOff && InputHelper.IsKeyDownThisFrame(key) && InputHelper.ShiftIsHeld && !(InputHelper.AltIsHeld || InputHelper.CtrlIsHeld);
+
+        public static void LoadShortcutSettings(ShortcutSettings shortcutSettings)
+		{
+            LoadShortcut(out MainMenu_NewProjectShortcutTriggered, shortcutSettings.MainMenu_NewProjectShortcutTriggered);
+            LoadShortcut(out MainMenu_OpenProjectShortcutTriggered, shortcutSettings.MainMenu_OpenProjectShortcutTriggered);
+            LoadShortcut(out MainMenu_SettingsShortcutTriggered, shortcutSettings.MainMenu_SettingsShortcutTriggered);
+            LoadShortcut(out MainMenu_QuitShortcutTriggered, shortcutSettings.MainMenu_QuitShortcutTriggered);
+
+            LoadShortcut(out SaveShortcutTriggered, shortcutSettings.SaveShortcutTriggered);
+            LoadShortcut(out LibraryShortcutTriggered, shortcutSettings.LibraryShortcutTriggered);
+            LoadShortcut(out PreferencesShortcutTriggered, shortcutSettings.PreferencesShortcutTriggered);
+            LoadShortcut(out StatsShortcutTriggered, shortcutSettings.StatsShortcutTriggered);
+            LoadShortcut(out CreateNewChipShortcutTriggered, shortcutSettings.CreateNewChipShortcutTriggered);
+            LoadShortcut(out QuitToMainMenuShortcutTriggered, shortcutSettings.QuitToMainMenuShortcutTriggered);
+            LoadShortcut(out SearchShortcutTriggered, shortcutSettings.SearchShortcutTriggered);
+            LoadShortcut(out SpecialChipsShortcutTriggered, shortcutSettings.SpecialChipsShortcutTriggered);
+
+            LoadShortcut(out DuplicateShortcutTriggered, shortcutSettings.DuplicateShortcutTriggered);
+            LoadShortcut(out ToggleGridShortcutTriggered, shortcutSettings.ToggleGridShortcutTriggered);
+            LoadShortcut(out ResetCameraShortcutTriggered, shortcutSettings.ResetCameraShortcutTriggered);
+            LoadShortcut(out UndoShortcutTriggered, shortcutSettings.UndoShortcutTriggered);
+            LoadShortcut(out RedoShortcutTriggered, shortcutSettings.RedoShortcutTriggered);
+
+            LoadShortcut(out CancelShortcutTriggered, shortcutSettings.CancelShortcutTriggered);
+            LoadShortcut(out ConfirmShortcutTriggered, shortcutSettings.ConfirmShortcutTriggered);
+            LoadShortcut(out DeleteShortcutTriggered, shortcutSettings.DeleteShortcutTriggered);
+            LoadShortcut(out SimNextStepShortcutTriggered, shortcutSettings.SimNextStepShortcutTriggered);
+            LoadShortcut(out SimPauseToggleShortcutTriggered, shortcutSettings.SimPauseToggleShortcutTriggered);
+
+            LoadShortcut(out OpenSaveDataFolderShortcutTriggered, shortcutSettings.OpenSaveDataFolderShortcutTriggered);
+        }
+
+        public static void LoadShortcut(out Func<bool> shortcutFunction, Shortcut shortcut)
+		{
+			shortcutFunction = () => false;
+			if (shortcut.ForbiddenModifier == ShortcutModifier.None && shortcut.AlternativeKeyCode == KeyCode.None && shortcut.AlternativeModifier == ShortcutModifier.None)
+			{
+				LoadSimpleShortcut(out shortcutFunction, shortcut);
+				return;
+			}
+
+			LoadComplexShortcut(out shortcutFunction, shortcut);
+		}
+
+		static void LoadSimpleShortcut(out Func<bool> shortcutFunction, Shortcut shortcut)
+		{
+			shortcutFunction = () => GetFuncFromShortcutModifier(shortcut.Modifier)() && InputHelper.IsKeyDownThisFrame(shortcut.KeyCode);
+		}
+
+		static void LoadComplexShortcut(out Func<bool> shortcutFunction, Shortcut shortcut)
+		{
+			Func<bool> modifier = GetFuncFromShortcutModifier(shortcut.Modifier);
+			Func<bool> alternativeModifier = GetFuncFromShortcutModifier(shortcut.AlternativeModifier, false);
+			Func<bool> forbiddenModifier = GetFuncFromShortcutModifier(shortcut.ForbiddenModifier, false);
+			Func<bool> keys = () => InputHelper.IsKeyDownThisFrame(shortcut.KeyCode) && 
+			(shortcut.AlternativeKeyCode == KeyCode.None ? true : InputHelper.IsKeyDownThisFrame(shortcut.AlternativeKeyCode));
+
+			shortcutFunction = () => (modifier() || alternativeModifier()) && !forbiddenModifier() && keys();
+		}
+
+		static Func<bool> GetFuncFromShortcutModifier(ShortcutModifier modifier, bool isStandardModifier = true)
+		{
+			switch (modifier)
+			{
+				case ShortcutModifier.None:
+					return () => isStandardModifier;
+				case ShortcutModifier.Ctrl:
+                    return () => InputHelper.CtrlIsHeld && !(InputHelper.ShiftIsHeld || InputHelper.AltIsHeld);
+                case ShortcutModifier.Shift:
+                    return () => InputHelper.ShiftIsHeld && !(InputHelper.CtrlIsHeld || InputHelper.AltIsHeld);
+                case ShortcutModifier.Alt:
+                    return () => InputHelper.AltIsHeld && !(InputHelper.CtrlIsHeld || InputHelper.ShiftIsHeld);
+                case ShortcutModifier.CtrlAndShift:
+                    return () => InputHelper.CtrlIsHeld && InputHelper.ShiftIsHeld && !InputHelper.AltIsHeld;
+                case ShortcutModifier.CtrlShiftAlt:
+					return () => InputHelper.CtrlIsHeld && InputHelper.ShiftIsHeld && InputHelper.AltIsHeld;
+				default:
+					return () => false;
+			}
+		}
 	}
 }

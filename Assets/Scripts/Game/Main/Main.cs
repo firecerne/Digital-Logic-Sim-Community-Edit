@@ -18,6 +18,7 @@ namespace DLS.Game
 		public const string LastUpdatedString = "5 May 2025";
 		public const string LastUpdatedModdedString = "10 August 2025";
 		public static AppSettings ActiveAppSettings;
+		public static ShortcutSettings ActiveShortcutSettings;
 
 		public static Project ActiveProject { get; private set; }
 
@@ -28,6 +29,7 @@ namespace DLS.Game
 		{
 			SavePaths.EnsureDirectoryExists(SavePaths.ProjectsPath);
 			SaveAndApplyAppSettings(Loader.LoadAppSettings());
+			SaveAndApplyShortcutSettings(Loader.LoadShortcutSettings());
 			Main.audioState = audioState;
 		}
 
@@ -58,6 +60,16 @@ namespace DLS.Game
 			int height = newSettings.fullscreenMode is FullScreenMode.Windowed ? newSettings.ResolutionY : FullScreenResolution.y;
 			Screen.SetResolution(width, height, newSettings.fullscreenMode);
 			QualitySettings.vSyncCount = newSettings.VSyncEnabled ? 1 : 0;
+		}
+
+		public static void SaveAndApplyShortcutSettings(ShortcutSettings shortcutSettings)
+		{
+			//Save shortcuts
+			ActiveShortcutSettings = shortcutSettings;
+			Saver.SaveShortcutSettings(shortcutSettings);
+
+			//Apply shortcuts
+			KeyboardShortcuts.LoadShortcutSettings(shortcutSettings);
 		}
 
 		public static void LoadMainMenu()
@@ -124,7 +136,7 @@ namespace DLS.Game
 
 		static void HandleGlobalInput()
 		{
-			if (KeyboardShortcuts.OpenSaveDataFolderShortcutTriggered) OpenSaveDataFolderInFileBrowser();
+			if (KeyboardShortcuts.OpenSaveDataFolderShortcutTriggered()) OpenSaveDataFolderInFileBrowser();
 		}
 
 		public class Version

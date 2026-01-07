@@ -165,7 +165,7 @@ namespace DLS.Game
 			if (UIDrawer.ActiveMenu is UIDrawer.MenuType.None)
 			{
 				// Step to next simulation frame when paused
-				if (simPaused && KeyboardShortcuts.SimNextStepShortcutTriggered)
+				if (simPaused && KeyboardShortcuts.SimNextStepShortcutTriggered())
 				{
 					advanceSingleSimStep = true;
 				}

@@ -150,7 +150,7 @@ namespace DLS.Graphics
 				if (IsOpen) DrawContextMenu(activeContextMenuEntries);
 
 				// Close menu input
-				if (InputHelper.IsMouseDownThisFrame(MouseButton.Left) || KeyboardShortcuts.CancelShortcutTriggered)
+				if (InputHelper.IsMouseDownThisFrame(MouseButton.Left) || KeyboardShortcuts.CancelShortcutTriggered())
 				{
 					CloseContextMenu();
 				}

@@ -1,4 +1,5 @@
 using System;
+using DLS.Description;
 using DLS.Game;
 using Seb.Helpers;
 using Seb.Types;
@@ -137,8 +138,8 @@ namespace DLS.Graphics
 
 			if (useKeyboardShortcuts)
 			{
-				if (canCancel && KeyboardShortcuts.CancelShortcutTriggered) buttonIndex = CancelIndex;
-				if (canConfirm && KeyboardShortcuts.ConfirmShortcutTriggered) buttonIndex = ConfirmIndex;
+				if (canCancel && KeyboardShortcuts.CancelShortcutTriggered()) buttonIndex = CancelIndex;
+				if (canConfirm && KeyboardShortcuts.ConfirmShortcutTriggered()) buttonIndex = ConfirmIndex;
 			}
 
 			return buttonIndex switch
@@ -147,6 +148,87 @@ namespace DLS.Graphics
 				ConfirmIndex => CancelConfirmResult.Confirm,
 				_ => CancelConfirmResult.None
 			};
+		}
+
+		public static string GetStringRepresentationOfShortcut(Shortcut shortcut)
+		{
+			string result = string.Empty;
+
+			if(shortcut.Modifier != ShortcutModifier.None)
+			{
+				result = GetModString(shortcut.Modifier);
+			}
+
+			if(shortcut.Modifier != ShortcutModifier.None && shortcut.KeyCode != KeyCode.None)
+			{
+				result += "+";
+			}
+
+			if( shortcut.KeyCode != KeyCode.None)
+			{
+				result += shortcut.KeyCode.ToString();
+			}
+
+			return result;
+		}
+
+		public static string GetComplexStringRepresentationOfShortcut(Shortcut shortcut)
+		{
+            bool hasKey = shortcut.KeyCode != KeyCode.None;
+			bool hasMod = shortcut.Modifier != ShortcutModifier.None;
+			bool hasAltMod = shortcut.AlternativeModifier != ShortcutModifier.None;
+			bool hasAltKey = shortcut.AlternativeKeyCode != KeyCode.None;
+			bool hasForbiddenMod = shortcut.ForbiddenModifier != ShortcutModifier.None; ;
+
+			bool hasAnyMod = hasMod || hasAltMod || hasForbiddenMod;
+			bool hasAnyKey = hasKey || hasAltKey;
+			bool hasBoth = hasAnyMod && hasAnyKey;
+
+			if (!(hasKey || hasMod || hasAltMod || hasAltKey || hasForbiddenMod))
+			{
+				return string.Empty;
+			}
+
+
+            bool atLeastTwoMods = (hasMod && hasForbiddenMod) || (hasMod && hasAltMod) || (hasForbiddenMod && hasAltMod);
+            string modEnclosing1 = (atLeastTwoMods) ? "(" : "";
+            string modEnclosing2 = (atLeastTwoMods) ? ")" : "";
+            string orMod = hasMod ? " <color=#ff5959ff>OR</color> " : "";
+            string andnot = atLeastTwoMods ? " <color=#ff5959ff>AND NOT</color> " : "<color=#ff5959ff>NOT</color> ";
+
+            string shortcutModifier = modEnclosing1
+                + (hasMod ? "<color=#5961ffff>" + GetModString(shortcut.Modifier) + "</color>" : "")
+                + (hasAltMod ? orMod + "<color=#5961ffff>" + GetModString(shortcut.AlternativeModifier) + "</color>" : "")
+                + (hasForbiddenMod ? andnot + "<color=#5961ffff>" + GetModString(shortcut.ForbiddenModifier) + "</color>" : "")
+                + modEnclosing2;
+
+			bool twoKeys = hasKey && hasAltKey;
+			string keyEnclosing1 = twoKeys ? "(" : "";
+			string keyEnclosing2 = twoKeys ? ")" : "";
+			string orKey = hasKey ? " <color=#ff5959ff>OR</color> " : "";
+
+			string shortcutKey = keyEnclosing1
+				+ (hasKey ? shortcut.KeyCode.ToString() : "")
+				+ (hasAltKey ? orKey + shortcut.AlternativeKeyCode.ToString() : "")
+				+ keyEnclosing2;
+
+			return (hasAnyMod ? shortcutModifier : "") + (hasBoth ? " <color=#ff5959ff>AND</color> " : "") + (hasAnyKey ? shortcutKey : " .");
+        }
+
+		static string GetModString(ShortcutModifier modifier)
+		{
+			return (new string[] { "", "Ctrl", "Shift", "Alt", "Ctrl+Shift", "Ctrl+Shift+Alt" })[(int)modifier];
+		}
+
+        public static string PadWithSpacesAndInsertColorString(string firstString, string colorstring, string secondString, int length) //19 for bottom bar ui
+		{
+			string resultString = firstString;
+			int paddingAmount = length - (secondString.Length + firstString.Length);
+			if (paddingAmount <=0) { resultString += colorstring + secondString; return resultString; }
+			string paddingString = "";
+			for (int i = 0; i < paddingAmount; i++) { paddingString += " "; }
+			resultString += paddingString + colorstring + secondString;
+			return resultString;
 		}
 	}
 }

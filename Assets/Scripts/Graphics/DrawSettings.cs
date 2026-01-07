@@ -172,7 +172,8 @@ namespace DLS.Graphics
 				MenuBackgroundOverlayCol = new Color(0, 0, 0, 0.85f),
 				// --- Buttons ---
 				ButtonTheme = MakeButtonTheme(fontRegular, MakeCol255(64), MakeCol255(225), Color.white, Color.white, Color.black, Color.black),
-				ProjectSelectionButton = MakeButtonTheme(fontRegular, Color.clear, MakeCol255(54, 58, 135), MakeCol255(95, 102, 240), Color.white, Color.white, Color.white),
+
+                ProjectSelectionButton = MakeButtonTheme(fontRegular, Color.clear, MakeCol255(54, 58, 135), MakeCol255(95, 102, 240), Color.white, Color.white, Color.white),
 				ProjectSelectionButtonSelected = MakeButtonTheme(fontRegular, MakeCol255(87, 94, 230), MakeCol255(87, 94, 230), MakeCol255(95, 102, 240), Color.white, Color.white, Color.white),
 				ChipButton = MakeButtonTheme(fontRegular, MakeCol255(48), MakeCol255(225), Color.white, Color.white, Color.black, Color.black),
 				MainMenuButtonTheme = MakeButtonTheme(fontRegular, MakeCol255(73, 73, 82), MakeCol255(72, 108, 233), MakeCol255(62, 116, 154), MakeCol255(228, 244, 255), Color.white, Color.white),
@@ -274,6 +275,7 @@ namespace DLS.Graphics
 		public class UIThemeDLS
 		{
 			public ButtonTheme ButtonTheme;
+
 			public CheckboxTheme CheckBoxTheme;
 
 			public ButtonTheme ChipButton; // Bottom bar -> chip buttons
