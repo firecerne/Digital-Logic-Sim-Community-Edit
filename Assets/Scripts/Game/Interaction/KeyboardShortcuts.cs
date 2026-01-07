@@ -26,7 +26,11 @@ namespace DLS.Game
 		public static bool ToggleGridShortcutTriggered => CtrlShortcutTriggered(KeyCode.G);
 		public static bool ResetCameraShortcutTriggered => CtrlShortcutTriggered(KeyCode.R);
 		public static bool UndoShortcutTriggered => CtrlShortcutTriggered(KeyCode.Z);
-		public static bool RedoShortcutTriggered => CtrlShiftShortcutTriggered(KeyCode.Z);
+		public static bool RedoShortcutTriggered => CtrlShiftShortcutTriggered(KeyCode.Z) || CtrlShortcutTriggered(KeyCode.Y); // Added Ctrl+Y for redo as well
+
+		public static bool ModifierKeysOffToggleTriggered => RightAltShortcutTriggered(KeyCode.F12);
+
+
 
 		// ---- Single key shortcuts ----
 		public static bool CancelShortcutTriggered => InputHelper.IsKeyDownThisFrame(KeyCode.Escape);
@@ -49,8 +53,11 @@ namespace DLS.Game
 		public static bool TakeFirstFromCollectionModifierHeld => InputHelper.CtrlIsHeld || InputHelper.AltIsHeld || InputHelper.ShiftIsHeld;
 
 		// ---- Helpers ----
-		static bool CtrlShortcutTriggered(KeyCode key) => InputHelper.IsKeyDownThisFrame(key) && InputHelper.CtrlIsHeld && !(InputHelper.AltIsHeld || InputHelper.ShiftIsHeld);
-		static bool CtrlShiftShortcutTriggered(KeyCode key) => InputHelper.IsKeyDownThisFrame(key) && InputHelper.CtrlIsHeld && InputHelper.ShiftIsHeld && !(InputHelper.AltIsHeld);
-		static bool ShiftShortcutTriggered(KeyCode key) => InputHelper.IsKeyDownThisFrame(key) && InputHelper.ShiftIsHeld && !(InputHelper.AltIsHeld || InputHelper.CtrlIsHeld);
+		static bool CtrlShortcutTriggered(KeyCode key) => !InputHelper.ModifierKeysOff && InputHelper.IsKeyDownThisFrame(key) && InputHelper.CtrlIsHeld && !(InputHelper.AltIsHeld || InputHelper.ShiftIsHeld);
+		static bool CtrlShiftShortcutTriggered(KeyCode key) => !InputHelper.ModifierKeysOff && InputHelper.IsKeyDownThisFrame(key) && InputHelper.CtrlIsHeld && InputHelper.ShiftIsHeld && !(InputHelper.AltIsHeld);
+
+		static bool RightAltShortcutTriggered(KeyCode key) => InputHelper.IsKeyDownThisFrame(key) && InputHelper.IsKeyHeld(KeyCode.RightAlt) && !(InputHelper.CtrlIsHeld || InputHelper.ShiftIsHeld); // Right Alt pressed only
+
+		static bool ShiftShortcutTriggered(KeyCode key) => !InputHelper.ModifierKeysOff && InputHelper.IsKeyDownThisFrame(key) && InputHelper.ShiftIsHeld && !(InputHelper.AltIsHeld || InputHelper.CtrlIsHeld);
 	}
 }

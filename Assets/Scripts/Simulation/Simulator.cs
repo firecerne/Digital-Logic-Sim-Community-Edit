@@ -331,7 +331,7 @@ namespace DLS.Simulation
 				}
 				case ChipType.Key:
 				{
-					bool isHeld = SimKeyboardHelper.KeyIsHeld((char)chip.InternalState[0]);
+					bool isHeld = SimKeyboardHelper.KeyIsHeld(chip.InternalState[0]);
 					chip.OutputPins[0].State.SmallSet(isHeld ? Constants.LOGIC_HIGH : Constants.LOGIC_LOW);
 					break;
 				}

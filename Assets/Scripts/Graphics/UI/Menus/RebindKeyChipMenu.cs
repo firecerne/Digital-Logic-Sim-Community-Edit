@@ -1,14 +1,16 @@
 using DLS.Game;
+using DLS.Simulation;
 using Seb.Helpers;
 using Seb.Vis;
 using Seb.Vis.UI;
 using UnityEngine;
+using System.Linq;
+using System;
 
 namespace DLS.Graphics
 {
 	public static class RebindKeyChipMenu
 	{
-		public const string allowedChars = "1234567890QWERTYUIOPASDFGHJKLZXCVBNM";
 		static SubChipInstance keyChip;
 		static string chosenKey;
 
@@ -20,23 +22,31 @@ namespace DLS.Graphics
 
 			Vector2 pos = UI.Centre + Vector2.up * (UI.HalfHeight * 0.25f);
 
+			float nameUILengthMultiplier = 1.2f;
+
 			using (UI.BeginBoundsScope(true))
 			{
-				if (InputHelper.AnyKeyOrMouseDownThisFrame && !string.IsNullOrEmpty(InputHelper.InputStringThisFrame))
+				if (InputHelper.AnyKeyOrMouseDownThisFrame && !string.IsNullOrEmpty(InputHelper.GetKeyCodePressedThisFrame().ToString()))
 				{
-					char activeChar = char.ToUpper(InputHelper.InputStringThisFrame[0]);
-					if (allowedChars.Contains(activeChar))
+					KeyCode activeKeyCode = InputHelper.GetKeyCodePressedThisFrame();
+
+					if (InputHelper.ValidInputKeys.Contains(activeKeyCode))
 					{
-						chosenKey = activeChar.ToString();
+						// Convert KeyCode.ToString() to new name using KeyRenameNames
+						string keyName = (string)typeof(InputHelper.KeyRenameNames).GetField(activeKeyCode.ToString())?.GetValue(null);
+
+						chosenKey = keyName;
 					}
 				}
 
-				UI.DrawText("Press a key to rebind\n (alphanumeric only)", theme.FontBold, theme.FontSizeRegular, pos, Anchor.TextCentre, Color.white * 0.8f);
+				UI.DrawText("Press a key to rebind\n (Alphanumeric, Symbols/Punctuation (Physical keys), and numpad keys only)", theme.FontBold, theme.FontSizeRegular, pos, Anchor.TextCentre, Color.white * 0.8f);
 
-				UI.DrawPanel(UI.PrevBounds.CentreBottom + Vector2.down, Vector2.one * 3.5f, new Color(0.1f, 0.1f, 0.1f), Anchor.CentreTop);
-				UI.DrawText(chosenKey, theme.FontBold, theme.FontSizeRegular * 1.5f, UI.PrevBounds.Centre, Anchor.TextCentre, Color.white);
+				float panelWidth = 3.5f + (chosenKey?.Length ?? 0) * nameUILengthMultiplier;
 
-				MenuHelper.CancelConfirmResult result = MenuHelper.DrawCancelConfirmButtons(UI.GetCurrentBoundsScope().BottomLeft, UI.GetCurrentBoundsScope().Width, true);
+				UI.DrawPanel(UI.PrevBounds.CentreBottom + Vector2.down, new Vector2(panelWidth, 3.5f), new Color(0.1f, 0.1f, 0.1f), Anchor.CentreTop);
+				UI.DrawText(chosenKey.ToString(), theme.FontBold, theme.FontSizeRegular * 1.5f, UI.PrevBounds.Centre, Anchor.TextCentre, Color.white);
+
+				MenuHelper.CancelConfirmResult result = MenuHelper.DrawCancelConfirmButtons(UI.GetCurrentBoundsScope().BottomLeft, UI.GetCurrentBoundsScope().Width, true, false); // Can't use keybinds to select anymore
 				MenuHelper.DrawReservedMenuPanel(panelID, UI.GetCurrentBoundsScope());
 
 				if (result == MenuHelper.CancelConfirmResult.Cancel)
@@ -45,7 +55,7 @@ namespace DLS.Graphics
 				}
 				else if (result == MenuHelper.CancelConfirmResult.Confirm)
 				{
-					Project.ActiveProject.NotifyKeyChipBindingChanged(keyChip, chosenKey[0]);
+					Project.ActiveProject.NotifyKeyChipBindingChanged(keyChip, chosenKey.ToString());
 					UIDrawer.SetActiveMenu(UIDrawer.MenuType.None);
 				}
 			}
@@ -54,7 +64,17 @@ namespace DLS.Graphics
 		public static void OnMenuOpened()
 		{
 			keyChip = (SubChipInstance)ContextMenu.interactionContext;
-			chosenKey = keyChip.activationKeyString;
+			// So we can get keycode from string
+			if (Enum.TryParse<InputHelper.KeyNumberEnum>(keyChip.activationKeyString, out InputHelper.KeyNumberEnum parsedKey))
+			{
+				string keyName = parsedKey.ToString();
+				KeyCode keyCode = (KeyCode)System.Enum.Parse(typeof(KeyCode), keyName);
+
+				// Convert KeyCode.ToString() to new name using KeyRenameNames
+				keyName = (string)typeof(InputHelper.KeyRenameNames).GetField(keyName)?.GetValue(null);
+				
+				chosenKey = keyName;
+			}
 		}
 	}
 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading;
 using DLS.Description;
 using DLS.Graphics;
@@ -286,11 +287,20 @@ namespace DLS.Game
 		}
 
 		// Key chip has been bound to a different key, so simulation must be updated
-		public void NotifyKeyChipBindingChanged(SubChipInstance keyChip, char newKey)
+		public void NotifyKeyChipBindingChanged(SubChipInstance keyChip, string newKey)
 		{
-			SimChip simChip = rootSimChip.GetSubChipFromID(keyChip.ID);
-			simChip.InternalState[0] = newKey;
-			keyChip.SetKeyChipActivationChar(newKey);
+			// Find field name that has value newKey
+			var field = typeof(InputHelper.KeyRenameNames)
+				.GetFields()
+				.FirstOrDefault(f => (string)f.GetValue(null) == newKey);
+
+			if (field != null)
+			{
+				SimChip simChip = rootSimChip.GetSubChipFromID(keyChip.ID);
+				InputHelper.KeyNumberEnum key = (InputHelper.KeyNumberEnum)Enum.Parse(typeof(InputHelper.KeyNumberEnum), field.Name);
+				simChip.InternalState[0] = (uint)key;
+				keyChip.SetKeyChipActivationChar(field.Name);
+			}
 		}
 
 		// Chip's pulse width has been changed, so simulation must be updated

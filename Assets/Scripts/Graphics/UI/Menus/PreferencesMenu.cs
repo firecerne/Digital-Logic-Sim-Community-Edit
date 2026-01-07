@@ -1,6 +1,7 @@
 using System;
 using DLS.Description;
 using DLS.Game;
+using Seb.Helpers;
 using Seb.Types;
 using Seb.Vis;
 using Seb.Vis.UI;
@@ -26,6 +27,12 @@ namespace DLS.Graphics
 		};
 
 		static readonly string[] GridDisplayOptions =
+		{
+			"Off",
+			"On"
+		};
+
+		static readonly string[] ModifierKeysOffOptions =
 		{
 			"Off",
 			"On"
@@ -67,6 +74,7 @@ namespace DLS.Graphics
 		static readonly UIHandle ID_ChipPinNames = new("PREFS_ChipPinNames");
 		static readonly UIHandle ID_GridDisplay = new("PREFS_GridDisplay");
 		static readonly UIHandle ID_Snapping = new("PREFS_Snapping");
+		static readonly UIHandle ID_ModifierOff = new("PREFS_ModifierOff");
 		static readonly UIHandle ID_StraightWires = new("PREFS_StraightWires");
 		static readonly UIHandle ID_SimStatus = new("PREFS_SimStatus");
 		static readonly UIHandle ID_SimFrequencyField = new("PREFS_SimTickTarget");
@@ -99,6 +107,10 @@ namespace DLS.Graphics
 			Color labelCol = Color.white;
 			Color headerCol = new(0.46f, 1, 0.54f);
 			Vector2 topLeft = UI.Centre + new Vector2(-menuWidth / 2, verticalOffset);
+			
+			// Increase y by a bit to make room for menu seletion
+			topLeft.y += entrySize.y * 1.5f;
+
 			Vector2 labelPosCurr = topLeft;
 
 			using (UI.BeginBoundsScope(true))
@@ -124,6 +136,10 @@ namespace DLS.Graphics
 				Vector2 tickLabelRight = MenuHelper.DrawLabelSectionOfLabelInputPair(labelPosCurr, entrySize, "Steps per second (current)", labelCol * 0.75f, true);
 				UI.DrawPanel(tickLabelRight, settingFieldSize, new Color(0.18f, 0.18f, 0.18f), Anchor.CentreRight);
 				UI.DrawText(currentSimSpeedString, theme.FontBold, theme.FontSizeRegular, tickLabelRight + new Vector2(inputTextPad - settingFieldSize.x, 0), Anchor.TextCentreLeft, currentSimSpeedStringColour);
+
+				// Draw modifier keys off
+				AddSpacing();
+				int modifierKeysOffMode = DrawNextWheel("Modifier keys off", ModifierKeysOffOptions, ID_ModifierOff);
 
 				// Draw cancel/confirm buttons
 				Vector2 buttonTopLeft = new(labelPosCurr.x, UI.PrevBounds.Bottom);
@@ -151,6 +167,7 @@ namespace DLS.Graphics
 				project.description.Prefs_SimStepsPerClockTick = clockSpeed;
 				project.description.Prefs_SimPaused = pauseSim;
 				project.description.Perfs_PinIndicators = pinIndicatorsMode;
+				InputHelper.ModifierKeysOff = modifierKeysOffMode == 1;
 
                 // Cancel / Confirm
                 if (result == MenuHelper.CancelConfirmResult.Cancel)
@@ -232,6 +249,12 @@ namespace DLS.Graphics
 			if (KeyboardShortcuts.ToggleGridShortcutTriggered)
 			{
 				Project.ActiveProject.ToggleGridDisplay();
+				anyChange = true;
+			}
+
+			if (KeyboardShortcuts.ModifierKeysOffToggleTriggered)
+			{
+				InputHelper.ModifierKeysOff = !InputHelper.ModifierKeysOff;
 				anyChange = true;
 			}
 

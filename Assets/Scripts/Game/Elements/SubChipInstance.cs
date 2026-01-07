@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using DLS.Description;
 using DLS.Graphics;
 using DLS.SaveSystem;
 using Seb.Helpers;
 using Seb.Types;
+using Seb.Vis;
 using UnityEngine;
 using Exception = System.Exception;
 
@@ -25,7 +27,7 @@ namespace DLS.Game
 		public readonly bool IsBus;
 		public Vector2 MinSize;
 
-		public readonly string MultiLineName;
+		public string MultiLineName;
 		public readonly PinInstance[] OutputPins;
 		public string activationKeyString; // input char for the 'key chip' type (stored as string to avoid allocating when drawing)
 		public string Label;
@@ -69,7 +71,15 @@ namespace DLS.Game
 
 				if (ChipType == ChipType.Key)
 				{
-					SetKeyChipActivationChar((char)subChipDesc.InternalData[0]);
+					// Convert uint to KeyNumberEnum to KeyCode
+					InputHelper.KeyNumberEnum keyEnum = (InputHelper.KeyNumberEnum)subChipDesc.InternalData[0];
+					string keyName = keyEnum.ToString();
+					KeyCode chosenKey = (KeyCode)System.Enum.Parse(typeof(KeyCode), keyName);
+
+					// Convert KeyCode.ToString() to new name using KeyRenameNames
+					keyName = (string)typeof(InputHelper.KeyRenameNames).GetField(keyName)?.GetValue(null);
+
+					SetKeyChipActivationChar(keyName);
 				}
 
 				if (IsBus && InternalData.Length > 1)
@@ -137,11 +147,45 @@ namespace DLS.Game
 			InternalData[0] = (uint)busPair.ID;
 		}
 
-		public void SetKeyChipActivationChar(char c)
+		public void SetKeyChipActivationChar(string c)
 		{
 			if (ChipType != ChipType.Key) throw new Exception("Expected KeyChip type, but instead got: " + ChipType);
-			activationKeyString = c.ToString();
-			InternalData[0] = c;
+			
+			// Try to parse c as enum name first, then if that fails find the enum part with matching value
+			InputHelper.KeyNumberEnum key;
+			string enumName = c;
+			
+			try
+			{
+				key = (InputHelper.KeyNumberEnum)Enum.Parse(typeof(InputHelper.KeyNumberEnum), c);
+			}
+			catch
+			{
+				// c might be the display name, find the enum part with this field
+				var fields = typeof(InputHelper.KeyRenameNames).GetFields();
+				enumName = null;
+				foreach (var field in fields)
+				{
+					var displayValue = (string)field.GetValue(null);
+					if (displayValue == c)
+					{
+						enumName = field.Name;
+						break;
+					}
+				}
+				
+				if (enumName == null) throw new Exception("Could not find key with display name: " + c);
+				key = (InputHelper.KeyNumberEnum)Enum.Parse(typeof(InputHelper.KeyNumberEnum), enumName);
+			}
+			
+			InternalData[0] = (uint)key;
+			
+			// Get the expanded display name
+			var nameField = typeof(InputHelper.KeyRenameNames).GetField(enumName);
+			activationKeyString = nameField != null ? (string)nameField.GetValue(null) : enumName;
+
+			// Update size so it changes
+			updateMinSize();
 		}
 
 		public void UpdatePinLayout()
@@ -314,11 +358,36 @@ namespace DLS.Game
             bool hasMultiLineName = multiLineName != Description.Name;
             float minNameHeight = DrawSettings.GridSize * (hasMultiLineName ? 4 : 3);
 
-            Vector2 nameDrawBoundsSize = DevSceneDrawer.CalculateChipNameBounds(multiLineName);
+			float sizeX, sizeY;
+			Vector2 nameDrawBoundsSize;
 
-            float sizeX = Mathf.Max(nameDrawBoundsSize.x + DrawSettings.GridSize, MinX);
-            float sizeY = Mathf.Max(minNameHeight, MinY);
+			// For the 1 char key chip name (Base/was before) use base size
+			if (ChipType == ChipType.Key && !string.IsNullOrEmpty(activationKeyString) && activationKeyString.Length == 1)
+			{
+				nameDrawBoundsSize = DevSceneDrawer.CalculateChipNameBounds(multiLineName);
+				sizeX = Mathf.Max(DrawSettings.GridSize * 3, MinX); // Size of normal key chip
+				sizeY = Mathf.Max(minNameHeight, MinY);
+			}
+			else
+			{
+				
+				// For key chips with more than 1 character, calculate size based on activation key string
+				if (ChipType == ChipType.Key && !string.IsNullOrEmpty(activationKeyString) && activationKeyString.Length > 1)
+				{
+					nameDrawBoundsSize = DevSceneDrawer.CalculateChipNameBounds(activationKeyString);
+				}
+				else
+				{
+					// Normal case (what was here before)
+					nameDrawBoundsSize = DevSceneDrawer.CalculateChipNameBounds(multiLineName);
+				}
+
+				sizeX = Mathf.Max(nameDrawBoundsSize.x + DrawSettings.GridSize, MinX);
+				sizeY = Mathf.Max(minNameHeight, MinY);
+			}
+
             MinSize = new Vector2(sizeX, sizeY);
+            Description.Size = MinSize;
         }
 
         // Calculate minimal height of chip to fit the given pins, and calculate their y positions (in grid space)
