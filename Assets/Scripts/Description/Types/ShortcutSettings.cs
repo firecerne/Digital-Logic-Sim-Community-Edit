@@ -25,6 +25,7 @@ namespace DLS.Description
         public Shortcut ResetCameraShortcutTriggered;
         public Shortcut UndoShortcutTriggered;
         public Shortcut RedoShortcutTriggered;
+        public Shortcut ModifierKeysOffToggleTriggered;
 
         // ---- Single key shortcuts ----
         public Shortcut CancelShortcutTriggered;
@@ -58,6 +59,7 @@ namespace DLS.Description
                 ResetCameraShortcutTriggered = new(ShortcutModifier.Ctrl, KeyCode.R),
                 UndoShortcutTriggered = new(ShortcutModifier.Ctrl, KeyCode.Z),
                 RedoShortcutTriggered = new(ShortcutModifier.CtrlAndShift, KeyCode.Z),
+                ModifierKeysOffToggleTriggered = new(ShortcutModifier.RightAlt, KeyCode.F12),
 
                 CancelShortcutTriggered = new(ShortcutModifier.None, KeyCode.Escape),
                 ConfirmShortcutTriggered = new(ShortcutModifier.None, KeyCode.Return, alternativeKey: KeyCode.KeypadEnter),
@@ -109,5 +111,6 @@ namespace DLS.Description
         Alt,
         CtrlAndShift,
         CtrlShiftAlt,
+        RightAlt,
     }
 }

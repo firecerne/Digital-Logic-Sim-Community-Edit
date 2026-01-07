@@ -26,6 +26,7 @@ namespace DLS.Game
 		public readonly uint[] InternalData;
 		public readonly bool IsBus;
 		public Vector2 MinSize;
+		public Vector2 InstanceSize;
 
 		public string MultiLineName;
 		public readonly PinInstance[] OutputPins;
@@ -44,6 +45,7 @@ namespace DLS.Game
 			IsBus = ChipTypeHelper.IsBusType(ChipType);
 			MultiLineName = CreateMultiLineName(description.Name);
 			MinSize = CalculateMinChipSize(description.InputPins, description.OutputPins, description.Name);
+			InstanceSize = MinSize;
 
 			HasCustomLayout = description.HasCustomLayout;
 
@@ -114,7 +116,7 @@ namespace DLS.Game
 
 		public int LinkedBusPairID => IsBus ? (int)InternalData[0] : -1;
 		public bool BusIsFlipped => IsBus && InternalData.Length > 1 && InternalData[1] == 1;
-		public Vector2 Size => Description.Size;
+		public Vector2 Size => InstanceSize;
 		public Vector2 Position { get; set; }
 
 		public Vector2 MoveStartPosition { get; set; }
@@ -387,7 +389,7 @@ namespace DLS.Game
 			}
 
             MinSize = new Vector2(sizeX, sizeY);
-            Description.Size = MinSize;
+            InstanceSize = MinSize;
         }
 
         // Calculate minimal height of chip to fit the given pins, and calculate their y positions (in grid space)

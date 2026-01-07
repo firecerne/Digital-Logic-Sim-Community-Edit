@@ -217,7 +217,7 @@ namespace DLS.Graphics
 
 		static string GetModString(ShortcutModifier modifier)
 		{
-			return (new string[] { "", "Ctrl", "Shift", "Alt", "Ctrl+Shift", "Ctrl+Shift+Alt" })[(int)modifier];
+			return (new string[] { "", "Ctrl", "Shift", "Alt", "Ctrl+Shift", "Ctrl+Shift+Alt", "Right Alt" })[(int)modifier];
 		}
 
         public static string PadWithSpacesAndInsertColorString(string firstString, string colorstring, string secondString, int length) //19 for bottom bar ui

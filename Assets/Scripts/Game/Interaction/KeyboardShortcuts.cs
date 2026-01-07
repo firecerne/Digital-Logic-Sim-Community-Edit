@@ -29,6 +29,7 @@ namespace DLS.Game
 		public static Func<bool> ResetCameraShortcutTriggered;
 		public static Func<bool> UndoShortcutTriggered;
 		public static Func<bool> RedoShortcutTriggered;
+		public static Func<bool> ModifierKeysOffToggleTriggered;
 
 		// ---- Single key shortcuts ----
 		public static Func<bool> CancelShortcutTriggered;
@@ -55,7 +56,6 @@ namespace DLS.Game
         public static bool CtrlShiftShortcutTriggered(KeyCode key) => InputHelper.IsKeyDownThisFrame(key) && InputHelper.CtrlIsHeld && InputHelper.ShiftIsHeld && !(InputHelper.AltIsHeld);
         public static bool ShiftShortcutTriggered(KeyCode key) => InputHelper.IsKeyDownThisFrame(key) && InputHelper.ShiftIsHeld && !(InputHelper.AltIsHeld || InputHelper.CtrlIsHeld);
 		public static bool AltShortcutTriggered(KeyCode key) => InputHelper.IsKeyDownThisFrame(key) && InputHelper.AltIsHeld && !(InputHelper.CtrlIsHeld || InputHelper.ShiftIsHeld);
-		static bool RightAltShortcutTriggered(KeyCode key) => InputHelper.IsKeyDownThisFrame(key) && InputHelper.IsKeyHeld(KeyCode.RightAlt) && !(InputHelper.CtrlIsHeld || InputHelper.ShiftIsHeld); // Right Alt and key pressed only
 		public static bool CtrlShiftAltShortcutTriggered(KeyCode key) => InputHelper.IsKeyDownThisFrame(key) && InputHelper.CtrlIsHeld && InputHelper.AltIsHeld && InputHelper.ShiftIsHeld;
 
 
@@ -81,6 +81,7 @@ namespace DLS.Game
             LoadShortcut(out ResetCameraShortcutTriggered, shortcutSettings.ResetCameraShortcutTriggered);
             LoadShortcut(out UndoShortcutTriggered, shortcutSettings.UndoShortcutTriggered);
             LoadShortcut(out RedoShortcutTriggered, shortcutSettings.RedoShortcutTriggered);
+			LoadShortcut(out ModifierKeysOffToggleTriggered, shortcutSettings.ModifierKeysOffToggleTriggered);
 
             LoadShortcut(out CancelShortcutTriggered, shortcutSettings.CancelShortcutTriggered);
             LoadShortcut(out ConfirmShortcutTriggered, shortcutSettings.ConfirmShortcutTriggered);
@@ -135,6 +136,8 @@ namespace DLS.Game
                     return () => InputHelper.CtrlIsHeld && InputHelper.ShiftIsHeld && !InputHelper.AltIsHeld;
                 case ShortcutModifier.CtrlShiftAlt:
 					return () => InputHelper.CtrlIsHeld && InputHelper.ShiftIsHeld && InputHelper.AltIsHeld;
+				case ShortcutModifier.RightAlt:
+					return () => InputHelper.RightAltIsHeld && !(InputHelper.CtrlIsHeld || InputHelper.ShiftIsHeld);
 				default:
 					return () => false;
 			}

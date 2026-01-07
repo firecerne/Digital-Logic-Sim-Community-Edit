@@ -101,6 +101,10 @@ namespace DLS.Graphics
 			MenuHelper.DrawBackgroundOverlay();
 			Draw.ID panelID = UI.ReservePanel();
 			UpdateSimSpeedString(project);
+			
+			// Initialize modifier keys off state to current value
+			var modifierKeysOffState = UI.GetWheelSelectorState(ID_ModifierOff);
+			modifierKeysOffState.index = InputHelper.ModifierKeysOff ? 1 : 0;
 
 			const int inputTextPad = 1;
 			const float headerSpacing = 1.5f;
@@ -251,8 +255,8 @@ namespace DLS.Graphics
 				Project.ActiveProject.ToggleGridDisplay();
 				anyChange = true;
 			}
-
-			if (KeyboardShortcuts.ModifierKeysOffToggleTriggered)
+			
+			if (KeyboardShortcuts.ModifierKeysOffToggleTriggered())
 			{
 				InputHelper.ModifierKeysOff = !InputHelper.ModifierKeysOff;
 				anyChange = true;

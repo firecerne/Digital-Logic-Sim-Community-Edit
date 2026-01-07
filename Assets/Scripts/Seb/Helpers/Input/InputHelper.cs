@@ -325,6 +325,7 @@ namespace Seb.Helpers
 		public static bool ShiftIsHeld => IsKeyHeld(KeyCode.LeftShift) || IsKeyHeld(KeyCode.RightShift);
 		public static bool CtrlIsHeld => IsKeyHeld(KeyCode.LeftControl) || IsKeyHeld(KeyCode.RightControl);
 		public static bool AltIsHeld => IsKeyHeld(KeyCode.LeftAlt) || IsKeyHeld(KeyCode.RightAlt);
+		public static bool RightAltIsHeld => IsKeyHeld(KeyCode.RightAlt);
 
 		public static KeyCode GetKeyCodePressedThisFrame()
 		{
