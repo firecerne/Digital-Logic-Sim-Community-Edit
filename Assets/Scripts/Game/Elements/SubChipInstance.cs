@@ -30,7 +30,6 @@ namespace DLS.Game
 
 		public string MultiLineName;
 		public readonly PinInstance[] OutputPins;
-		public string activationKeyString; // input char for the 'key chip' type (stored as string to avoid allocating when drawing)
 		public string Label;
 		public bool HasCustomLayout;
 
@@ -73,15 +72,7 @@ namespace DLS.Game
 
 				if (ChipType == ChipType.Key)
 				{
-					// Convert uint to KeyNumberEnum to KeyCode
-					InputHelper.KeyNumberEnum keyEnum = (InputHelper.KeyNumberEnum)subChipDesc.InternalData[0];
-					string keyName = keyEnum.ToString();
-					KeyCode chosenKey = (KeyCode)System.Enum.Parse(typeof(KeyCode), keyName);
-
-					// Convert KeyCode.ToString() to new name using KeyRenameNames
-					keyName = (string)typeof(InputHelper.KeyRenameNames).GetField(keyName)?.GetValue(null);
-
-					SetKeyChipActivationChar(keyName);
+					SetKeyChipActivationChar(InternalData[0]);
 				}
 
 				if (IsBus && InternalData.Length > 1)
@@ -149,42 +140,11 @@ namespace DLS.Game
 			InternalData[0] = (uint)busPair.ID;
 		}
 
-		public void SetKeyChipActivationChar(string c)
+		public void SetKeyChipActivationChar(uint key)
 		{
 			if (ChipType != ChipType.Key) throw new Exception("Expected KeyChip type, but instead got: " + ChipType);
 			
-			// Try to parse c as enum name first, then if that fails find the enum part with matching value
-			InputHelper.KeyNumberEnum key;
-			string enumName = c;
-			
-			try
-			{
-				key = (InputHelper.KeyNumberEnum)Enum.Parse(typeof(InputHelper.KeyNumberEnum), c);
-			}
-			catch
-			{
-				// c might be the display name, find the enum part with this field
-				var fields = typeof(InputHelper.KeyRenameNames).GetFields();
-				enumName = null;
-				foreach (var field in fields)
-				{
-					var displayValue = (string)field.GetValue(null);
-					if (displayValue == c)
-					{
-						enumName = field.Name;
-						break;
-					}
-				}
-				
-				if (enumName == null) throw new Exception("Could not find key with display name: " + c);
-				key = (InputHelper.KeyNumberEnum)Enum.Parse(typeof(InputHelper.KeyNumberEnum), enumName);
-			}
-			
-			InternalData[0] = (uint)key;
-			
-			// Get the expanded display name
-			var nameField = typeof(InputHelper.KeyRenameNames).GetField(enumName);
-			activationKeyString = nameField != null ? (string)nameField.GetValue(null) : enumName;
+			InternalData[0] = key; // KeyCode -> Number 
 
 			// Update size so it changes
 			updateMinSize();
@@ -362,6 +322,8 @@ namespace DLS.Game
 
 			float sizeX, sizeY;
 			Vector2 nameDrawBoundsSize;
+
+			string activationKeyString = InputHelper.UintToKeyName(InternalData[0]);
 
 			// For the 1 char key chip name (Base/was before) use base size
 			if (ChipType == ChipType.Key && !string.IsNullOrEmpty(activationKeyString) && activationKeyString.Length == 1)

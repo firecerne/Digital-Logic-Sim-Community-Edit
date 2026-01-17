@@ -2,6 +2,7 @@ using System.Data;
 using Seb.Helpers.InputHandling;
 using Seb.Types;
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace Seb.Helpers
 {
@@ -28,225 +29,115 @@ namespace Seb.Helpers
 		public static Vector2 MouseScrollDelta => InputSource.MouseScrollDelta;
 		public static bool ModifierKeysOff = false; // So we can use special keys for the key chip
 
-		// Numbers first
-		public enum KeyNumberEnum : uint
-		{
-			Alpha0 = 0,
-			Alpha1 = 1,
-			Alpha2 = 2,
-			Alpha3 = 3,
-			Alpha4 = 4,
-			Alpha5 = 5,
-			Alpha6 = 6,
-			Alpha7 = 7,
-			Alpha8 = 8,
-			Alpha9 = 9,
-			A = 10,
-			B = 11,
-			C = 12,
-			D = 13,
-			E = 14,
-			F = 15,
-			G = 16,
-			H = 17,
-			I = 18,
-			J = 19,
-			K = 20,
-			L = 21,
-			M = 22,
-			N = 23,
-			O = 24,
-			P = 25,
-			Q = 26,
-			RightArrow = 27,
-			S = 28,
-			T = 29,
-			U = 30,
-			V = 31,
-			W = 32,
-			X = 33,
-			Y = 34,
-			Z = 35,
-			BackQuote = 36,
-			Minus = 37,
-			Equals = 38,
-			LeftBracket = 39,
-			RightBracket = 40,
-			Semicolon = 41,
-			Quote = 42,
-			Comma = 43,
-			Period = 44,
-			Slash = 45,
-			Keypad0 = 46,
-			Keypad1 = 47,
-			Keypad2 = 48,
-			Keypad3 = 49,
-			Keypad4 = 50,
-			Keypad5 = 51,
-			Keypad6 = 52,
-			Keypad7 = 53,
-			Keypad8 = 54,
-			Keypad9 = 55,
-			KeypadDivide = 56,
-			KeypadEnter = 57,
-			KeypadEquals = 58,
-			KeypadMinus = 59,
-			KeypadPlus = 60,
-			KeypadMultiply = 61,
-			KeypadPeriod = 62,
-			Tab = 63,
-			Return = 64,
-			Escape = 65,
-			Space = 66,
-			Delete = 67,
-			Backspace = 68,
-			Insert = 69,
-			Home = 70,
-			End = 71,
-			PageUp = 72,
-			PageDown = 73,
-			LeftArrow = 74,
-			R = 75, // So we can make it start at R
-			UpArrow = 76,
-			DownArrow = 77,
-			CapsLock = 78,
-			Numlock = 79,
-			ScrollLock = 80,
-			Print = 81,
-			Pause = 82,
-			Clear = 83,
-			LeftControl = 84,
-			RightControl = 85,
-			LeftShift = 86,
-			RightShift = 87,
-			LeftAlt = 88,
-			RightAlt = 89,
-			LeftMeta = 90,
-			RightMeta = 91,
-			F1 = 92,
-			F2 = 93,
-			F3 = 94,
-			F4 = 95,
-			F5 = 96,
-			F6 = 97,
-			F7 = 98,
-			F8 = 99,
-			F9 = 100,
-			F10 = 101,
-			F11 = 102,
-			F12 = 103,
-			Backslash = 104
-		}
-
 		// Allows me to rename these keys to be more readable versions
-		public static class KeyRenameNames
+		public static readonly Dictionary<string, string> KeysRenameMap = new Dictionary<string, string>
 		{
-			public static string Alpha0 = "0";
-			public static string Alpha1 = "1";
-			public static string Alpha2 = "2";
-			public static string Alpha3 = "3";
-			public static string Alpha4 = "4";
-			public static string Alpha5 = "5";
-			public static string Alpha6 = "6";
-			public static string Alpha7 = "7";
-			public static string Alpha8 = "8";
-			public static string Alpha9 = "9";
-			public static string A = "A";
-			public static string B = "B";
-			public static string C = "C";
-			public static string D = "D";
-			public static string E = "E";
-			public static string F = "F";
-			public static string G = "G";
-			public static string H = "H";
-			public static string I = "I";
-			public static string J = "J";
-			public static string K = "K";
-			public static string L = "L";
-			public static string M = "M";
-			public static string N = "N";
-			public static string O = "O";
-			public static string P = "P";
-			public static string Q = "Q";
-			public static string R = "R";
-			public static string S = "S";
-			public static string T = "T";
-			public static string U = "U";
-			public static string V = "V";
-			public static string W = "W";
-			public static string X = "X";
-			public static string Y = "Y";
-			public static string Z = "Z";
-			public static string BackQuote = "`";
-			public static string Minus = "-";
-			public static new string Equals = "="; // Gave warning with "new"
-			public static string LeftBracket = "[";
-			public static string RightBracket = "]";
-			public static string Semicolon = ";";
-			public static string Quote = "'";
-			public static string Comma = ",";
-			public static string Period = ".";
-			public static string Slash = "/";
-			public static string Keypad0 = "Keypad 0";
-			public static string Keypad1 = "Keypad 1";
-			public static string Keypad2 = "Keypad 2";
-			public static string Keypad3 = "Keypad 3";
-			public static string Keypad4 = "Keypad 4";
-			public static string Keypad5 = "Keypad 5";
-			public static string Keypad6 = "Keypad 6";
-			public static string Keypad7 = "Keypad 7";
-			public static string Keypad8 = "Keypad 8";
-			public static string Keypad9 = "Keypad 9";
-			public static string KeypadDivide = "Keypad /";
-			public static string KeypadEnter = "Keypad Enter";
-			public static string KeypadEquals = "Keypad =";
-			public static string KeypadMinus = "Keypad -";
-			public static string KeypadPlus = "Keypad +";
-			public static string KeypadMultiply = "Keypad *";
-			public static string KeypadPeriod = "Keypad .";
-			public static string Tab = "Tab";
-			public static string Return = "Enter";
-			public static string Escape = "Escape";
-			public static string Space = "Space";
-			public static string Delete = "Delete";
-			public static string Backspace = "Backspace";
-			public static string Insert = "Insert";
-			public static string Home = "Home";
-			public static string End = "End";
-			public static string PageUp = "Page Up";
-			public static string PageDown = "Page Down";
-			public static string LeftArrow = "Left Arrow";
-			public static string RightArrow = "Right Arrow";
-			public static string UpArrow = "Up Arrow";
-			public static string DownArrow = "Down Arrow";
-			public static string CapsLock = "Caps Lock";
-			public static string Numlock = "Num Lock";
-			public static string ScrollLock = "Scroll Lock";
-			public static string Print = "Print Screen";
-			public static string Pause = "Pause";
-			public static string Clear = "Clear";
-			public static string LeftControl = "Left Control";
-			public static string RightControl = "Right Control";
-			public static string LeftShift = "Left Shift";
-			public static string RightShift = "Right Shift";
-			public static string LeftAlt = "Left Alt";
-			public static string RightAlt = "Right Alt";
-			public static string LeftMeta = "Left Windows";
-			public static string RightMeta = "Right Windows";
-			public static string Backslash = "\\";
-			public static string F1 = "F1";
-			public static string F2 = "F2";
-			public static string F3 = "F3";
-			public static string F4 = "F4";
-			public static string F5 = "F5";
-			public static string F6 = "F6";
-			public static string F7 = "F7";
-			public static string F8 = "F8";
-			public static string F9 = "F9";
-			public static string F10 = "F10";
-			public static string F11 = "F11";
-			public static string F12 = "F12";
-		}
+			{ "Alpha0", "0" },
+			{ "Alpha1", "1" },
+			{ "Alpha2", "2" },
+			{ "Alpha3", "3" },
+			{ "Alpha4", "4" },
+			{ "Alpha5", "5" },
+			{ "Alpha6", "6" },
+			{ "Alpha7", "7" },
+			{ "Alpha8", "8" },
+			{ "Alpha9", "9" },
+			{ "A", "A" },
+			{ "B", "B" },
+			{ "C", "C" },
+			{ "D", "D" },
+			{ "E", "E" },
+			{ "F", "F" },
+			{ "G", "G" },
+			{ "H", "H" },
+			{ "I", "I" },
+			{ "J", "J" },
+			{ "K", "K" },
+			{ "L", "L" },
+			{ "M", "M" },
+			{ "N", "N" },
+			{ "O", "O" },
+			{ "P", "P" },
+			{ "Q", "Q" },
+			{ "R", "R" },
+			{ "S", "S" },
+			{ "T", "T" },
+			{ "U", "U" },
+			{ "V", "V" },
+			{ "W", "W" },
+			{ "X", "X" },
+			{ "Y", "Y" },
+			{ "Z", "Z" },
+			{ "BackQuote", "`" },
+			{ "Minus", "-" },
+			{ "Equals", "=" },
+			{ "LeftBracket", "[" },
+			{ "RightBracket", "]" },
+			{ "Semicolon", ";" },
+			{ "Quote", "'" },
+			{ "Comma", "," },
+			{ "Period", "." },
+			{ "Slash", "/" },
+			{ "Keypad0", "Keypad 0" },
+			{ "Keypad1", "Keypad 1" },
+			{ "Keypad2", "Keypad 2" },
+			{ "Keypad3", "Keypad 3" },
+			{ "Keypad4", "Keypad 4" },
+			{ "Keypad5", "Keypad 5" },
+			{ "Keypad6", "Keypad 6" },
+			{ "Keypad7", "Keypad 7" },
+			{ "Keypad8", "Keypad 8" },
+			{ "Keypad9", "Keypad 9" },
+			{ "KeypadDivide", "Keypad /" },
+			{ "KeypadEnter", "Keypad Enter" },
+			{ "KeypadEquals", "Keypad =" },
+			{ "KeypadMinus", "Keypad -" },
+			{ "KeypadPlus", "Keypad +" },
+			{ "KeypadMultiply", "Keypad *" },
+			{ "KeypadPeriod", "Keypad ." },
+			{ "Tab", "Tab" },
+			{ "Return", "Enter" },
+			{ "Escape", "Escape" },
+			{ "Space", "Space" },
+			{ "Delete", "Delete" },
+			{ "Backspace", "Backspace" },
+			{ "Insert", "Insert" },
+			{ "Home", "Home" },
+			{ "End", "End" },
+			{ "PageUp", "Page Up" },
+			{ "PageDown", "Page Down" },
+			{ "LeftArrow", "Left Arrow" },
+			{ "RightArrow", "Right Arrow" },
+			{ "UpArrow", "Up Arrow" },
+			{ "DownArrow", "Down Arrow" },
+			{ "CapsLock", "Caps Lock" },
+			{ "Numlock", "Num Lock" },
+			{ "ScrollLock", "Scroll Lock" },
+			{ "Print", "Print Screen" },
+			{ "Pause", "Pause" },
+			{ "Clear", "Clear" },
+			{ "LeftControl", "Left Control" },
+			{ "RightControl", "Right Control" },
+			{ "LeftShift", "Left Shift" },
+			{ "RightShift", "Right Shift" },
+			{ "LeftAlt", "Left Alt" },
+			{ "RightAlt", "Right Alt" },
+			{ "LeftMeta", "Left Windows" },
+			{ "RightMeta", "Right Windows" },
+			{ "Backslash", "\\" },
+			{ "F1", "F1" },
+			{ "F2", "F2" },
+			{ "F3", "F3" },
+			{ "F4", "F4" },
+			{ "F5", "F5" },
+			{ "F6", "F6" },
+			{ "F7", "F7" },
+			{ "F8", "F8" },
+			{ "F9", "F9" },
+			{ "F10", "F10" },
+			{ "F11", "F11" },
+			{ "F12", "F12" }
+		};
 
 		// List of keys that can be used as input to key chips
 		public static readonly KeyCode[] ValidInputKeys =
@@ -294,7 +185,6 @@ namespace Seb.Helpers
 			KeyCode.LeftShift, KeyCode.RightShift,
 			KeyCode.LeftAlt, KeyCode.RightAlt
 		};
-
 
 		static int[] keycodes = GetKeyCodeValues();
 		static bool[] keysPressed;
@@ -514,6 +404,17 @@ namespace Seb.Helpers
 		{
 			keycodes = GetKeyCodeValues();
 			keysPressed = new bool[keycodes.Length];
+		}
+
+		public static string UintToKeyName(uint InputUint)
+		{
+			KeyCode keyCodeInput = (KeyCode)InputUint;
+
+			if (KeysRenameMap.TryGetValue(keyCodeInput.ToString(), out string correctName))
+				return correctName;
+
+			UnityEngine.Debug.LogError("Error getting value from KeysRenameMap in UintToKeyName, with input: " + InputUint);
+			return null;
 		}
 	}
 }

@@ -139,7 +139,7 @@ namespace DLS.SaveSystem
 			{
 				ChipType.Rom_256x16 => new uint[256], // ROM contents
 				ChipType.EEPROM_256x16 => new uint[257], // EEPROM contents + Rising-Edge detection
-				ChipType.Key => new uint[] { 'K' }, // Key binding
+				ChipType.Key => new uint[] { (uint)KeyCode.K }, // Key binding
 				ChipType.Pulse => new uint[] { 50, 0, 0 }, // Pulse width, ticks remaining, input state old
 				ChipType.DisplayLED => new uint[] { 0 }, // LED colour
 				ChipType.Button => new uint[] { 0 }, // Button colour

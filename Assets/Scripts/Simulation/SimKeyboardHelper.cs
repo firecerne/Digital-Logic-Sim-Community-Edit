@@ -50,10 +50,7 @@ namespace DLS.Simulation
 		{
 			bool isHeld;
 
-			// Convert uint to KeyNumberEnum to KeyCode
-			InputHelper.KeyNumberEnum keyEnum = (InputHelper.KeyNumberEnum)key;
-			string keyName = keyEnum.ToString();
-			KeyCode chosenKey = (KeyCode)System.Enum.Parse(typeof(KeyCode), keyName);
+			KeyCode chosenKey = (KeyCode)key;
 			
 			lock (KeyLookup)
 			{
