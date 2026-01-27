@@ -27,7 +27,7 @@ namespace Seb.Helpers
 		public static bool AnyKeyOrMouseDownThisFrame => InputSource.AnyKeyOrMouseDownThisFrame;
 		public static bool AnyKeyOrMouseHeldThisFrame => InputSource.AnyKeyOrMouseHeldThisFrame;
 		public static Vector2 MouseScrollDelta => InputSource.MouseScrollDelta;
-		public static bool ModifierKeysOff = false; // So we can use special keys for the key chip
+		public static bool LockMode = false; // So we can lock the game in place for good wiring testing (users)
 
 		// Allows me to rename these keys to be more readable versions
 		public static readonly Dictionary<string, string> KeysRenameMap = new Dictionary<string, string>
@@ -136,7 +136,14 @@ namespace Seb.Helpers
 			{ "F9", "F9" },
 			{ "F10", "F10" },
 			{ "F11", "F11" },
-			{ "F12", "F12" }
+			{ "F12", "F12" },
+			{ "Mouse0", "Mouse Left" },
+			{ "Mouse1", "Mouse Right" },
+			{ "Mouse2", "Mouse Middle" },
+			{ "Mouse3", "Mouse 4" },
+			{ "Mouse4", "Mouse 5" },
+			{ "Mouse5", "Mouse 6" },
+			{ "Mouse6", "Mouse 7" },
 		};
 
 		// List of keys that can be used as input to key chips
@@ -176,6 +183,16 @@ namespace Seb.Helpers
 			// Function Keys
 			KeyCode.F1, KeyCode.F2, KeyCode.F3, KeyCode.F4, KeyCode.F5, KeyCode.F6,
 			KeyCode.F7, KeyCode.F8, KeyCode.F9, KeyCode.F10, KeyCode.F11, KeyCode.F12,
+
+			// Mouse keys
+			KeyCode.Mouse0, KeyCode.Mouse1, KeyCode.Mouse2, KeyCode.Mouse3, KeyCode.Mouse4,
+			KeyCode.Mouse5, KeyCode.Mouse6,
+
+			// No key pressed key
+			KeyCode.None,
+
+			// Scrolling keys
+			(KeyCode)99997, (KeyCode)99999 // Scroll Down, Scroll Up
 		};
 
 		// List of keys that can be used when the special keys are turned off (and otherwise can't)
@@ -183,7 +200,11 @@ namespace Seb.Helpers
 		{
 			KeyCode.LeftControl, KeyCode.RightControl,
 			KeyCode.LeftShift, KeyCode.RightShift,
-			KeyCode.LeftAlt, KeyCode.RightAlt
+			KeyCode.LeftAlt, KeyCode.RightAlt,
+
+			// Scrolling keys
+			(KeyCode)99997, // Scroll Down
+			(KeyCode)99999  // Scroll Up
 		};
 
 		static int[] keycodes = GetKeyCodeValues();
@@ -409,6 +430,19 @@ namespace Seb.Helpers
 		public static string UintToKeyName(uint InputUint)
 		{
 			KeyCode keyCodeInput = (KeyCode)InputUint;
+			
+			// Check if scroll key
+			if (InputUint > 99996)
+			{
+				if (InputUint == 99997)
+					return "Scroll Down";
+				else if (InputUint == 99999)
+					return "Scroll Up";
+			}
+			else if (keyCodeInput == KeyCode.None)
+			{
+				return "No Key";
+			}
 
 			if (KeysRenameMap.TryGetValue(keyCodeInput.ToString(), out string correctName))
 				return correctName;

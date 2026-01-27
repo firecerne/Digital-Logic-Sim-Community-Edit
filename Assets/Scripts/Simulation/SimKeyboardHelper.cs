@@ -19,24 +19,26 @@ namespace DLS.Simulation
 				KeyLookup.Clear();
 				HasAnyInput = false;
 
-				if (!InputHelper.AnyKeyOrMouseHeldThisFrame) return; // early exit if no key held
+				float scrollInput = Input.GetAxis("Mouse ScrollWheel");
 
-				// Don't trigger key chips if modifier is held
-				if (InputHelper.ModifierKeysOff == false)
-				{
-					// Do for each in SpecialKeys
-					foreach (KeyCode key in InputHelper.ModifierKeys)
-					{
-						if (InputHelper.IsKeyHeld(key))
-						{
-							return; // If special key is held and special keys are not off, don't process keys
-						}
-					}
-				}
+				if (!InputHelper.AnyKeyOrMouseHeldThisFrame && scrollInput == 0f) return; // early exit if no key held and not scrolling
 
 				foreach (KeyCode key in Seb.Helpers.InputHelper.ValidInputKeys)
 				{
-					if (InputHelper.IsKeyHeld(key))
+					if (key == (KeyCode)99997 || key == (KeyCode)99999)
+					{
+						if (scrollInput < 0f)
+						{
+							KeyLookup.Add((KeyCode)99997); // Scroll Down
+							HasAnyInput = true;
+						}
+						else if (scrollInput > 0f)
+						{
+							KeyLookup.Add((KeyCode)99999); // Scroll Up
+							HasAnyInput = true;
+						}
+					}
+					else if (InputHelper.IsKeyHeld(key))
 					{
 						KeyLookup.Add(key);
 						HasAnyInput = true;
@@ -51,7 +53,13 @@ namespace DLS.Simulation
 			bool isHeld;
 
 			KeyCode chosenKey = (KeyCode)key;
-			
+
+			// Deal with no key
+			if (chosenKey == KeyCode.None)
+			{
+				return !HasAnyInput;
+			}
+
 			lock (KeyLookup)
 			{
 				isHeld = HasAnyInput && KeyLookup.Contains(chosenKey);

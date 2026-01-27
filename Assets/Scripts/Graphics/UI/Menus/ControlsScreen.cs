@@ -33,7 +33,7 @@ namespace DLS.Graphics
             { "Reset Camera", Main.ActiveShortcutSettings.ResetCameraShortcutTriggered },
             { "Undo", Main.ActiveShortcutSettings.UndoShortcutTriggered },
             { "Redo", Main.ActiveShortcutSettings.RedoShortcutTriggered },
-            { "Modifier Keys Toggle", Main.ActiveShortcutSettings.ModifierKeysOffToggleTriggered },
+            { "Lock Mode", Main.ActiveShortcutSettings.LockModeShortcutTriggered },
 
             { "Cancel", Main.ActiveShortcutSettings.CancelShortcutTriggered },
             { "Confirm", Main.ActiveShortcutSettings.ConfirmShortcutTriggered },

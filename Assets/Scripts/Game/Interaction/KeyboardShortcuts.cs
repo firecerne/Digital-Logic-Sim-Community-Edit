@@ -29,7 +29,7 @@ namespace DLS.Game
 		public static Func<bool> ResetCameraShortcutTriggered;
 		public static Func<bool> UndoShortcutTriggered;
 		public static Func<bool> RedoShortcutTriggered;
-		public static Func<bool> ModifierKeysOffToggleTriggered;
+		public static Func<bool> LockModeShortcutTriggered;
 
 		// ---- Single key shortcuts ----
 		public static Func<bool> CancelShortcutTriggered;
@@ -81,7 +81,7 @@ namespace DLS.Game
             LoadShortcut(out ResetCameraShortcutTriggered, shortcutSettings.ResetCameraShortcutTriggered);
             LoadShortcut(out UndoShortcutTriggered, shortcutSettings.UndoShortcutTriggered);
             LoadShortcut(out RedoShortcutTriggered, shortcutSettings.RedoShortcutTriggered);
-			LoadShortcut(out ModifierKeysOffToggleTriggered, shortcutSettings.ModifierKeysOffToggleTriggered);
+			LoadShortcut(out LockModeShortcutTriggered, shortcutSettings.LockModeShortcutTriggered);
 
             LoadShortcut(out CancelShortcutTriggered, shortcutSettings.CancelShortcutTriggered);
             LoadShortcut(out ConfirmShortcutTriggered, shortcutSettings.ConfirmShortcutTriggered);

@@ -32,12 +32,6 @@ namespace DLS.Graphics
 			"On"
 		};
 
-		static readonly string[] ModifierKeysOffOptions =
-		{
-			"Off",
-			"On"
-		};
-
 		static readonly string[] SnappingOptions =
 		{
 			"Hold Ctrl",
@@ -74,7 +68,6 @@ namespace DLS.Graphics
 		static readonly UIHandle ID_ChipPinNames = new("PREFS_ChipPinNames");
 		static readonly UIHandle ID_GridDisplay = new("PREFS_GridDisplay");
 		static readonly UIHandle ID_Snapping = new("PREFS_Snapping");
-		static readonly UIHandle ID_ModifierOff = new("PREFS_ModifierOff");
 		static readonly UIHandle ID_StraightWires = new("PREFS_StraightWires");
 		static readonly UIHandle ID_SimStatus = new("PREFS_SimStatus");
 		static readonly UIHandle ID_SimFrequencyField = new("PREFS_SimTickTarget");
@@ -101,10 +94,6 @@ namespace DLS.Graphics
 			MenuHelper.DrawBackgroundOverlay();
 			Draw.ID panelID = UI.ReservePanel();
 			UpdateSimSpeedString(project);
-			
-			// Initialize modifier keys off state to current value
-			var modifierKeysOffState = UI.GetWheelSelectorState(ID_ModifierOff);
-			modifierKeysOffState.index = InputHelper.ModifierKeysOff ? 1 : 0;
 
 			const int inputTextPad = 1;
 			const float headerSpacing = 1.5f;
@@ -113,7 +102,7 @@ namespace DLS.Graphics
 			Vector2 topLeft = UI.Centre + new Vector2(-menuWidth / 2, verticalOffset);
 			
 			// Increase y by a bit to make room for menu seletion
-			topLeft.y += entrySize.y * 1.5f;
+			topLeft.y += entrySize.y;
 
 			Vector2 labelPosCurr = topLeft;
 
@@ -141,10 +130,6 @@ namespace DLS.Graphics
 				UI.DrawPanel(tickLabelRight, settingFieldSize, new Color(0.18f, 0.18f, 0.18f), Anchor.CentreRight);
 				UI.DrawText(currentSimSpeedString, theme.FontBold, theme.FontSizeRegular, tickLabelRight + new Vector2(inputTextPad - settingFieldSize.x, 0), Anchor.TextCentreLeft, currentSimSpeedStringColour);
 
-				// Draw modifier keys off
-				AddSpacing();
-				int modifierKeysOffMode = DrawNextWheel("Modifier keys off", ModifierKeysOffOptions, ID_ModifierOff);
-
 				// Draw cancel/confirm buttons
 				Vector2 buttonTopLeft = new(labelPosCurr.x, UI.PrevBounds.Bottom);
 				MenuHelper.CancelConfirmResult result = MenuHelper.DrawCancelConfirmButtons(buttonTopLeft, menuWidth, true);
@@ -171,7 +156,6 @@ namespace DLS.Graphics
 				project.description.Prefs_SimStepsPerClockTick = clockSpeed;
 				project.description.Prefs_SimPaused = pauseSim;
 				project.description.Perfs_PinIndicators = pinIndicatorsMode;
-				InputHelper.ModifierKeysOff = modifierKeysOffMode == 1;
 
                 // Cancel / Confirm
                 if (result == MenuHelper.CancelConfirmResult.Cancel)
@@ -250,22 +234,26 @@ namespace DLS.Graphics
 			bool inPrefsMenu = UIDrawer.ActiveMenu == UIDrawer.MenuType.Preferences;
 			bool anyChange = false;
 
-			if (KeyboardShortcuts.ToggleGridShortcutTriggered())
+			if (KeyboardShortcuts.LockModeShortcutTriggered())
 			{
-				Project.ActiveProject.ToggleGridDisplay();
-				anyChange = true;
-			}
-			
-			if (KeyboardShortcuts.ModifierKeysOffToggleTriggered())
-			{
-				InputHelper.ModifierKeysOff = !InputHelper.ModifierKeysOff;
+				InputHelper.LockMode = !InputHelper.LockMode;
 				anyChange = true;
 			}
 
-			if (KeyboardShortcuts.SimPauseToggleShortcutTriggered())
+			// Don't allow other shortcuts if in lock mode
+			if (!InputHelper.LockMode)
 			{
-				Project.ActiveProject.description.Prefs_SimPaused = !Project.ActiveProject.description.Prefs_SimPaused;
-				anyChange = true;
+				if (KeyboardShortcuts.ToggleGridShortcutTriggered())
+				{
+					Project.ActiveProject.ToggleGridDisplay();
+					anyChange = true;
+				}
+
+				if (KeyboardShortcuts.SimPauseToggleShortcutTriggered())
+				{
+					Project.ActiveProject.description.Prefs_SimPaused = !Project.ActiveProject.description.Prefs_SimPaused;
+					anyChange = true;
+				}
 			}
 
 			if (anyChange)
