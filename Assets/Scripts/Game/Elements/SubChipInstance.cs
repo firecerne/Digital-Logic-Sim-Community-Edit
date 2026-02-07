@@ -107,7 +107,7 @@ namespace DLS.Game
 
 		public int LinkedBusPairID => IsBus ? (int)InternalData[0] : -1;
 		public bool BusIsFlipped => IsBus && InternalData.Length > 1 && InternalData[1] == 1;
-		public Vector2 Size => InstanceSize;
+		public Vector2 Size => ChipType == ChipType.Key ? InstanceSize : Description.Size;
 		public Vector2 Position { get; set; }
 
 		public Vector2 MoveStartPosition { get; set; }
@@ -323,7 +323,7 @@ namespace DLS.Game
 			float sizeX, sizeY;
 			Vector2 nameDrawBoundsSize;
 
-			string activationKeyString = InputHelper.UintToKeyName(InternalData[0]);
+			string activationKeyString = ChipType == ChipType.Key ? InputHelper.UintToKeyName(InternalData[0]) : "";
 
 			// For the 1 char key chip name (Base/was before) use base size
 			if (ChipType == ChipType.Key && !string.IsNullOrEmpty(activationKeyString) && activationKeyString.Length == 1)
@@ -351,7 +351,7 @@ namespace DLS.Game
 			}
 
             MinSize = new Vector2(sizeX, sizeY);
-            InstanceSize = MinSize;
+			InstanceSize = MinSize;
         }
 
         // Calculate minimal height of chip to fit the given pins, and calculate their y positions (in grid space)
