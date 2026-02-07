@@ -98,6 +98,13 @@ namespace DLS.Graphics
 			UI.DrawLine(contentBounds.BottomRight, contentBounds.BottomLeft, outlineWidth, outlineCol);
 		}
 
+		public static bool DrawButton(string name, Vector2 topLeft, float width, bool addVerticalPadding, bool interactable = true, bool ignoreInputs = false)
+		{
+			if (addVerticalPadding) topLeft += Vector2.down * (DefaultButtonSpacing * 3);
+			bool buttonPressed = UI.Button(name, Theme.ButtonTheme, topLeft, new Vector2(width, ButtonHeight), interactable, false, false, Anchor.TopLeft, false, 0, ignoreInputs);
+			return buttonPressed;
+		}
+
 		public static int DrawButtonPair(string nameA, string nameB, Vector2 topLeft, float width, bool addVerticalPadding, bool interactableA = true, bool interactableB = true, bool ignoreInputs = false)
 		{
 			if (addVerticalPadding) topLeft += Vector2.down * (DefaultButtonSpacing * 3);
@@ -217,7 +224,7 @@ namespace DLS.Graphics
 
 		static string GetModString(ShortcutModifier modifier)
 		{
-			return (new string[] { "", "Ctrl", "Shift", "Alt", "Ctrl+Shift", "Ctrl+Shift+Alt" })[(int)modifier];
+			return (new string[] { "", "Ctrl", "Shift", "Alt", "Ctrl+Shift", "Ctrl+Shift+Alt", "Right Alt" })[(int)modifier];
 		}
 
         public static string PadWithSpacesAndInsertColorString(string firstString, string colorstring, string secondString, int length) //19 for bottom bar ui

@@ -29,6 +29,7 @@ namespace DLS.Game
 		public static Func<bool> ResetCameraShortcutTriggered;
 		public static Func<bool> UndoShortcutTriggered;
 		public static Func<bool> RedoShortcutTriggered;
+		public static Func<bool> LockModeShortcutTriggered;
 
 		// ---- Single key shortcuts ----
 		public static Func<bool> CancelShortcutTriggered;
@@ -80,6 +81,7 @@ namespace DLS.Game
             LoadShortcut(out ResetCameraShortcutTriggered, shortcutSettings.ResetCameraShortcutTriggered);
             LoadShortcut(out UndoShortcutTriggered, shortcutSettings.UndoShortcutTriggered);
             LoadShortcut(out RedoShortcutTriggered, shortcutSettings.RedoShortcutTriggered);
+			LoadShortcut(out LockModeShortcutTriggered, shortcutSettings.LockModeShortcutTriggered);
 
             LoadShortcut(out CancelShortcutTriggered, shortcutSettings.CancelShortcutTriggered);
             LoadShortcut(out ConfirmShortcutTriggered, shortcutSettings.ConfirmShortcutTriggered);
@@ -134,6 +136,8 @@ namespace DLS.Game
                     return () => InputHelper.CtrlIsHeld && InputHelper.ShiftIsHeld && !InputHelper.AltIsHeld;
                 case ShortcutModifier.CtrlShiftAlt:
 					return () => InputHelper.CtrlIsHeld && InputHelper.ShiftIsHeld && InputHelper.AltIsHeld;
+				case ShortcutModifier.RightAlt:
+					return () => InputHelper.RightAltIsHeld && !(InputHelper.CtrlIsHeld || InputHelper.ShiftIsHeld);
 				default:
 					return () => false;
 			}

@@ -32,6 +32,7 @@ namespace DLS.Graphics
             { "Reset Camera", Main.ActiveShortcutSettings.ResetCameraShortcutTriggered },
             { "Undo", Main.ActiveShortcutSettings.UndoShortcutTriggered },
             { "Redo", Main.ActiveShortcutSettings.RedoShortcutTriggered },
+            { "Lock Mode", Main.ActiveShortcutSettings.LockModeShortcutTriggered },
 
             { "Cancel", Main.ActiveShortcutSettings.CancelShortcutTriggered },
             { "Confirm", Main.ActiveShortcutSettings.ConfirmShortcutTriggered },
@@ -42,7 +43,7 @@ namespace DLS.Graphics
             { "Open Save Data Folder", Main.ActiveShortcutSettings.OpenSaveDataFolderShortcutTriggered },
         };
 
-        static string[] modifierNames = new[] {"None","Control","Shift","Alt","Ctrl+Shift","Ctrl+Shift+Alt" };
+        static string[] modifierNames = new[] {"None","Control","Shift","Alt","Ctrl+Shift","Ctrl+Shift+Alt","Right Alt" };
 
         static List<ShortcutEditingCollapsable> collapsables = new List<ShortcutEditingCollapsable>();
         static List<ShortcutEditingCollapsable> startingCollapsable;

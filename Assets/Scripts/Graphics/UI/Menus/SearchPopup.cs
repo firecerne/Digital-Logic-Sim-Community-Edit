@@ -73,7 +73,7 @@ namespace DLS.Graphics
 					}
 				}
 			}
-			else if (KeyboardShortcuts.CancelShortcutTriggered() || (KeyboardShortcuts.SearchShortcutTriggered() && Time.frameCount > menuOpenedFrame))
+			else if (KeyboardShortcuts.CancelShortcutTriggered() || (KeyboardShortcuts.SearchShortcutTriggered() && Time.frameCount > menuOpenedFrame) && !InputHelper.LockMode)
 			{
 				UIDrawer.SetActiveMenu(UIDrawer.MenuType.None);
 			}

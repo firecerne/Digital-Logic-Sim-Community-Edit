@@ -64,7 +64,7 @@ namespace DLS.Game
 		}
 
 		// Don't allow interaction with wire that's currently being placed (this would allow it to try to connect to itself for example...)
-		public bool CanInteractWithWire(WireInstance wire) => CanInteract && wire != WireToPlace;
+		public bool CanInteractWithWire(WireInstance wire) => CanInteract && wire != WireToPlace && !InputHelper.LockMode;
 
 		public bool CanCompleteWireConnection(WireInstance wireToConnectTo, out PinInstance endPin)
 		{
@@ -184,8 +184,8 @@ namespace DLS.Game
 
 		void HandleKeyboardInput()
 		{
-			// Ignore shortcuts if don't have control
-			if (!HasControl) return;
+			// Ignore shortcuts if don't have control or lock mode is enabled
+			if (!HasControl || InputHelper.LockMode) return;
 
 			if (KeyboardShortcuts.UndoShortcutTriggered()) ActiveDevChip.UndoController.TryUndo();
 			else if (KeyboardShortcuts.RedoShortcutTriggered()) ActiveDevChip.UndoController.TryRedo();
@@ -240,9 +240,12 @@ namespace DLS.Game
 			if (HasControl) UpdatePositionsToMouse();
 
 			// --- Mouse button input ---
-			if (InputHelper.IsMouseDownThisFrame(MouseButton.Left)) HandleLeftMouseDown();
-			if (InputHelper.IsMouseUpThisFrame(MouseButton.Left)) HandleLeftMouseUp();
-			if (InputHelper.IsMouseDownThisFrame(MouseButton.Right)) HandleRightMouseDown();
+			if (!InputHelper.LockMode)
+			{
+				if (InputHelper.IsMouseDownThisFrame(MouseButton.Left)) HandleLeftMouseDown();
+				if (InputHelper.IsMouseUpThisFrame(MouseButton.Left)) HandleLeftMouseUp();
+				if (InputHelper.IsMouseDownThisFrame(MouseButton.Right)) HandleRightMouseDown();
+			}
 
 			// Shift + scroll to increase vertical spacing between elements when placing multiple at a time
 			// (disabled if elements were duplicated since then we want to preserve relative positions)
@@ -454,7 +457,7 @@ namespace DLS.Game
 			if (InteractionState.MouseIsOverUI) return;
 
 			// Confirm placement of new item
-			if (IsPlacingElementOrCreatingWire)
+			if (IsPlacingElementOrCreatingWire && !InputHelper.LockMode)
 			{
 				// Place wire
 				if (IsCreatingWire) //
@@ -474,7 +477,7 @@ namespace DLS.Game
 					FinishPlacingNewElements();
 				}
 			}
-			else
+			else if (!InputHelper.LockMode)
 			{
 				// Mouse down on pin: start placing wire
 				if (InteractionState.ElementUnderMouse is PinInstance pin && HasControl)
@@ -651,7 +654,7 @@ namespace DLS.Game
 			}
 
 			// Select all selectable elements inside selection box
-			if (IsCreatingSelectionBox)
+			if (IsCreatingSelectionBox && !InputHelper.LockMode)
 			{
 				if (!KeyboardShortcuts.MultiModeHeld) ClearSelection();
 				IsCreatingSelectionBox = false;

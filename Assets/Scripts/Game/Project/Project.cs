@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading;
 using DLS.Description;
 using DLS.Graphics;
@@ -286,11 +287,47 @@ namespace DLS.Game
 		}
 
 		// Key chip has been bound to a different key, so simulation must be updated
-		public void NotifyKeyChipBindingChanged(SubChipInstance keyChip, char newKey)
+		public void NotifyKeyChipBindingChanged(SubChipInstance keyChip, KeyCode newKey)
 		{
 			SimChip simChip = rootSimChip.GetSubChipFromID(keyChip.ID);
-			simChip.InternalState[0] = newKey;
-			keyChip.SetKeyChipActivationChar(newKey);
+
+			if ((uint)newKey > 99996) // Scrolling key
+			{
+				// Scroll key
+				uint key = 99997;
+				if ((uint)newKey == 99997)
+					key = 99997; // Scroll Down
+				else if ((uint)newKey == 99999)
+					key = 99999; // Scroll Up
+
+				simChip.InternalState[0] = key;
+
+				keyChip.SetKeyChipActivationChar(key);
+			}
+			else if (newKey == KeyCode.None)
+			{
+				// No key
+				uint key = 0; // No key
+
+				simChip.InternalState[0] = key;
+
+				keyChip.SetKeyChipActivationChar(key);
+			}
+			else
+			{
+				string searchStr = newKey.ToString();
+
+				var pair = InputHelper.KeysRenameMap.FirstOrDefault(p => p.Key == searchStr);
+
+				if (pair.Key != null)
+				{
+					uint key = (uint)newKey;
+
+					simChip.InternalState[0] = key;
+					
+					keyChip.SetKeyChipActivationChar(key); 
+    			}
+			}
 		}
 
 		// Chip's pulse width has been changed, so simulation must be updated

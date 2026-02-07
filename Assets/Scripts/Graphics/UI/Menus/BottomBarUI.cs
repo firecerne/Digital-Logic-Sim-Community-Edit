@@ -63,6 +63,8 @@ namespace DLS.Graphics
 
 		public static void DrawUI(Project project)
 		{
+			if (InputHelper.LockMode) return; // Don't draw bottom bar if in lock mode
+			
 			DrawBottomBar(project);
 
 			if (UIDrawer.ActiveMenu == UIDrawer.MenuType.BottomBarMenuPopup)

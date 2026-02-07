@@ -3,20 +3,20 @@
   "DLSVersion_LastSaved": "2.1.6",
   "DLSVersion_EarliestCompatible": "2.0.0",
   "DLSVersion_LastSavedModdedVersion": "1.1.2",
-  "CreationTime": "2025-03-14T18:23:30.404+01:00",
-  "LastSaveTime": "2025-11-15T13:24:57.653+01:00",
+  "CreationTime": "2025-03-14T10:23:30.404-07:00",
+  "LastSaveTime": "2026-01-27T10:08:30.741-08:00",
   "Prefs_MainPinNamesDisplayMode": 2,
   "Prefs_ChipPinNamesDisplayMode": 1,
   "Prefs_GridDisplayMode": 1,
   "Prefs_Snapping": 0,
   "Prefs_StraightWires": 0,
   "Prefs_SimPaused": false,
-  "Prefs_SimTargetStepsPerSecond": 600000000,
+  "Prefs_SimTargetStepsPerSecond": 100,
   "Prefs_SimStepsPerClockTick": 1,
   "Perfs_PinIndicators": 4,
-  "StepsRanSinceCreated": 105987563,
+  "StepsRanSinceCreated": 25181827100,
   "TimeSpentSinceCreated": {
-    "StartFrom": "03:37:46.8860901"
+    "StartFrom": "05:53:40.2325945"
   },
   "AllCustomChipNames":[
     "AND",
@@ -68,7 +68,10 @@
     "TEST MergeSplit",
     "#",
     "BuzzTest",
-    "#AA"
+    "#AA",
+    "scroll test",
+    "scroll test 2",
+    "testhalt"
   ],
   "StarredList":[
     {
@@ -106,6 +109,18 @@
     {
       "Name":"REGISTER-4",
       "IsCollection":false
+    },
+    {
+      "Name":"scroll test",
+      "IsCollection":false
+    },
+    {
+      "Name":"scroll test 2",
+      "IsCollection":false
+    },
+    {
+      "Name":"testhalt",
+      "IsCollection":false
     }
   ],
   "ChipCollections":[
@@ -136,22 +151,22 @@
     },
     {
       "Chips":["REGISTER-4","REG-8"],
-      "IsToggledOpen":true,
+      "IsToggledOpen":false,
       "Name":"MEMORY"
     },
     {
       "Chips":["D-LATCH","FLIP-FLOP","OR-8","MEM-1","NOT-8","AND(8,1)","MUX-8","PC","BUF-8","ALU-8","DECODE-3","AND-3","CONTROL UNIT","TOGGLE","FLAGS","DISP-7","demo","7-SEGMENT DRIVER","DABBLE","LSB","LSHIFT-8","DOUBLE DABBLE","ALU","BUS BUFFER","MEM-256","REGISTER-8","XNOR","EQUALS-8","ADDER-4","DECODER-2","ADDER-8","ADDER","MEM-16","REGISTER-1","AND-8","RAM-256×8 (async)","ROM 256×16"],
-      "IsToggledOpen":true,
+      "IsToggledOpen":false,
       "Name":"KEEP"
     },
     {
       "Chips":["WIP2","RAM-sync","CONST"],
-      "IsToggledOpen":true,
+      "IsToggledOpen":false,
       "Name":"TEST"
     },
     {
-      "Chips":["PULSE","TEST MergeSplit","BUZZER","SPS","#","BuzzTest","SPSTest","#AA","StatsTest","StatsTest1","StatsTest2","EEPROM 256×16","EEPROM_test","BUTTON","BUTTON_test","BUTTON_test2","DIPSWITCH","4sw","RAM-8","DETECTOR","RTC","ConstTest"],
-      "IsToggledOpen":true,
+      "Chips":["PULSE","TEST MergeSplit","BUZZER","SPS","#","BuzzTest","SPSTest","#AA","StatsTest","StatsTest1","StatsTest2","EEPROM 256×16","EEPROM_test","BUTTON","BUTTON_test","BUTTON_test2","DIPSWITCH","4sw","RAM-8","DETECTOR","RTC","ConstTest","scroll test","scroll test 2","testhalt"],
+      "IsToggledOpen":false,
       "Name":"OTHER"
     }
   ],
