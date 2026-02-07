@@ -68,12 +68,17 @@ namespace DLS.Game
 			description.InputPins ??= Array.Empty<PinDescription>();
 			description.OutputPins ??= Array.Empty<PinDescription>();
 			description.Wires ??= Array.Empty<WireDescription>();
-			instance.HasCustomLayout = description.HasCustomLayout;
 
 			bool anyElementFailedToLoad = false;
 
-			// Load subchips
-			foreach (SubChipDescription subChipDescription in description.SubChips)
+			if(!Main.DLSVersion.ToString().Equals(description.DLSVersion))
+			{
+				anyElementFailedToLoad = true;
+			}
+
+            instance.HasCustomLayout = description.HasCustomLayout;
+            // Load subchips
+            foreach (SubChipDescription subChipDescription in description.SubChips)
 			{
 				if (library.TryGetChipDescription(subChipDescription.Name, out ChipDescription fullDescriptionOfSubchip))
 				{

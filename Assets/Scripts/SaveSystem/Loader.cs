@@ -22,6 +22,16 @@ namespace DLS.SaveSystem
 			return AppSettings.Default();
 		}
 
+		public static ShortcutSettings LoadShortcutSettings()
+		{
+			if(File.Exists(SavePaths.ShortcutSettingsPath))
+			{
+				string shortcutsString = File.ReadAllText (SavePaths.ShortcutSettingsPath);
+				return Serializer.DeserializeShortcutSettings(shortcutsString);
+			}
+			return ShortcutSettings.Default();
+		}
+
 		public static Project LoadProject(string projectName)
 		{
 			ProjectDescription projectDescription = LoadProjectDescription(projectName);

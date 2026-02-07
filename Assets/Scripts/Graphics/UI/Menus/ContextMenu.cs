@@ -150,7 +150,7 @@ namespace DLS.Graphics
 				if (IsOpen) DrawContextMenu(activeContextMenuEntries);
 
 				// Close menu input
-				if (InputHelper.IsMouseDownThisFrame(MouseButton.Left) || KeyboardShortcuts.CancelShortcutTriggered)
+				if (InputHelper.IsMouseDownThisFrame(MouseButton.Left) || KeyboardShortcuts.CancelShortcutTriggered())
 				{
 					CloseContextMenu();
 				}
@@ -160,7 +160,7 @@ namespace DLS.Graphics
 		static void HandleOpenMenuInput()
 		{
 			// Open menu input
-			if (InputHelper.IsMouseDownThisFrame(MouseButton.Right) && !KeyboardShortcuts.CameraActionKeyHeld && !InteractionState.MouseIsOverUI)
+			if (InputHelper.IsMouseDownThisFrame(MouseButton.Right) && !KeyboardShortcuts.CameraActionKeyHeld && !InteractionState.MouseIsOverUI && !InputHelper.LockMode)
 			{
 				bool inCustomizeMenu = UIDrawer.ActiveMenu == UIDrawer.MenuType.ChipCustomization;
 				IInteractable hoverElement = InteractionState.ElementUnderMouse;

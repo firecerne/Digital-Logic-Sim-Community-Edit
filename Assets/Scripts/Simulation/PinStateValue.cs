@@ -116,7 +116,7 @@ namespace DLS.Simulation
 
         public void SetShortValue(ushort value)
         {
-            a = value| (a & 0xFFFF0000);
+            a = value | (a & 0xFFFF0000);
         }
 
         public void SetShortTristateAndValue(ushort tristate, ushort value)
@@ -303,11 +303,11 @@ namespace DLS.Simulation
             (uint a, uint b) AND = (a & other.a, (uint)(b.Data & other.b.Data));
             uint bitsNew = Simulator.RandomBool() ? OR.a : AND.a;
 
-            bitsNew = (bitsNew & ~OR.b) | (OR.b);
+            bitsNew = (bitsNew & ~OR.b) | (OR.a & OR.b);
 
             uint tristateNew = AND.b;
 
-            set = bitsNew != a && (tristateNew != b.Data);
+            set = bitsNew != a || (tristateNew != b.Data);
 
             a = bitsNew;
             b = new BitVector32((int)tristateNew);

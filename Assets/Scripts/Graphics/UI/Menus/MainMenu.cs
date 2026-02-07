@@ -83,7 +83,7 @@ namespace DLS.Graphics
 		{
 			Simulator.UpdateInPausedState();
 			
-			if (KeyboardShortcuts.CancelShortcutTriggered && activePopup == PopupKind.None)
+			if (KeyboardShortcuts.CancelShortcutTriggered() && activePopup == PopupKind.None)
 			{
 				BackToMain();
 			}
@@ -113,6 +113,10 @@ namespace DLS.Graphics
 				case MenuScreen.About:
 					DrawAboutScreen();
 					break;
+				case MenuScreen.Controls:
+					DrawControlsScreen();
+					break;
+
 			}
 
 			switch (activePopup)
@@ -148,18 +152,18 @@ namespace DLS.Graphics
 
 			int buttonIndex = UI.VerticalButtonGroup(menuButtonNames, theme.MainMenuButtonTheme, UI.Centre + Vector2.up * 6, new Vector2(buttonWidth, 0), false, true, 1);
 
-			if (buttonIndex == 0 || KeyboardShortcuts.MainMenu_NewProjectShortcutTriggered) // New project
+			if (buttonIndex == 0 || KeyboardShortcuts.MainMenu_NewProjectShortcutTriggered()) // New project
 			{
 				RefreshLoadedProjects();
 				activePopup = PopupKind.NamePopup_NewProject;
 			}
-			else if (buttonIndex == 1 || KeyboardShortcuts.MainMenu_OpenProjectShortcutTriggered) // Load project
+			else if (buttonIndex == 1 || KeyboardShortcuts.MainMenu_OpenProjectShortcutTriggered()) // Load project
 			{
 				RefreshLoadedProjects();
 				selectedProjectIndex = -1;
 				activeMenuScreen = MenuScreen.LoadProject;
 			}
-			else if (buttonIndex == 2 || KeyboardShortcuts.MainMenu_SettingsShortcutTriggered) // Settings
+			else if (buttonIndex == 2 || KeyboardShortcuts.MainMenu_SettingsShortcutTriggered()) // Settings
 			{
 				EditedAppSettings = Main.ActiveAppSettings;
 				activeMenuScreen = MenuScreen.Settings;
@@ -169,7 +173,7 @@ namespace DLS.Graphics
 			{
 				activeMenuScreen = MenuScreen.About;
 			}
-			else if (buttonIndex == 4 || KeyboardShortcuts.MainMenu_QuitShortcutTriggered) // Quit
+			else if (buttonIndex == 4 || KeyboardShortcuts.MainMenu_QuitShortcutTriggered()) // Quit
 			{
 				Quit();
 			}
@@ -266,7 +270,7 @@ namespace DLS.Graphics
 			}
 		}
 
-		static void BackToMain()
+		public static void BackToMain()
 		{
 			UI.GetInputFieldState(ID_ProjectNameInput).ClearText();
 			activeMenuScreen = MenuScreen.Main;
@@ -310,7 +314,9 @@ namespace DLS.Graphics
 			float elementOriginRight = UI.Centre.x + regionWidth / 2;
 			Vector2 wheelSize = new(16, 2.5f);
 			Vector2 pos = new(labelOriginLeft, UI.Centre.y + 4);
-			using (UI.BeginBoundsScope(true))
+
+
+            using (UI.BeginBoundsScope(true))
 			{
 				Draw.ID backgroundPanelID = UI.ReservePanel();
 
@@ -338,7 +344,8 @@ namespace DLS.Graphics
 				UI.ModifyPanel(backgroundPanelID, UI.GetCurrentBoundsScope().Centre, UI.GetCurrentBoundsScope().Size + Vector2.one * 3, ColHelper.MakeCol255(37, 37, 43));
 			}
 
-			Vector2 buttonPos = UI.PrevBounds.BottomLeft + Vector2.down * DrawSettings.VerticalButtonSpacing;
+
+            Vector2 buttonPos = UI.PrevBounds.BottomLeft + Vector2.down * DrawSettings.VerticalButtonSpacing;
 			settingsButtonGroupStates[0] = true;
 			settingsButtonGroupStates[1] = true;
 
@@ -352,9 +359,27 @@ namespace DLS.Graphics
 			{
 				Main.SaveAndApplyAppSettings(EditedAppSettings);
 			}
+
+			Vector2 controlButtonPos = UI.PrevBounds.BottomLeft + Vector2.down * DrawSettings.VerticalButtonSpacing + Vector2.right * UI.PrevBounds.Width * 0.5f ;
+            bool controlButtonClicked = UI.Button("CONTROLS", theme.MainMenuButtonTheme, controlButtonPos, anchor:Anchor.CentreTop, size: new(UI.PrevBounds.Width * 0.33f, 0f));
+
+			if (controlButtonClicked) {
+				activeMenuScreen = MenuScreen.Controls;
+				OnControlsScreenOpen();
+			}
+        }
+
+		static void DrawControlsScreen()
+		{
+			ControlsScreen.DrawControlsScreen();
 		}
 
-		static void DrawNamePopup()
+		static void OnControlsScreenOpen()
+		{
+			ControlsScreen.OpenControlsScreen();
+		}
+
+        static void DrawNamePopup()
 		{
 			DrawSettings.UIThemeDLS theme = DrawSettings.ActiveUITheme;
 
@@ -392,13 +417,13 @@ namespace DLS.Graphics
 				bool cancelButton = UI.Button("CANCEL", theme.MainMenuButtonTheme, layoutCancel.centre, new Vector2(layoutCancel.size.x, 0), true, false, true);
 				bool confirmButton = UI.Button("CONFIRM", theme.MainMenuButtonTheme, layoutConfirm.centre, new Vector2(layoutConfirm.size.x, 0), canCreateProject, false, true);
 
-				if (cancelButton || KeyboardShortcuts.CancelShortcutTriggered)
+				if (cancelButton || KeyboardShortcuts.CancelShortcutTriggered())
 				{
 					state.ClearText();
 					activePopup = PopupKind.None;
 				}
 
-				if (confirmButton || KeyboardShortcuts.ConfirmShortcutTriggered)
+				if (confirmButton || KeyboardShortcuts.ConfirmShortcutTriggered())
 				{
 					state.ClearText();
 					PopupKind kind = activePopup;
@@ -505,7 +530,8 @@ namespace DLS.Graphics
 			Main,
 			LoadProject,
 			Settings,
-			About
+			About,
+			Controls
 		}
 
 		enum PopupKind

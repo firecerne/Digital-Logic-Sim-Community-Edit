@@ -3,6 +3,7 @@ using Seb.Vis;
 using Seb.Vis.UI;
 using UnityEngine;
 using static DLS.Graphics.DrawSettings;
+using Seb.Helpers;
 
 namespace DLS.Graphics
 {
@@ -14,6 +15,7 @@ namespace DLS.Graphics
 		{
 			Vector2 topLeft = UI.TopLeft;
 			if (simPausedBannerIsActive) topLeft += Vector2.down * InfoBarHeight;
+			if (InputHelper.LockMode) return;
 
 			UI.DrawPanel(topLeft, new Vector2(UI.Width, InfoBarHeight), ActiveUITheme.InfoBarCol, Anchor.TopLeft);
 
@@ -26,7 +28,7 @@ namespace DLS.Graphics
 			Vector2 buttonCentreRight = new(UI.Width - pad, pos.y);
 			bool backButtonPressed = UI.Button("Back", ActiveUITheme.ChipButton, buttonCentreRight, buttonSize, true, false, false, Anchor.CentreRight);
 
-			if (backButtonPressed || KeyboardShortcuts.CancelShortcutTriggered)
+			if (backButtonPressed || KeyboardShortcuts.CancelShortcutTriggered())
 			{
 				project.ReturnToPreviousViewedChip();
 			}

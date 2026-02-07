@@ -1,23 +1,14 @@
 using System.Collections.Generic;
 using Seb.Helpers;
 using UnityEngine;
+using System;
 
 namespace DLS.Simulation
 {
 	public static class SimKeyboardHelper
 	{
-		public static readonly KeyCode[] ValidInputKeys =
-		{
-			KeyCode.A, KeyCode.B, KeyCode.C, KeyCode.D, KeyCode.E, KeyCode.F, KeyCode.G,
-			KeyCode.H, KeyCode.I, KeyCode.J, KeyCode.K, KeyCode.L, KeyCode.M, KeyCode.N,
-			KeyCode.O, KeyCode.P, KeyCode.Q, KeyCode.R, KeyCode.S, KeyCode.T, KeyCode.U,
-			KeyCode.V, KeyCode.W, KeyCode.X, KeyCode.Y, KeyCode.Z,
 
-			KeyCode.Alpha0, KeyCode.Alpha1, KeyCode.Alpha2, KeyCode.Alpha3, KeyCode.Alpha4,
-			KeyCode.Alpha5, KeyCode.Alpha6, KeyCode.Alpha7, KeyCode.Alpha8, KeyCode.Alpha9
-		};
-
-		static readonly HashSet<char> KeyLookup = new();
+		static readonly HashSet<KeyCode> KeyLookup = new();
 		static bool HasAnyInput;
 
 		// Call from Main Thread
@@ -28,15 +19,28 @@ namespace DLS.Simulation
 				KeyLookup.Clear();
 				HasAnyInput = false;
 
-				if (!InputHelper.AnyKeyOrMouseHeldThisFrame) return; // early exit if no key held
-				if (InputHelper.CtrlIsHeld || InputHelper.ShiftIsHeld || InputHelper.AltIsHeld) return; // don't trigger key chips if modifier is held
+				float scrollInput = Input.GetAxis("Mouse ScrollWheel");
 
-				foreach (KeyCode key in ValidInputKeys)
+				if (!InputHelper.AnyKeyOrMouseHeldThisFrame && scrollInput == 0f) return; // early exit if no key held and not scrolling
+
+				foreach (KeyCode key in Seb.Helpers.InputHelper.ValidInputKeys)
 				{
-					if (InputHelper.IsKeyHeld(key))
+					if (key == (KeyCode)99997 || key == (KeyCode)99999)
 					{
-						char keyChar = char.ToUpper((char)key);
-						KeyLookup.Add(keyChar);
+						if (scrollInput < 0f)
+						{
+							KeyLookup.Add((KeyCode)99997); // Scroll Down
+							HasAnyInput = true;
+						}
+						else if (scrollInput > 0f)
+						{
+							KeyLookup.Add((KeyCode)99999); // Scroll Up
+							HasAnyInput = true;
+						}
+					}
+					else if (InputHelper.IsKeyHeld(key))
+					{
+						KeyLookup.Add(key);
 						HasAnyInput = true;
 					}
 				}
@@ -44,13 +48,21 @@ namespace DLS.Simulation
 		}
 
 		// Call from Sim Thread
-		public static bool KeyIsHeld(char key)
+		public static bool KeyIsHeld(uint key)
 		{
 			bool isHeld;
 
+			KeyCode chosenKey = (KeyCode)key;
+
+			// Deal with no key
+			if (chosenKey == KeyCode.None)
+			{
+				return !HasAnyInput;
+			}
+
 			lock (KeyLookup)
 			{
-				isHeld = HasAnyInput && KeyLookup.Contains(key);
+				isHeld = HasAnyInput && KeyLookup.Contains(chosenKey);
 			}
 
 			return isHeld;
