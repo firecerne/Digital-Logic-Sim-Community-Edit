@@ -324,7 +324,7 @@ namespace DLS.Simulation
 
             bitsNew = BitArrayHelper.NonMutativeOR(
                 BitArrayHelper.NonMutativeAND(bitsNew, BitArrayHelper.NonMutativeNOT(OR.b)),
-                OR.b);
+                BitArrayHelper.NonMutativeAND(OR.a, OR.b));
 
             BitArray tristatesNew = AND.b;
             set = !bitsNew.Equals(BigValues) && !tristatesNew.Equals(BigTristates);
