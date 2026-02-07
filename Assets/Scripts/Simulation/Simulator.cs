@@ -331,11 +331,57 @@ namespace DLS.Simulation
 				}
 				case ChipType.Key:
 				{
-					bool isHeld = SimKeyboardHelper.KeyIsHeld((char)chip.InternalState[0]);
+					bool isHeld = SimKeyboardHelper.KeyIsHeld(chip.InternalState[0]);
 					chip.OutputPins[0].State.SmallSet(isHeld ? Constants.LOGIC_HIGH : Constants.LOGIC_LOW);
 					break;
 				}
 				case ChipType.DisplayRGB:
+				{
+					const uint addressSpace = 256;
+					uint addressPin = chip.InputPins[0].State.GetShortValues();
+					bool writePin = chip.InputPins[5].State.SmallHigh();
+					bool clockPin = chip.InputPins[7].State.SmallHigh();
+
+					bool isRisingEdge = clockPin && chip.InternalState[^1] == 0;
+					chip.InternalState[^1] = clockPin ? 1u : 0;
+
+					if (isRisingEdge)
+					{
+						// Clear back buffer
+						if (chip.InputPins[4].State.SmallHigh())
+						{
+							for (int i = 0; i < addressSpace; i++)
+							{
+								chip.InternalState[i + addressSpace] = 0;
+							}
+						}
+						// Write to back-buffer
+						else if (writePin)
+						{
+							uint data = (chip.InputPins[1].State.GetShortValues() | (chip.InputPins[2].State.GetShortValues() << 4) | (chip.InputPins[3].State.GetShortValues() << 8));
+							chip.InternalState[addressPin + addressSpace] = data;
+						}
+
+						// Copy back-buffer to display buffer
+						if (chip.InputPins[6].State.SmallHigh())
+						{
+							for (int i = 0; i < addressSpace; i++)
+							{
+								chip.InternalState[i] = chip.InternalState[i + addressSpace];
+							}
+						}
+					}
+
+					// Output current pixel colour
+					uint colData = chip.InternalState[addressPin];
+					chip.OutputPins[0].State.SetShort((ushort)(colData & 0b1111));//red
+					chip.OutputPins[1].State.SetShort((ushort)((colData >> 4) & 0b1111));//green
+					chip.OutputPins[2].State.SetShort((ushort)((colData >> 8) & 0b1111)	);//blue
+
+
+                    break;
+				}
+				case ChipType.DisplayRGBTouch:
 				{
 					const uint addressSpace = 256;
 					uint addressPin = chip.InputPins[0].State.GetShortValues();

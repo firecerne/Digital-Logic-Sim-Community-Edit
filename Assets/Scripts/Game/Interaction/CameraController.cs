@@ -59,7 +59,7 @@ namespace DLS.Game
 			}
 			else
 			{
-				if (KeyboardShortcuts.ResetCameraShortcutTriggered)
+				if (KeyboardShortcuts.ResetCameraShortcutTriggered() && !InputHelper.LockMode)
 				{
 					chipViewStateLookup.Remove(Project.ActiveProject.ViewedChip.ChipName);
 				}
@@ -77,7 +77,7 @@ namespace DLS.Game
 		// Pan with middle-mouse drag or alt+left-mouse drag
 		static void HandlePanInput(Vector2 mouseScreenPos, Vector2 mouseWorldPos)
 		{
-			if (CanMove)
+			if (CanMove && !InputHelper.LockMode)
 			{
 				bool altLeftMouseDown = KeyboardShortcuts.CameraActionKeyHeld && InputHelper.IsMouseDownThisFrame(MouseButton.Left);
 				bool middleMouseDown = InputHelper.IsMouseDownThisFrame(MouseButton.Middle);
@@ -107,7 +107,7 @@ namespace DLS.Game
 		// Zoom with middle mouse scroll, or alt+right-mouse drag
 		static void HandleZoomInput(Vector2 mouseScreenPos)
 		{
-			if (CanStartNewInput && CanZoom)
+			if (CanStartNewInput && CanZoom && !InputHelper.LockMode)
 			{
 				Vector2 mouseWorldPosAfterPanning = camera.ScreenToWorldPoint(mouseScreenPos);
 				float zoomPrev = activeView.OrthoSize;

@@ -1,6 +1,8 @@
+using System.Data;
 using Seb.Helpers.InputHandling;
 using Seb.Types;
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace Seb.Helpers
 {
@@ -25,6 +27,188 @@ namespace Seb.Helpers
 		public static bool AnyKeyOrMouseDownThisFrame => InputSource.AnyKeyOrMouseDownThisFrame;
 		public static bool AnyKeyOrMouseHeldThisFrame => InputSource.AnyKeyOrMouseHeldThisFrame;
 		public static Vector2 MouseScrollDelta => InputSource.MouseScrollDelta;
+		public static bool LockMode = false; // So we can lock the game in place for good wiring testing (users)
+
+		// Allows me to rename these keys to be more readable versions
+		public static readonly Dictionary<string, string> KeysRenameMap = new Dictionary<string, string>
+		{
+			{ "Alpha0", "0" },
+			{ "Alpha1", "1" },
+			{ "Alpha2", "2" },
+			{ "Alpha3", "3" },
+			{ "Alpha4", "4" },
+			{ "Alpha5", "5" },
+			{ "Alpha6", "6" },
+			{ "Alpha7", "7" },
+			{ "Alpha8", "8" },
+			{ "Alpha9", "9" },
+			{ "A", "A" },
+			{ "B", "B" },
+			{ "C", "C" },
+			{ "D", "D" },
+			{ "E", "E" },
+			{ "F", "F" },
+			{ "G", "G" },
+			{ "H", "H" },
+			{ "I", "I" },
+			{ "J", "J" },
+			{ "K", "K" },
+			{ "L", "L" },
+			{ "M", "M" },
+			{ "N", "N" },
+			{ "O", "O" },
+			{ "P", "P" },
+			{ "Q", "Q" },
+			{ "R", "R" },
+			{ "S", "S" },
+			{ "T", "T" },
+			{ "U", "U" },
+			{ "V", "V" },
+			{ "W", "W" },
+			{ "X", "X" },
+			{ "Y", "Y" },
+			{ "Z", "Z" },
+			{ "BackQuote", "`" },
+			{ "Minus", "-" },
+			{ "Equals", "=" },
+			{ "LeftBracket", "[" },
+			{ "RightBracket", "]" },
+			{ "Semicolon", ";" },
+			{ "Quote", "'" },
+			{ "Comma", "," },
+			{ "Period", "." },
+			{ "Slash", "/" },
+			{ "Keypad0", "Keypad 0" },
+			{ "Keypad1", "Keypad 1" },
+			{ "Keypad2", "Keypad 2" },
+			{ "Keypad3", "Keypad 3" },
+			{ "Keypad4", "Keypad 4" },
+			{ "Keypad5", "Keypad 5" },
+			{ "Keypad6", "Keypad 6" },
+			{ "Keypad7", "Keypad 7" },
+			{ "Keypad8", "Keypad 8" },
+			{ "Keypad9", "Keypad 9" },
+			{ "KeypadDivide", "Keypad /" },
+			{ "KeypadEnter", "Keypad Enter" },
+			{ "KeypadEquals", "Keypad =" },
+			{ "KeypadMinus", "Keypad -" },
+			{ "KeypadPlus", "Keypad +" },
+			{ "KeypadMultiply", "Keypad *" },
+			{ "KeypadPeriod", "Keypad ." },
+			{ "Tab", "Tab" },
+			{ "Return", "Enter" },
+			{ "Escape", "Escape" },
+			{ "Space", "Space" },
+			{ "Delete", "Delete" },
+			{ "Backspace", "Backspace" },
+			{ "Insert", "Insert" },
+			{ "Home", "Home" },
+			{ "End", "End" },
+			{ "PageUp", "Page Up" },
+			{ "PageDown", "Page Down" },
+			{ "LeftArrow", "Left Arrow" },
+			{ "RightArrow", "Right Arrow" },
+			{ "UpArrow", "Up Arrow" },
+			{ "DownArrow", "Down Arrow" },
+			{ "CapsLock", "Caps Lock" },
+			{ "Numlock", "Num Lock" },
+			{ "ScrollLock", "Scroll Lock" },
+			{ "Print", "Print Screen" },
+			{ "Pause", "Pause" },
+			{ "Clear", "Clear" },
+			{ "LeftControl", "Left Control" },
+			{ "RightControl", "Right Control" },
+			{ "LeftShift", "Left Shift" },
+			{ "RightShift", "Right Shift" },
+			{ "LeftAlt", "Left Alt" },
+			{ "RightAlt", "Right Alt" },
+			{ "LeftMeta", "Left Windows" },
+			{ "RightMeta", "Right Windows" },
+			{ "Backslash", "\\" },
+			{ "F1", "F1" },
+			{ "F2", "F2" },
+			{ "F3", "F3" },
+			{ "F4", "F4" },
+			{ "F5", "F5" },
+			{ "F6", "F6" },
+			{ "F7", "F7" },
+			{ "F8", "F8" },
+			{ "F9", "F9" },
+			{ "F10", "F10" },
+			{ "F11", "F11" },
+			{ "F12", "F12" },
+			{ "Mouse0", "Mouse Left" },
+			{ "Mouse1", "Mouse Right" },
+			{ "Mouse2", "Mouse Middle" },
+			{ "Mouse3", "Mouse 4" },
+			{ "Mouse4", "Mouse 5" },
+			{ "Mouse5", "Mouse 6" },
+			{ "Mouse6", "Mouse 7" },
+		};
+
+		// List of keys that can be used as input to key chips
+		public static readonly KeyCode[] ValidInputKeys =
+		{
+			// Letters
+			KeyCode.A, KeyCode.B, KeyCode.C, KeyCode.D, KeyCode.E, KeyCode.F, KeyCode.G,
+			KeyCode.H, KeyCode.I, KeyCode.J, KeyCode.K, KeyCode.L, KeyCode.M, KeyCode.N,
+			KeyCode.O, KeyCode.P, KeyCode.Q, KeyCode.R, KeyCode.S, KeyCode.T, KeyCode.U,
+			KeyCode.V, KeyCode.W, KeyCode.X, KeyCode.Y, KeyCode.Z,
+
+			// Numbers
+			KeyCode.Alpha0, KeyCode.Alpha1, KeyCode.Alpha2, KeyCode.Alpha3, KeyCode.Alpha4,
+			KeyCode.Alpha5, KeyCode.Alpha6, KeyCode.Alpha7, KeyCode.Alpha8, KeyCode.Alpha9,
+
+			// Symbols
+			KeyCode.BackQuote, KeyCode.Minus, KeyCode.Equals, KeyCode.LeftBracket,
+			KeyCode.RightBracket, KeyCode.Semicolon, KeyCode.Quote, KeyCode.Comma,
+			KeyCode.Period, KeyCode.Slash, KeyCode.Backslash,
+
+			// Keypad
+			KeyCode.Keypad0, KeyCode.Keypad1, KeyCode.Keypad2, KeyCode.Keypad3,
+			KeyCode.Keypad4, KeyCode.Keypad5, KeyCode.Keypad6, KeyCode.Keypad7,
+			KeyCode.Keypad8, KeyCode.Keypad9, KeyCode.KeypadDivide, KeyCode.KeypadEnter,
+			KeyCode.KeypadEquals, KeyCode.KeypadMinus, KeyCode.KeypadPlus, KeyCode.KeypadMultiply,
+			KeyCode.KeypadPeriod,
+
+			// Controls
+			KeyCode.Tab, KeyCode.Return, KeyCode.Escape, KeyCode.Space, KeyCode.Delete,
+			KeyCode.Backspace, KeyCode.Insert, KeyCode.Home, KeyCode.End, KeyCode.PageUp,
+			KeyCode.PageDown, KeyCode.LeftArrow, KeyCode.RightArrow, KeyCode.UpArrow,
+			KeyCode.DownArrow, KeyCode.CapsLock, KeyCode.Numlock, KeyCode.ScrollLock,
+			KeyCode.Print, KeyCode.Pause, KeyCode.Clear, KeyCode.LeftControl, KeyCode.RightControl,
+			KeyCode.LeftShift, KeyCode.RightShift, KeyCode.LeftAlt, KeyCode.RightAlt, KeyCode.LeftMeta,
+			KeyCode.RightMeta,
+
+			// Function Keys
+			KeyCode.F1, KeyCode.F2, KeyCode.F3, KeyCode.F4, KeyCode.F5, KeyCode.F6,
+			KeyCode.F7, KeyCode.F8, KeyCode.F9, KeyCode.F10, KeyCode.F11, KeyCode.F12,
+
+			// Mouse keys
+			KeyCode.Mouse0, KeyCode.Mouse1, KeyCode.Mouse2, KeyCode.Mouse3, KeyCode.Mouse4,
+			KeyCode.Mouse5, KeyCode.Mouse6,
+
+			// No key pressed key
+			KeyCode.None,
+
+			// Scrolling keys
+			(KeyCode)99997, (KeyCode)99999 // Scroll Down, Scroll Up
+		};
+
+		// List of keys that can be used when the special keys are turned off (and otherwise can't)
+		public static readonly KeyCode[] ModifierKeys =
+		{
+			KeyCode.LeftControl, KeyCode.RightControl,
+			KeyCode.LeftShift, KeyCode.RightShift,
+			KeyCode.LeftAlt, KeyCode.RightAlt,
+
+			// Scrolling keys
+			(KeyCode)99997, // Scroll Down
+			(KeyCode)99999  // Scroll Up
+		};
+
+		static int[] keycodes = GetKeyCodeValues();
+		static bool[] keysPressed;
 
 		public static Camera WorldCam
 		{
@@ -52,6 +236,18 @@ namespace Seb.Helpers
 		public static bool ShiftIsHeld => IsKeyHeld(KeyCode.LeftShift) || IsKeyHeld(KeyCode.RightShift);
 		public static bool CtrlIsHeld => IsKeyHeld(KeyCode.LeftControl) || IsKeyHeld(KeyCode.RightControl);
 		public static bool AltIsHeld => IsKeyHeld(KeyCode.LeftAlt) || IsKeyHeld(KeyCode.RightAlt);
+		public static bool RightAltIsHeld => IsKeyHeld(KeyCode.RightAlt);
+
+		public static KeyCode GetKeyCodePressedThisFrame()
+		{
+			// Get first key pressed this frame
+			if (ValidInputKeys == null) return KeyCode.None;
+			foreach (KeyCode k in ValidInputKeys)
+			{
+				if (IsKeyHeld(k)) return k;
+			}
+			return KeyCode.None;
+		}
 
 		public static bool IsKeyDownThisFrame(KeyCode key) => InputSource.IsKeyDownThisFrame(key);
 		public static bool IsKeyUpThisFrame(KeyCode key) => InputSource.IsKeyUpThisFrame(key);
@@ -166,6 +362,25 @@ namespace Seb.Helpers
 			return InputSource.IsMouseUpThisFrame(button);
 		}
 
+		public static void TickPreciseKeyLogging() // Only tick when necessary (for exemple, controls screen)
+		{
+			for (int i = 0; i < keycodes.Length; i++)
+			{
+				keysPressed[i] = Input.GetKey((KeyCode)keycodes[i]);
+			}
+		}
+
+		public static KeyCode GetFirstValidKeyCodePressed() // returns the first valid keycode pressed in the order provided in the enum
+		{
+			KeyCode pressed = KeyCode.None;
+			for(int i = 0; i < keysPressed.Length; ++i)
+			{
+				if (keysPressed[i]) { pressed = (KeyCode)keycodes[i]; break; }
+			}
+			return pressed;
+		}
+
+
 		public static void CopyToClipboard(string s) => GUIUtility.systemCopyBuffer = s;
 		public static string GetClipboardContents() => GUIUtility.systemCopyBuffer;
 
@@ -178,6 +393,62 @@ namespace Seb.Helpers
 			rightMouseDownConsumeFrame = -1;
 			middleMouseDownConsumeFrame = -1;
 			InputSource = new UnityInputSource();
+		}
+
+		static int[] GetKeyCodeValues()
+		{
+			int[] keys = (int[])System.Enum.GetValues(typeof(KeyCode));
+			int keyCount = 0;
+
+			for (int i = 0; i < keys.Length; i++) {
+				if (!(keys[i] >= 323 & keys[i] <= 509)) // removes unwanted mouse and joystick values (keeps only keyboard)
+				{
+					keyCount++;
+				}
+			}
+
+			int[] validKeys = new int[keyCount];
+			int j = 0;
+            for (int i = 0; i < keys.Length; i++)
+            {
+                if (!(keys[i] >= 323 & keys[i] <= 509)) // removes unwanted mouse and joystick values (keeps only keyboard)
+                {
+					validKeys[j] = keys[i];
+					j++;
+                }
+            }
+
+			return validKeys;
+        }
+
+		public static void InitiatePreciseKeyLogging()
+		{
+			keycodes = GetKeyCodeValues();
+			keysPressed = new bool[keycodes.Length];
+		}
+
+		public static string UintToKeyName(uint InputUint)
+		{
+			KeyCode keyCodeInput = (KeyCode)InputUint;
+			
+			// Check if scroll key
+			if (InputUint > 99996)
+			{
+				if (InputUint == 99997)
+					return "Scroll Down";
+				else if (InputUint == 99999)
+					return "Scroll Up";
+			}
+			else if (keyCodeInput == KeyCode.None)
+			{
+				return "No Key";
+			}
+
+			if (KeysRenameMap.TryGetValue(keyCodeInput.ToString(), out string correctName))
+				return correctName;
+
+			UnityEngine.Debug.LogError("Error getting value from KeysRenameMap in UintToKeyName, with input: " + InputUint);
+			return null;
 		}
 	}
 }

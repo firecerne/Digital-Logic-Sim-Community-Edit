@@ -13,10 +13,14 @@ namespace DLS.Description
 	public static class Serializer
 	{
 		public static string SerializeAppSettings(AppSettings settings) => Serialize(settings);
+
+		public static string SerializeShortcutSettings(ShortcutSettings shortcutSettings) => Serialize(shortcutSettings);
 		public static string SerializeChipDescription(ChipDescription description) => Serialize(description);
 		public static string SerializeProjectDescription(ProjectDescription description) => Serialize(description);
 
 		public static AppSettings DeserializeAppSettings(string settingsString) => Deserialize<AppSettings>(settingsString);
+		public static ShortcutSettings DeserializeShortcutSettings(string settingString) => Deserialize<ShortcutSettings>(settingString);
+
 		public static ChipDescription DeserializeChipDescription(string serializedDescription) => Deserialize<ChipDescription>(serializedDescription);
 		public static ProjectDescription DeserializeProjectDescription(string serializedDescription) => Deserialize<ProjectDescription>(serializedDescription);
 

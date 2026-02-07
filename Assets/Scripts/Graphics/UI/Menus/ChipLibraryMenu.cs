@@ -96,7 +96,7 @@ namespace DLS.Graphics
 				DrawSelectedItemPanel(panelCTopLeft, panelSizeC);
 			}
 
-			if (KeyboardShortcuts.CancelShortcutTriggered || (KeyboardShortcuts.LibraryShortcutTriggered && !wasOpenedThisFrame))
+			if (KeyboardShortcuts.CancelShortcutTriggered()	 || (KeyboardShortcuts.LibraryShortcutTriggered() && !wasOpenedThisFrame))
 			{
 				if (popupHasFocus) ResetPopupState();
 				else ExitLibrary();
@@ -438,7 +438,7 @@ namespace DLS.Graphics
 								creatingNewCollection = false;
 								renamingCollection = false;
 							}
-							else if (button_cancelConfirm == 1 || KeyboardShortcuts.ConfirmShortcutTriggered)
+							else if (button_cancelConfirm == 1 || KeyboardShortcuts.ConfirmShortcutTriggered())
 							{
 								if (creatingNewCollection)
 								{
@@ -482,7 +482,7 @@ namespace DLS.Graphics
 						{
 							ResetPopupState();
 						}
-						else if (button_cancelConfirm == 1 || KeyboardShortcuts.ConfirmShortcutTriggered) // confirm delete
+						else if (button_cancelConfirm == 1 || KeyboardShortcuts.ConfirmShortcutTriggered()) // confirm delete
 						{
 							if (isConfirmingChipDeletion)
 							{

@@ -15,7 +15,8 @@ namespace DLS.Description
 				ResolutionX = 1920,
 				ResolutionY = 1080,
 				fullscreenMode = FullScreenMode.FullScreenWindow,
-				VSyncEnabled = true
+				VSyncEnabled = true,
 			};
 	}
+
 }
