@@ -114,8 +114,8 @@ namespace DLS.Game
 			Func<bool> modifier = GetFuncFromShortcutModifier(shortcut.Modifier);
 			Func<bool> alternativeModifier = GetFuncFromShortcutModifier(shortcut.AlternativeModifier, false);
 			Func<bool> forbiddenModifier = GetFuncFromShortcutModifier(shortcut.ForbiddenModifier, false);
-			Func<bool> keys = () => InputHelper.IsKeyDownThisFrame(shortcut.KeyCode) && 
-			(shortcut.AlternativeKeyCode == KeyCode.None ? true : InputHelper.IsKeyDownThisFrame(shortcut.AlternativeKeyCode));
+			Func<bool> keys = () => InputHelper.IsKeyDownThisFrame(shortcut.KeyCode) ||
+			(shortcut.AlternativeKeyCode == KeyCode.None ? false : InputHelper.IsKeyDownThisFrame(shortcut.AlternativeKeyCode));
 
 			shortcutFunction = () => (modifier() || alternativeModifier()) && !forbiddenModifier() && keys();
 		}
