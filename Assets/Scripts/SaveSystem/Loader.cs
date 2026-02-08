@@ -111,7 +111,8 @@ namespace DLS.SaveSystem
 				string chipSaveString = File.ReadAllText(chipPath);
 
 				ChipDescription chipDesc = Serializer.DeserializeChipDescription(chipSaveString);
-				loadedChips[i] = chipDesc;
+				SavedDescriptionCorrector.CorrectChipDescription(chipDesc);
+                loadedChips[i] = chipDesc;
 				customChipNameHashset.Add(chipDesc.Name);
 			}
 
