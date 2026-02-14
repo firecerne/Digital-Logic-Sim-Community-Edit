@@ -1,12 +1,11 @@
-using Seb.Vis.UI;
-using Seb.Vis;
-using UnityEngine;
-using static DLS.Graphics.DrawSettings;
 using System;
 using System.Collections.Generic;
-using DLS.Game;
 using System.Linq;
-
+using DLS.Game;
+using Seb.Vis;
+using Seb.Vis.UI;
+using UnityEngine;
+using static DLS.Graphics.DrawSettings;
 
 
 namespace DLS.Graphics
@@ -26,7 +25,7 @@ namespace DLS.Graphics
         const float menuWidth = 55;
         const float verticalOffset = 22;
 
-        static readonly Vector2 entrySize = new(menuWidth, DrawSettings.SelectorWheelHeight);
+        static readonly Vector2 entrySize = new(menuWidth, SelectorWheelHeight);
         public static readonly Vector2 settingFieldSize = new(entrySize.x / 3, entrySize.y);
 
         static int previousValue;
@@ -93,7 +92,7 @@ namespace DLS.Graphics
 
                 Vector2 buttonTopLeft = new(labelPosCurr.x, UI.PrevBounds.Bottom - 2f);
                 int addOrClose = UI.VerticalButtonGroup(new[] { "Add special chip", "Save", "Close" }, new[] {canAddChip && !displayDone, !saved, true },
-                ActiveUITheme.ButtonTheme, buttonTopLeft + (menuWidth / 2) * Vector2.right, entrySize, false, false, entrySpacing);
+                ActiveUITheme.ButtonTheme, buttonTopLeft + menuWidth / 2 * Vector2.right, entrySize, false, false, entrySpacing);
 
                 if(mainPinNamesMode == OPTION_PIN && canAddChip && addOrClose == 0)
                 {

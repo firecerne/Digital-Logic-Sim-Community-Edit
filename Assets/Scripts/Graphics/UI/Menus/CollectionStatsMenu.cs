@@ -58,9 +58,6 @@ namespace DLS.Graphics
 				if (result)
 					UIDrawer.SetActiveMenu(UIDrawer.MenuType.None);
 			}
-
-			return;
-
 		}
 
 		private static int GetCollectionChipsLength() => 

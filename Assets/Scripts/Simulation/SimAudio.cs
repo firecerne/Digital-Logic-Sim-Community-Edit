@@ -1,6 +1,5 @@
 using System;
 using Seb.Helpers;
-using UnityEngine;
 
 namespace DLS.Simulation
 {

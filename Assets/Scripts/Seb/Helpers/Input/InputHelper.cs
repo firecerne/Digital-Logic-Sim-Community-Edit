@@ -1,8 +1,8 @@
-using System.Data;
+using System;
+using System.Collections.Generic;
 using Seb.Helpers.InputHandling;
 using Seb.Types;
 using UnityEngine;
-using System.Collections.Generic;
 
 namespace Seb.Helpers
 {
@@ -397,7 +397,7 @@ namespace Seb.Helpers
 
 		static int[] GetKeyCodeValues()
 		{
-			int[] keys = (int[])System.Enum.GetValues(typeof(KeyCode));
+			int[] keys = (int[])Enum.GetValues(typeof(KeyCode));
 			int keyCount = 0;
 
 			for (int i = 0; i < keys.Length; i++) {
@@ -436,7 +436,7 @@ namespace Seb.Helpers
 			{
 				if (InputUint == 99997)
 					return "Scroll Down";
-				else if (InputUint == 99999)
+				if (InputUint == 99999)
 					return "Scroll Up";
 			}
 			else if (keyCodeInput == KeyCode.None)
@@ -447,7 +447,7 @@ namespace Seb.Helpers
 			if (KeysRenameMap.TryGetValue(keyCodeInput.ToString(), out string correctName))
 				return correctName;
 
-			UnityEngine.Debug.LogError("Error getting value from KeysRenameMap in UintToKeyName, with input: " + InputUint);
+			Debug.LogError("Error getting value from KeysRenameMap in UintToKeyName, with input: " + InputUint);
 			return null;
 		}
 	}

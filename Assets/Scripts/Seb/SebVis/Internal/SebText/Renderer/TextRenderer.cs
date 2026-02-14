@@ -157,7 +157,7 @@ namespace Seb.Vis.Text.Rendering
 						currCol = richTextInfo.richTextCol;
 						continue;
 					}
-					else if (richTextInfo.tagType is TextLayoutHelper.RichTextTagType.ColorBlockEnd)
+					if (richTextInfo.tagType is TextLayoutHelper.RichTextTagType.ColorBlockEnd)
 					{
 						currCol = textCol;
 						continue;

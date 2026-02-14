@@ -1,13 +1,13 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using DLS.Description;
 using DLS.Game;
 using Seb.Helpers;
 using Seb.Types;
 using Seb.Vis;
-using UnityEngine;
-using System.Linq;
 using Seb.Vis.UI;
-using System.Collections.Generic;
+using UnityEngine;
 
 namespace DLS.Graphics
 {

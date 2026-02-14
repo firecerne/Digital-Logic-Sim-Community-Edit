@@ -34,9 +34,9 @@ namespace DLS.Simulation
 		public SimChip[] SubChips = Array.Empty<SimChip>();
 		// Small, purely combinational chips use a LUT for fast calculations. These are stored here. Maps the name of a chip to its LUT.
 		public static readonly Dictionary<string, (int framCacheWasMade, uint[][] LUT)> combinationalChipCaches = new();
-		public uint[][] LUT = null;
+		public uint[][] LUT;
 		// Variables for the creating cache info popup.
-		public static bool isCreatingACache = false;
+		public static bool isCreatingACache;
 		public static string nameOfChipWhoseCacheIsBeingCreated;
 		public static float cacheCreatingProgress;
 		// If this is set to the current frame, all cache attempts will abort until the next frame.
@@ -219,7 +219,7 @@ namespace DLS.Simulation
 			int numberOfBits = 0;
 			foreach (SimPin pin in InputPins)
 			{
-				numberOfBits += (int)pin.State.size;
+				numberOfBits += pin.State.size;
 			}
 			return numberOfBits;
 		}
@@ -345,7 +345,7 @@ namespace DLS.Simulation
 					{
 						uint mask = ((uint)1 << InputPins[i].State.size) - 1;
 						InputPins[i].State.SetShort((uint)(tempInput & mask));
-						tempInput >>= (int)InputPins[i].State.size;
+						tempInput >>= InputPins[i].State.size;
 					}
 					Simulator.StepChip(this); // Calculate Result
 
@@ -396,7 +396,7 @@ namespace DLS.Simulation
 				// Fails if at least one input is in TriState (as these are not cached)
 				if(InputPins[i].State.GetShort() >> 16 != 0)
 					return false;
-				input <<= (int)InputPins[i].State.size;
+				input <<= InputPins[i].State.size;
 				input |= (int)InputPins[i].State.GetShort();
 			}
 			uint[] outputs = LUT[input];

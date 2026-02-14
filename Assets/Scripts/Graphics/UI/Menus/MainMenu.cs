@@ -7,6 +7,7 @@ using DLS.Simulation;
 using Seb.Helpers;
 using Seb.Vis;
 using Seb.Vis.UI;
+using UnityEditor;
 using UnityEngine;
 
 namespace DLS.Graphics
@@ -519,7 +520,7 @@ namespace DLS.Graphics
 		{
 			#if UNITY_EDITOR
 				// There should be a NullReferenceException when quitting, but it does not affect the application.
-				UnityEditor.EditorApplication.isPlaying = false;
+				EditorApplication.isPlaying = false;
 			#else
 				Application.Quit();
 			#endif

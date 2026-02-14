@@ -569,7 +569,7 @@ namespace DLS.Game
 					return;
 				}
 
-				hasMoved |= (element.MoveStartPosition != element.Position);
+				hasMoved |= element.MoveStartPosition != element.Position;
 			}
 
 			if (hasMoved) ActiveDevChip.UndoController.RecordMoveElements(SelectedElements);

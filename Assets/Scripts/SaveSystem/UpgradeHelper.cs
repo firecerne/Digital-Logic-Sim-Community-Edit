@@ -1,8 +1,6 @@
-using System.Collections.Generic;
 using System.Linq;
 using DLS.Description;
 using DLS.Game;
-using UnityEngine;
 
 namespace DLS.SaveSystem
 {
@@ -38,8 +36,8 @@ namespace DLS.SaveSystem
 
 			bool canParseModdedVersion = Main.Version.TryParse(projectDescription.DLSVersion_LastSavedModdedVersion, out Main.Version projectVersion);
 
-			bool isVersionEarlierThan_1_1_0 = (!canParseModdedVersion) || projectVersion.ToInt() < moddedVersion_1_1_0.ToInt();
-			bool isVersionEarlierThan_1_1_1 = (!canParseModdedVersion) || projectVersion.ToInt() < moddedVersion_1_1_1.ToInt();
+			bool isVersionEarlierThan_1_1_0 = !canParseModdedVersion || projectVersion.ToInt() < moddedVersion_1_1_0.ToInt();
+			bool isVersionEarlierThan_1_1_1 = !canParseModdedVersion || projectVersion.ToInt() < moddedVersion_1_1_1.ToInt();
 
 			bool isSplitMergeInvalid = projectDescription.SplitMergePairs == null || projectDescription.SplitMergePairs.Count == 0;
 			bool isPinBitCountInvalid = projectDescription.pinBitCounts == null || projectDescription.pinBitCounts.Count == 0;

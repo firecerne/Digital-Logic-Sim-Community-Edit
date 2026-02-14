@@ -218,7 +218,7 @@ namespace DLS.Game
 				{
 					IMoveable element = elementLookupByID[subChipIDs[i]];
 					element.Position = undo ? originalPositions[i] : newPositions[i];
-					Project.ActiveProject.controller.Select(element, true);
+					Project.ActiveProject.controller.Select(element);
 				}
 
 				for (int i = 0; i < devChip.Wires.Count; i++)
@@ -252,7 +252,7 @@ namespace DLS.Game
 					{
 						(WireInstance loadedWire, bool failed) = DevChipInstance.TryLoadWireFromDescription(wireDescription, wireIndex, devChip, devChip.Wires);
 						if (failed) throw new Exception("Failed to load wire in undo/redo action");
-						else devChip.AddWire(loadedWire, false, wireIndex);
+						devChip.AddWire(loadedWire, false, wireIndex);
 					}
 				}
 				else
@@ -307,7 +307,7 @@ namespace DLS.Game
 					{
 						SubChipInstance subchip = new(description, subchipDescriptions[i]);
 						devChip.AddNewSubChip(subchip, false);
-						Project.ActiveProject.controller.Select(subchip, true);
+						Project.ActiveProject.controller.Select(subchip);
 					}
 					else if (!devChip.TryDeleteSubChipByID(subchipDescriptions[i].ID))
 					{
@@ -325,7 +325,7 @@ namespace DLS.Game
 					{
 						DevPinInstance devPin = new(pinDescription, pinInInputFlags[i]);
 						devChip.AddNewDevPin(devPin, false);
-						Project.ActiveProject.controller.Select(devPin, true);
+						Project.ActiveProject.controller.Select(devPin);
 					}
 					else
 					{
