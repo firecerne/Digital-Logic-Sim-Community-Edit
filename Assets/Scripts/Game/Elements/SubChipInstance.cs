@@ -1,13 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
 using DLS.Description;
 using DLS.Graphics;
 using DLS.SaveSystem;
 using Seb.Helpers;
 using Seb.Types;
-using Seb.Vis;
 using UnityEngine;
 using Exception = System.Exception;
 
@@ -260,7 +258,7 @@ namespace DLS.Game
                 }
             }
         }
-        public void SetCustomLayout(bool SetCustom) => this.HasCustomLayout = SetCustom;
+        public void SetCustomLayout(bool SetCustom) => HasCustomLayout = SetCustom;
 
 		// Min chip height based on input and output pins
 		public static float MinChipHeightForPins(PinDescription[] inputs, PinDescription[] outputs) => Mathf.Max(MinChipHeightForPins(inputs), MinChipHeightForPins(outputs));
@@ -479,7 +477,7 @@ namespace DLS.Game
 				PinBitCount.Bit1 => DrawSettings.PinRadius * 2,
 				PinBitCount.Bit4 => DrawSettings.PinHeight4Bit, 
 				PinBitCount.Bit8 => DrawSettings.PinHeight8Bit,
-                _ => (GetPinDepthMultiplier(bitCount) * bitCount.BitCount * DrawSettings.PinHeightPerBit) + 0.03f,
+                _ => GetPinDepthMultiplier(bitCount) * bitCount.BitCount * DrawSettings.PinHeightPerBit + 0.03f,
             };
 		}
 

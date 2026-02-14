@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using Seb.Helpers;
 using UnityEngine;
-using System;
 
 namespace DLS.Simulation
 {
@@ -23,7 +22,7 @@ namespace DLS.Simulation
 
 				if (!InputHelper.AnyKeyOrMouseHeldThisFrame && scrollInput == 0f) return; // early exit if no key held and not scrolling
 
-				foreach (KeyCode key in Seb.Helpers.InputHelper.ValidInputKeys)
+				foreach (KeyCode key in InputHelper.ValidInputKeys)
 				{
 					if (key == (KeyCode)99997 || key == (KeyCode)99999)
 					{

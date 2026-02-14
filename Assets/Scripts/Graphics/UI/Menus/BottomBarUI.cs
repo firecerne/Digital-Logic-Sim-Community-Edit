@@ -18,7 +18,7 @@ namespace DLS.Graphics
 
 		const string shortcutTextCol = "<color=#666666ff>";
 
-		static string[] menuButtonNames => new string[]{
+		static string[] menuButtonNames => new[]{
 			MenuHelper.PadWithSpacesAndInsertColorString("NEW CHIP",shortcutTextCol,
 				MenuHelper.GetStringRepresentationOfShortcut(Main.ActiveShortcutSettings.CreateNewChipShortcutTriggered), 19),
 			MenuHelper.PadWithSpacesAndInsertColorString("SAVE CHIP", shortcutTextCol,
@@ -290,7 +290,7 @@ namespace DLS.Graphics
 					for (int i = firstButtonIndex; i >= 0; i--)
 					{
 						string chipName = activeCollection.Chips[i];
-						UI.Button(chipName, DrawSettings.ActiveUITheme.ChipButton, buttonLayoutPos, new Vector2(0, buttonHeight), false, true, false, Anchor.BottomLeft, false, 0);
+						UI.Button(chipName, DrawSettings.ActiveUITheme.ChipButton, buttonLayoutPos, new Vector2(0, buttonHeight), false, true, false, Anchor.BottomLeft);
 						buttonLayoutPos = UI.PrevBounds.TopLeft + Vector2.up * buttonSpacing;
 
 						// Stop if approaching top of screen (we'll draw the rest of the collection starting on a new line)

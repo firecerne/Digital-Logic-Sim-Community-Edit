@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using Seb.Types;
 using Seb.Vis.Internal;
 using Seb.Vis.Text.FontLoading;
+using UnityEditor;
+using UnityEditor.Callbacks;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -136,14 +138,14 @@ namespace Seb.Vis
 		}
 
 #if UNITY_EDITOR
-		static void OnPlayModeStateChanged(UnityEditor.PlayModeStateChange state)
+		static void OnPlayModeStateChanged(PlayModeStateChange state)
 		{
-			if (state is UnityEditor.PlayModeStateChange.ExitingPlayMode)
+			if (state is PlayModeStateChange.ExitingPlayMode)
 			{
 				Cleanup();
 			}
 
-			if (state is UnityEditor.PlayModeStateChange.EnteredEditMode)
+			if (state is PlayModeStateChange.EnteredEditMode)
 			{
 				RegisterCallbacks();
 				Init();
@@ -220,15 +222,15 @@ namespace Seb.Vis
 			Camera.onPreRender += OnPreRender;
 
 #if UNITY_EDITOR
-			UnityEditor.AssemblyReloadEvents.beforeAssemblyReload -= CleanupBeforeAssemblyReload;
-			UnityEditor.AssemblyReloadEvents.beforeAssemblyReload += CleanupBeforeAssemblyReload;
-			UnityEditor.EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
-			UnityEditor.EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
+			AssemblyReloadEvents.beforeAssemblyReload -= CleanupBeforeAssemblyReload;
+			AssemblyReloadEvents.beforeAssemblyReload += CleanupBeforeAssemblyReload;
+			EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
+			EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
 #endif
 		}
 
 #if UNITY_EDITOR
-		[UnityEditor.Callbacks.DidReloadScripts]
+		[DidReloadScripts]
 #endif
 		// Callback invoked when starting up the runtime. Called before the first scene is loaded.
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]

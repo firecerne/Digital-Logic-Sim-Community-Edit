@@ -1,5 +1,4 @@
 using System.Linq;
-using DLS.SaveSystem;
 using Seb.Vis;
 using Seb.Vis.UI;
 using UnityEngine;
@@ -133,7 +132,7 @@ namespace DLS.Graphics
 				GridCol = MakeCol255(49, 49, 51),
 				FlatColors = flatColors,
 				FlatColorsHover = flatHover,
-				PinSizeIndicatorColors = new Color[] {
+				PinSizeIndicatorColors = new[] {
 					new(0,0,0,0), // Depth 0 -- UNUSED
 					MakeCol255(153, 102, 51), // Depth 1
 					MakeCol255(255, 0, 0), // Depth 2

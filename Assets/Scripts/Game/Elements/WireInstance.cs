@@ -45,7 +45,7 @@ namespace DLS.Game
 
 			WirePoints = new List<Vector2>(points);
 			originalWireConnectionPoint = sourceConnection.IsConnectedAtWire ? points[0] : points[^1];
-			BitWires = new BitWire[(int)bitCount];
+			BitWires = new BitWire[bitCount];
 			ConnectedWireRecursionDepth = CalculateConnectedWireRecursionDepth(this);
 			this.spawnOrder = spawnOrder;
 			InitCommon();
@@ -65,7 +65,7 @@ namespace DLS.Game
 			WirePoints.Add(GetAttachmentPoint(firstConnectionInfo));
 			WirePoints.Add(WirePoints[0]); // end point to be controlled by mouse during placement mode
 
-			BitWires = new BitWire[(int)bitCount];
+			BitWires = new BitWire[bitCount];
 			this.spawnOrder = spawnOrder;
 			InitCommon();
 		}

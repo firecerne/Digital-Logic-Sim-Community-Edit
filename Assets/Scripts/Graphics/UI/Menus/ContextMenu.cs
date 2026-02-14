@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using DLS.Description;
 using DLS.Game;
@@ -475,7 +474,7 @@ namespace DLS.Graphics
 
 		public static void UnstarBottomBarEntry()
 		{
-			Project.ActiveProject.SetStarred(interactionContextName, false, bottomBarItemIsCollection, true);
+			Project.ActiveProject.SetStarred(interactionContextName, false, bottomBarItemIsCollection);
 		}
 
 		public readonly struct MenuEntry

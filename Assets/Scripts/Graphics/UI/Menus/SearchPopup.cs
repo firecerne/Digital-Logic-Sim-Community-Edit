@@ -73,7 +73,7 @@ namespace DLS.Graphics
 					}
 				}
 			}
-			else if (KeyboardShortcuts.CancelShortcutTriggered() || (KeyboardShortcuts.SearchShortcutTriggered() && Time.frameCount > menuOpenedFrame) && !InputHelper.LockMode)
+			else if (KeyboardShortcuts.CancelShortcutTriggered() || KeyboardShortcuts.SearchShortcutTriggered() && Time.frameCount > menuOpenedFrame && !InputHelper.LockMode)
 			{
 				UIDrawer.SetActiveMenu(UIDrawer.MenuType.None);
 			}
@@ -101,7 +101,7 @@ namespace DLS.Graphics
 
 
 				bool isStarred = Project.ActiveProject.description.IsStarred(chipName, false);
-				int buttonIndex = MenuHelper.DrawButtonTriplet("USE", "OPEN", isStarred ? "UN-STAR" : "STAR", buttonsTopLeft, buttonsWidth, false, canPlaceChip, canOpenChip, true);
+				int buttonIndex = MenuHelper.DrawButtonTriplet("USE", "OPEN", isStarred ? "UN-STAR" : "STAR", buttonsTopLeft, buttonsWidth, false, canPlaceChip, canOpenChip);
 
 
 				if (buttonIndex == 0) UseChip(chipName);
