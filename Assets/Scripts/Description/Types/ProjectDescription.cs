@@ -7,7 +7,7 @@ namespace DLS.Description
 {
     public struct ProjectDescription
     {
-        public static readonly List<String> BuiltInSpecialChipNames = new List<string>()
+        public static readonly List<String> BuiltInSpecialChipNames = new()
         {
             "IN-1", "IN-4", "IN-8",
             "OUT-1", "OUT-4", "OUT-8",
@@ -79,8 +79,8 @@ namespace DLS.Description
 			List<String> result = new List<String>();
 			foreach(KeyValuePair<PinBitCount, PinBitCount> pair in SplitMergePairs)
 			{
-				result.Add(pair.Key.ToString()+"-"+pair.Value.ToString()+"BIT");
-				result.Add(pair.Value.ToString() + "-" + pair.Key.ToString()+"BIT");
+				result.Add(pair.Key+"-"+pair.Value+"BIT");
+				result.Add(pair.Value + "-" + pair.Key+"BIT");
 			}
 			return result;
 		}
@@ -90,8 +90,8 @@ namespace DLS.Description
 			List<String > result = new List<String>();
 			foreach(PinBitCount count in pinBitCounts)
 			{
-				result.Add("IN-"+count.ToString());
-                result.Add("OUT-" + count.ToString());
+				result.Add("IN-"+count);
+                result.Add("OUT-" + count);
             }
 			return result;
         }

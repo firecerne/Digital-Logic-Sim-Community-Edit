@@ -81,9 +81,9 @@ namespace DLS.Description
 		public int GetTier()
 		{
 			if (BitCount <= 64) return 0;
-			else if (BitCount <= 512) return 1;
-			else if (BitCount <= 4096) return 2;
-			else return 3;
+			if (BitCount <= 512) return 1;
+			if (BitCount <= 4096) return 2;
+			return 3;
 		}
 
         public static bool operator ==(PinBitCount a, PinBitCount b) => a.BitCount == b.BitCount;

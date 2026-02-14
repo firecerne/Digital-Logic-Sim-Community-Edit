@@ -233,7 +233,7 @@ namespace DLS.Graphics
 
 			int charCount;
 
-			if (pin.Pin.State.IsValueBiggerThanInt() || (((pin.GetStateDecimalDisplayValue()&(1<<31)) == (1<<31)) && pin.pinValueDisplayMode!=PinValueDisplayMode.SignedDecimal) )
+			if (pin.Pin.State.IsValueBiggerThanInt() || ((pin.GetStateDecimalDisplayValue()&(1<<31)) == 1<<31 && pin.pinValueDisplayMode!=PinValueDisplayMode.SignedDecimal) )
 			{
 				charCount = 7;
 				CopyToCharBuffer(pin, "TOO BIG");
@@ -840,7 +840,7 @@ namespace DLS.Graphics
 
 			Vector2 topLeft = new(centre.x - inputGridSizeWithoutOutline.x / 2, centre.y + inputGridSizeWithoutOutline.y / 2);
 			Draw.Quad(centre, inputGridSize, Color.black);
-			int currBitIndex = (int)devPin.BitCount - 1;
+			int currBitIndex = devPin.BitCount - 1;
 
 			bool mouseOverStateGrid = InputHelper.MouseInsideBounds_World(centre, inputGridSize);
 			bool isInteractable = controller.CanInteractWithPinStateDisplay && devPin.IsInputPin;
@@ -1063,7 +1063,7 @@ namespace DLS.Graphics
                     float pinWidth = PinRadius * 2 * 0.95f;
                     float pinHeight = SubChipInstance.PinHeightFromBitCount(pin.bitCount);
 
-                    Vector2 pinSize = (pin.face == 0 || pin.face == 2)
+                    Vector2 pinSize = pin.face == 0 || pin.face == 2
                         ? new Vector2(pinHeight, pinWidth)  // horizontal pin
                         : new Vector2(pinWidth, pinHeight); // vertical pin
 
@@ -1351,7 +1351,7 @@ namespace DLS.Graphics
 			int drawPriority_signalHigh = wireIsHigh ? 1000 : 0;
 
 			// Draw multi-bit wires above single bit wires
-			int drawPriority_bitCount = (int)wire.bitCount * 1000;
+			int drawPriority_bitCount = wire.bitCount * 1000;
 
 			// If a wire is connected to another wire, it should be drawn beneath it
 			// (mainly important for multi-bit wires, since these look strange otherwise)

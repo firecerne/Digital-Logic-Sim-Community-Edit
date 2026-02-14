@@ -72,7 +72,7 @@ namespace DLS.Simulation
                 return;
             }
 
-            else if(size <= 32)
+            if(size <= 32)
             {
                 a = 0;
                 b = new BitVector32(-1);
@@ -96,7 +96,8 @@ namespace DLS.Simulation
         public bool FirstBitHigh()
         {
             if (size <= 32) { return (a & 1) == 1; }
-            else return BigValues.Get(0);
+
+            return BigValues.Get(0);
         }
         public void ToggleBit(int index)
         {
@@ -188,14 +189,12 @@ namespace DLS.Simulation
                 return GetShortBitTristatedValue(index);
             }
 
-            else if (size <= 32)
+            if (size <= 32)
             {
                 return GetMediumBitTristatedValue(index);
             }
-            else
-            {
-                return GetBigBitTristatedValue(index);
-            }
+
+            return GetBigBitTristatedValue(index);
         }
 
         ushort GetShortBitTristatedValue(int index)
@@ -254,9 +253,9 @@ namespace DLS.Simulation
 
         public uint OR(PinStateValue pinStateValue)
         {
-            if (size == 1) { return (pinStateValue.a | a); }
-            else if (size <= 16) { return pinStateValue.GetShortValues() | GetShortValues(); }
-            else if (size <= 32) { return pinStateValue.GetMediumValues() | GetMediumValues(); }
+            if (size == 1) { return pinStateValue.a | a; }
+            if (size <= 16) { return pinStateValue.GetShortValues() | GetShortValues(); }
+            if (size <= 32) { return pinStateValue.GetMediumValues() | GetMediumValues(); }
             return 0;
         }
 
@@ -307,7 +306,7 @@ namespace DLS.Simulation
 
             uint tristateNew = AND.b;
 
-            set = bitsNew != a || (tristateNew != b.Data);
+            set = bitsNew != a || tristateNew != b.Data;
 
             a = bitsNew;
             b = new BitVector32((int)tristateNew);
@@ -341,14 +340,11 @@ namespace DLS.Simulation
             {
                 return HandleConflictShort(other);
             }
-            else if (size <= 32)
+            if (size <= 32)
             {
                 return HandleConflictMedium(other);
             }
-            else
-            {
-                return HandleConflictBig(other);
-            }
+            return HandleConflictBig(other);
         }
 
         public void HandleShortSplit(ref SimPin[] targets)
@@ -369,7 +365,7 @@ namespace DLS.Simulation
 
             for (int i = 0; i < targets.Length; i++)
             {
-                int off = (i * targetSize);
+                int off = i * targetSize;
                 targets[offset - i].State.a = (uint)(((a>>off) & mask) | (((b.Data>>off) & mask) <<16));
             }
         }
@@ -442,7 +438,7 @@ namespace DLS.Simulation
 
             for (int i = 1; i < sources.Length; i++)
             {
-                int shift = (i * sourceSize);
+                int shift = i * sourceSize;
                 uint sourceState = sources[offset-i].State.a;
                 a |= (sourceState & mask) << shift;
                 tri |= (int)((sourceState >> 16)& mask) << shift;
@@ -464,8 +460,8 @@ namespace DLS.Simulation
                 for (int i = 0; i < sources.Length; i++)
                 {
                     uint sourceState = sources[^(i + 1)].State.a;
-                    BitArrayHelper.SetUShortOfMaxLengthAtIndex(ref BigValues, (ushort)(sourceState & mask), (i * sourceSize), sourceSize);
-                    BitArrayHelper.SetUShortOfMaxLengthAtIndex(ref BigTristates, (ushort)((sourceState & triMask)>>16), (i * sourceSize), sourceSize);
+                    BitArrayHelper.SetUShortOfMaxLengthAtIndex(ref BigValues, (ushort)(sourceState & mask), i * sourceSize, sourceSize);
+                    BitArrayHelper.SetUShortOfMaxLengthAtIndex(ref BigTristates, (ushort)((sourceState & triMask)>>16), i * sourceSize, sourceSize);
                 }
             }
             else if (sourceSize <= 32)

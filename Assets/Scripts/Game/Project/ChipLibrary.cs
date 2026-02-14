@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using DLS.Description;
@@ -65,7 +66,7 @@ namespace DLS.Game
 				}
 			}
 
-			throw new System.Exception("Bus terminus not found");
+			throw new Exception("Bus terminus not found");
 		}
 
 		public bool TryGetChipDescription(string name, out ChipDescription description) => descriptionFromNameLookup.TryGetValue(name, out description);

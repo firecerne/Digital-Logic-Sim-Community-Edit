@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using DLS.Description;
 using DLS.Graphics;
 using DLS.Simulation;
@@ -61,7 +60,7 @@ namespace DLS.Game
                         Vector2 chipSize = subchip.Size;
                         Vector2 chipPos = subchip.Position;
 
-                        float halfWidth = (chipSize.x / 2f) * (faceRight ? 1 : -1);
+                        float halfWidth = chipSize.x / 2f * (faceRight ? 1 : -1);
                         float halfHeight = chipSize.y / 2f;
                         float inset = DrawSettings.SubChipPinInset;
                         float outlineOffset = DrawSettings.ChipOutlineWidth / 2f;
@@ -113,7 +112,7 @@ namespace DLS.Game
 
 		public Color GetStateCol(int bitIndex, bool hover = false, bool canUsePlayerState = true, bool forWires = false)
 		{
-			PinStateValue pinState = (IsSourcePin && canUsePlayerState) ? PlayerInputState : State; // dev input pin uses player state (so it updates even when sim is paused)
+			PinStateValue pinState = IsSourcePin && canUsePlayerState ? PlayerInputState : State; // dev input pin uses player state (so it updates even when sim is paused)
 			uint state = pinState.GetTristatedValue(bitIndex);
 			if (state == PinStateValue.LOGIC_DISCONNECTED) return DrawSettings.ActiveTheme.StateDisconnectedCol;
 			if(forWires && bitCount >= 64) { return DrawSettings.GetFlatColour(state == PinStateValue.LOGIC_HIGH, (uint)Colour, hover); }

@@ -51,8 +51,8 @@ public class AudioState
 		return waveType switch
 		{
 			WaveType.Sin => SinWave(phase),
-			WaveType.Square => SquareWave(phase, waveIterations),
-			WaveType.Saw => SawtoothWave(phase, waveIterations),
+			WaveType.Square => SquareWave(phase),
+			WaveType.Saw => SawtoothWave(phase),
 			_ => throw new NotImplementedException()
 		};
 	}

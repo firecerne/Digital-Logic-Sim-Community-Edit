@@ -1,13 +1,9 @@
 using System;
-using System.Collections;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Diagnostics;
 using DLS.Description;
 using DLS.Game;
-using NUnit.Framework.Interfaces;
 using Random = System.Random;
-using System.Security.Cryptography;
 
 namespace DLS.Simulation
 {
@@ -252,14 +248,14 @@ namespace DLS.Simulation
 				{
                         uint nandOp = 1 ^ (chip.InputPins[0].State.a & chip.InputPins[1].State.a);
 
-                        chip.OutputPins[0].State.a = (nandOp & 1);
+                        chip.OutputPins[0].State.a = nandOp & 1;
 
                         break;
                 }
 				case ChipType.Clock:
 				{
                         bool high = stepsPerClockTransition != 0 && ((simulationFrame / stepsPerClockTransition) & 1) == 0;
-						chip.OutputPins[0].State.SmallSet((high ? Constants.LOGIC_HIGH : Constants.LOGIC_LOW));
+						chip.OutputPins[0].State.SmallSet(high ? Constants.LOGIC_HIGH : Constants.LOGIC_LOW);
                         break;
                 }
 				case ChipType.Pulse:
@@ -288,7 +284,7 @@ namespace DLS.Simulation
                             chip.InternalState[1]--;
                             outputState = 1;
                         }
-                        else if ((inputState >> 1) != 0)
+                        else if (inputState >> 1 != 0)
                         {
                             outputState = 0b_0000_0000_0000_0001___0000_0000_0000_0000;
                         }
@@ -358,7 +354,7 @@ namespace DLS.Simulation
 						// Write to back-buffer
 						else if (writePin)
 						{
-							uint data = (chip.InputPins[1].State.GetShortValues() | (chip.InputPins[2].State.GetShortValues() << 4) | (chip.InputPins[3].State.GetShortValues() << 8));
+							uint data = chip.InputPins[1].State.GetShortValues() | (chip.InputPins[2].State.GetShortValues() << 4) | (chip.InputPins[3].State.GetShortValues() << 8);
 							chip.InternalState[addressPin + addressSpace] = data;
 						}
 
@@ -404,7 +400,7 @@ namespace DLS.Simulation
 						// Write to back-buffer
 						else if (writePin)
 						{
-							uint data = (chip.InputPins[1].State.GetShortValues() | (chip.InputPins[2].State.GetShortValues() << 4) | (chip.InputPins[3].State.GetShortValues() << 8));
+							uint data = chip.InputPins[1].State.GetShortValues() | (chip.InputPins[2].State.GetShortValues() << 4) | (chip.InputPins[3].State.GetShortValues() << 8);
 							chip.InternalState[addressPin + addressSpace] = data;
 						}
 

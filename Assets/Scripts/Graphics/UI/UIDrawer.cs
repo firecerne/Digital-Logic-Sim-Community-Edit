@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using DLS.Game;
 using DLS.Simulation;
 using Seb.Vis.UI;

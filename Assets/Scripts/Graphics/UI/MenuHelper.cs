@@ -198,8 +198,8 @@ namespace DLS.Graphics
 
 
             bool atLeastTwoMods = (hasMod && hasForbiddenMod) || (hasMod && hasAltMod) || (hasForbiddenMod && hasAltMod);
-            string modEnclosing1 = (atLeastTwoMods) ? "(" : "";
-            string modEnclosing2 = (atLeastTwoMods) ? ")" : "";
+            string modEnclosing1 = atLeastTwoMods ? "(" : "";
+            string modEnclosing2 = atLeastTwoMods ? ")" : "";
             string orMod = hasMod ? " <color=#ff5959ff>OR</color> " : "";
             string andnot = atLeastTwoMods ? " <color=#ff5959ff>AND NOT</color> " : "<color=#ff5959ff>NOT</color> ";
 
@@ -216,7 +216,7 @@ namespace DLS.Graphics
 
 			string shortcutKey = keyEnclosing1
 				+ (hasKey ? shortcut.KeyCode.ToString() : "")
-				+ (hasAltKey ? orKey + shortcut.AlternativeKeyCode.ToString() : "")
+				+ (hasAltKey ? orKey + shortcut.AlternativeKeyCode : "")
 				+ keyEnclosing2;
 
 			return (hasAnyMod ? shortcutModifier : "") + (hasBoth ? " <color=#ff5959ff>AND</color> " : "") + (hasAnyKey ? shortcutKey : " .");
@@ -224,7 +224,7 @@ namespace DLS.Graphics
 
 		static string GetModString(ShortcutModifier modifier)
 		{
-			return (new string[] { "", "Ctrl", "Shift", "Alt", "Ctrl+Shift", "Ctrl+Shift+Alt", "Right Alt" })[(int)modifier];
+			return new[] { "", "Ctrl", "Shift", "Alt", "Ctrl+Shift", "Ctrl+Shift+Alt", "Right Alt" }[(int)modifier];
 		}
 
         public static string PadWithSpacesAndInsertColorString(string firstString, string colorstring, string secondString, int length) //19 for bottom bar ui

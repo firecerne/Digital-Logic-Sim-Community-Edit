@@ -1,3 +1,4 @@
+using System;
 using DLS.Graphics;
 using DLS.Simulation;
 using Seb.Helpers;
@@ -130,8 +131,8 @@ namespace DLS.Game
 					SimPin simPin = Project.ActiveProject.rootSimChip.GetSimPinFromAddress(InteractionState.PinUnderMouse.Address);
 					uint bitData = simPin.State.GetValue();
 					uint tristateFlags = simPin.State.GetTristatedFlags() ;
-					string bitString = StringHelper.CreateBinaryString(bitData, false);
-					string triStateString = StringHelper.CreateBinaryString(tristateFlags, false);
+					string bitString = StringHelper.CreateBinaryString(bitData);
+					string triStateString = StringHelper.CreateBinaryString(tristateFlags);
 
 					string displayString = "";
 					for (int i = 0; i < bitString.Length; i++)
@@ -175,7 +176,7 @@ namespace DLS.Game
 			WorldDrawer.Reset();
 		}
 
-		[System.Serializable]
+		[Serializable]
 		public struct NoteTest
 		{
 			public int noteIndex;
