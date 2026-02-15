@@ -16,9 +16,7 @@ namespace DLS.SaveSystem
 			ChipDescription descOld = chip.LastSavedDescription;
 			bool hasSavedDesc = descOld != null;
 			Vector2 size = hasSavedDesc ? descOld.Size : Vector2.zero;
-			Color col = hasSavedDesc ? descOld.Colour : RandomInitialChipColour();
 			string name = hasSavedDesc ? descOld.Name : string.Empty;
-			DisplayDescription[] displays = hasSavedDesc ? descOld.Displays : null;
 
 
             // Create pin and subchip descriptions
@@ -87,16 +85,16 @@ namespace DLS.SaveSystem
 				Name = name,
 				NameLocation = hasSavedDesc ? descOld.NameLocation : NameDisplayLocation.Centre,
 				Size = size,
-				Colour = col,
+				Colour = hasSavedDesc ? descOld.Colour : RandomInitialChipColour(),
 				ShouldBeCached = hasSavedDesc ? descOld.ShouldBeCached : false,
 
 				SubChips = subchips,
 				InputPins = inputPins,
 				OutputPins = outputPins,
 				Wires = chip.Wires.Select(CreateWireDescription).ToArray(),
-				Displays = displays,
+				Displays = hasSavedDesc ? descOld.Displays : null,
 				ChipType = ChipType.Custom,
-				HasCustomLayout = hasSavedDesc ? descOld.HasCustomLayout : false
+				HasCustomLayout = hasSavedDesc && descOld.HasCustomLayout
 			};
 		}
 
@@ -218,7 +216,7 @@ namespace DLS.SaveSystem
 				devPin.pinValueDisplayMode
 			);
 
-		public static PinDescription CreatePinDescriptionAndConserveCustomInfo(DevPinInstance devPin, PinDescription pinDescription) =>
+		static PinDescription CreatePinDescriptionAndConserveCustomInfo(DevPinInstance devPin, PinDescription pinDescription) =>
 			new(
 				devPin.Pin.Name,
 				devPin.ID,

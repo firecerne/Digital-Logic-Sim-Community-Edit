@@ -16,7 +16,8 @@ namespace DLS.Description
         public float LocalOffset; //offset on chip edge for pin location
 		
 
-        public PinDescription(string name, int id, Vector2 position, PinBitCount bitCount, PinColour colour, PinValueDisplayMode valueDisplayMode, float localoff = 0)
+        public PinDescription(string name, int id, Vector2 position, PinBitCount bitCount, PinColour colour,
+	        PinValueDisplayMode valueDisplayMode, float offset = 0, int side = 1)
 		{
 			Name = name;
 			ID = id;
@@ -24,19 +25,7 @@ namespace DLS.Description
 			BitCount = bitCount;
 			Colour = colour;
 			ValueDisplayMode = valueDisplayMode;
-            LocalOffset = localoff;
-			face = 1;
-        }
-
-		public PinDescription(string name, int id, Vector2 position, PinBitCount bitCount, PinColour colour, PinValueDisplayMode valueDisplayMode, float localoff, int side)
-		{
-            Name = name;
-            ID = id;
-            Position = position;
-            BitCount = bitCount;
-            Colour = colour;
-            ValueDisplayMode = valueDisplayMode;
-            LocalOffset = localoff;
+            LocalOffset = offset;
 			face = side;
         }
 	}
