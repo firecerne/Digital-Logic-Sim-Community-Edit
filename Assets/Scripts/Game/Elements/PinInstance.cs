@@ -23,7 +23,7 @@ namespace DLS.Game
 		public float LocalPosY;
 		public string Name;
 		public int face;
-        public int ID;
+        public readonly int ID;
 		
 
         public PinInstance(PinDescription desc, PinAddress address, IMoveable parent, bool isSourcePin)
@@ -35,7 +35,7 @@ namespace DLS.Game
 			IsSourcePin = isSourcePin;
 			Colour = desc.Colour;
 
-            IsBusPin = parent is SubChipInstance subchip && subchip.IsBus;
+            IsBusPin = parent is SubChipInstance { IsBus: true };
 			faceRight = isSourcePin;
 			desc.face = faceRight ? 1 : 3; // 1 for right, 3 for left
 			face = faceRight ? 1 : 3;
@@ -55,10 +55,10 @@ namespace DLS.Game
             {
                 case DevPinInstance devPin:
                     return devPin.PinPosition;
-                case SubChipInstance subchip:
+                case SubChipInstance subChip:
                     {
-                        Vector2 chipSize = subchip.Size;
-                        Vector2 chipPos = subchip.Position;
+                        Vector2 chipSize = subChip.Size;
+                        Vector2 chipPos = subChip.Position;
 
                         float halfWidth = chipSize.x / 2f * (faceRight ? 1 : -1);
                         float halfHeight = chipSize.y / 2f;
@@ -66,8 +66,8 @@ namespace DLS.Game
                         float outlineOffset = DrawSettings.ChipOutlineWidth / 2f;
 
                         
-                        float x = 0f;
-                        float y = 0f;
+                        float x;
+                        float y;
 
                         switch (face)
                         {
@@ -118,10 +118,6 @@ namespace DLS.Game
 			if(forWires && bitCount >= 64) { return DrawSettings.GetFlatColour(state == PinStateValue.LOGIC_HIGH, (uint)Colour, hover); }
 			return DrawSettings.GetStateColour(state == PinStateValue.LOGIC_HIGH, (uint)Colour, hover);
 			
-		}
-		public void ChangeBitCount(int NewBitCount)
-		{ 
-			bitCount.BitCount = (ushort)NewBitCount;
 		}
 	}
 }
