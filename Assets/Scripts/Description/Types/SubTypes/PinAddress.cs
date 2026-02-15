@@ -1,10 +1,10 @@
 namespace DLS.Description
 {
-	public struct PinAddress
+	public readonly struct PinAddress
 	{
 		// ----- Data -----
-		public int PinID; // ID for this pin (unique within its owner, but not globally unique)
-		public int PinOwnerID; // ID of the devpin or subchip to which this pin belongs (unique within its parent)
+		public readonly int PinID; // ID for this pin (unique within its owner, but not globally unique)
+		public readonly int PinOwnerID; // ID of the devPin or subChip to which this pin belongs (unique within its parent)
 
 		// ---- Constructor and functions ----
 		public PinAddress(int pinOwnerID, int pinID)

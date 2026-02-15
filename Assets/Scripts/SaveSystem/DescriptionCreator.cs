@@ -15,9 +15,7 @@ namespace DLS.SaveSystem
 			// Get previously saved customizations such as name and colour (if exist)
 			ChipDescription descOld = chip.LastSavedDescription;
 			bool hasSavedDesc = descOld != null;
-			Color col = hasSavedDesc ? descOld.Colour : RandomInitialChipColour();
 			string name = hasSavedDesc ? descOld.Name : string.Empty;
-			DisplayDescription[] displays = hasSavedDesc ? descOld.Displays : null;
 
 
             // Create pin and subchip descriptions
@@ -106,16 +104,16 @@ namespace DLS.SaveSystem
 				Name = name,
 				NameLocation = hasSavedDesc ? descOld.NameLocation : NameDisplayLocation.Centre,
 				Size = size,
-				Colour = col,
+				Colour = hasSavedDesc ? descOld.Colour : RandomInitialChipColour(),
 				ShouldBeCached = shouldBeCached,
 
 				SubChips = subchips,
 				InputPins = inputPins,
 				OutputPins = outputPins,
 				Wires = chip.Wires.Select(CreateWireDescription).ToArray(),
-				Displays = displays,
+				Displays = hasSavedDesc ? descOld.Displays : null,
 				ChipType = ChipType.Custom,
-				HasCustomLayout = hasSavedDesc ? descOld.HasCustomLayout : false
+				HasCustomLayout = hasSavedDesc && descOld.HasCustomLayout
 			};
 		}
 

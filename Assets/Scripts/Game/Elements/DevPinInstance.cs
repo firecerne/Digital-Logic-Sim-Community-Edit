@@ -121,12 +121,5 @@ namespace DLS.Game
 		public bool PointIsInStateIndicatorBounds(Vector2 point) => Maths.PointInCircle2D(point, StateDisplayPosition, DevPinStateDisplayRadius);
 
 		public bool PointIsInHandleBounds(Vector2 point) => HandleBounds().PointInBounds(point);
-
-		public void ChangeBitCount(ushort bitcount)
-		{
-			BitCount.BitCount = bitcount;
-            StateGridDimensions = GridHelper.GetStateGridDimension(BitCount.BitCount);
-            StateGridSize = BitCount.BitCount == 1 ? Vector2.one * (DevPinStateDisplayRadius * 2 + DevPinStateDisplayOutline * 2) : (Vector2)StateGridDimensions * MultiBitPinStateDisplaySquareSize + Vector2.one * DevPinStateDisplayOutline;
-        }
     }
 }
