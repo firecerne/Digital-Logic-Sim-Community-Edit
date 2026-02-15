@@ -2,9 +2,9 @@
   "ProjectName": "MainTest",
   "DLSVersion_LastSaved": "2.1.6",
   "DLSVersion_EarliestCompatible": "2.0.0",
-  "DLSVersion_LastSavedModdedVersion": "1.1.2",
-  "CreationTime": "2025-03-14T10:23:30.404-07:00",
-  "LastSaveTime": "2026-01-27T10:08:30.741-08:00",
+  "DLSVersion_LastSavedModdedVersion": "1.2.1",
+  "CreationTime": "2025-03-14T18:23:30.404+01:00",
+  "LastSaveTime": "2026-02-15T01:03:10.951+01:00",
   "Prefs_MainPinNamesDisplayMode": 2,
   "Prefs_ChipPinNamesDisplayMode": 1,
   "Prefs_GridDisplayMode": 1,
@@ -14,9 +14,9 @@
   "Prefs_SimTargetStepsPerSecond": 100,
   "Prefs_SimStepsPerClockTick": 1,
   "Perfs_PinIndicators": 4,
-  "StepsRanSinceCreated": 25181827100,
+  "StepsRanSinceCreated": 25181849130,
   "TimeSpentSinceCreated": {
-    "StartFrom": "05:53:40.2325945"
+    "StartFrom": "05:57:21.5877241"
   },
   "AllCustomChipNames":[
     "AND",
@@ -68,10 +68,7 @@
     "TEST MergeSplit",
     "#",
     "BuzzTest",
-    "#AA",
-    "scroll test",
-    "scroll test 2",
-    "testhalt"
+    "#AA"
   ],
   "StarredList":[
     {
@@ -109,24 +106,12 @@
     {
       "Name":"REGISTER-4",
       "IsCollection":false
-    },
-    {
-      "Name":"scroll test",
-      "IsCollection":false
-    },
-    {
-      "Name":"scroll test 2",
-      "IsCollection":false
-    },
-    {
-      "Name":"testhalt",
-      "IsCollection":false
     }
   ],
   "ChipCollections":[
     {
       "Chips":["NAND","AND","NOT","NOR","XOR","OR","KEY","CLOCK","3-STATE BUFFER"],
-      "IsToggledOpen":true,
+      "IsToggledOpen":false,
       "Name":"BASICS"
     },
     {
@@ -165,7 +150,7 @@
       "Name":"TEST"
     },
     {
-      "Chips":["PULSE","TEST MergeSplit","BUZZER","SPS","#","BuzzTest","SPSTest","#AA","StatsTest","StatsTest1","StatsTest2","EEPROM 256×16","EEPROM_test","BUTTON","BUTTON_test","BUTTON_test2","DIPSWITCH","4sw","RAM-8","DETECTOR","RTC","ConstTest","scroll test","scroll test 2","testhalt"],
+      "Chips":["PULSE","TEST MergeSplit","BUZZER","SPS","#","BuzzTest","SPSTest","#AA","StatsTest","StatsTest1","StatsTest2","EEPROM 256×16","EEPROM_test","BUTTON","BUTTON_test","BUTTON_test2","DIPSWITCH","4sw","RAM-8","DETECTOR","RTC","ConstTest"],
       "IsToggledOpen":false,
       "Name":"OTHER"
     }
