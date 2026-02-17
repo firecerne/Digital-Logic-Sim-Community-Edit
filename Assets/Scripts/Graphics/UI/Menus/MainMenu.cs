@@ -1,4 +1,5 @@
 using System;
+using System.IO.Compression;
 using System.Linq;
 using DLS.Description;
 using DLS.Game;
@@ -48,6 +49,8 @@ namespace DLS.Graphics
 			FormatButtonString("Delete"),
 			FormatButtonString("Duplicate"),
 			FormatButtonString("Rename"),
+			FormatButtonString("Import"),
+			FormatButtonString("Export"),
 			FormatButtonString("Open")
 		};
 
@@ -133,6 +136,12 @@ namespace DLS.Graphics
 				case PopupKind.NamePopup_NewProject:
 					DrawNamePopup();
 					break;
+				case PopupKind.ZipPopup_ImportProject:
+					DrawImportProjectPopup();
+					break;
+				case PopupKind.ZipPopup_ExportProject:
+					DrawExportProjectPopup();
+					break;
 			}
 		}
 
@@ -185,7 +194,9 @@ namespace DLS.Graphics
 			const int deleteButtonIndex = 1;
 			const int duplicateButtonIndex = 2;
 			const int renameButtonIndex = 3;
-			const int openButtonIndex = 4;
+			const int importButtonIndex = 4;
+			const int exportButtonIndex = 5;
+			const int openButtonIndex = 6;
 			DrawSettings.UIThemeDLS theme = DrawSettings.ActiveUITheme;
 
 			Vector2 pos = UI.Centre + new Vector2(0, -1);
@@ -199,7 +210,7 @@ namespace DLS.Graphics
 
 			for (int i = 0; i < openProjectButtonStates.Length; i++)
 			{
-				bool buttonEnabled = activePopup == PopupKind.None && (compatibleProject || i == backButtonIndex || (i == deleteButtonIndex && projectSelected));
+				bool buttonEnabled = activePopup == PopupKind.None && (compatibleProject || i == backButtonIndex || (i == deleteButtonIndex && projectSelected) || i == importButtonIndex || (i == exportButtonIndex && projectSelected));
 				openProjectButtonStates[i] = buttonEnabled;
 			}
 
@@ -217,6 +228,8 @@ namespace DLS.Graphics
 			else if (buttonIndex == deleteButtonIndex) activePopup = PopupKind.DeleteConfirmation;
 			else if (buttonIndex == duplicateButtonIndex) activePopup = PopupKind.NamePopup_DuplicateProject;
 			else if (buttonIndex == renameButtonIndex) activePopup = PopupKind.NamePopup_RenameProject;
+			else if (buttonIndex == importButtonIndex) activePopup = PopupKind.ZipPopup_ImportProject;
+			else if (buttonIndex == exportButtonIndex) activePopup = PopupKind.ZipPopup_ExportProject;
 			else if (buttonIndex == openButtonIndex) Main.CreateOrLoadProject(SelectedProjectName, string.Empty);
 		}
 
@@ -483,6 +496,174 @@ namespace DLS.Graphics
 			}
 		}
 
+		static void DrawImportProjectPopup()
+		{
+			DrawSettings.UIThemeDLS theme = DrawSettings.ActiveUITheme;
+
+			UI.StartNewLayer();
+			UI.DrawFullscreenPanel(theme.MenuBackgroundOverlayCol);
+
+			using (UI.BeginBoundsScope(true))
+			{
+				Draw.ID panelID = UI.ReservePanel();
+				UI.DrawText("Import Project from ZIP", theme.FontRegular, theme.FontSizeRegular, UI.Centre, Anchor.Centre, Color.white);
+				
+				Vector2 instructionPos = UI.PrevBounds.BottomLeft + Vector2.down * DrawSettings.VerticalButtonSpacing;
+				UI.DrawText("Select a ZIP file containing a DLS project to import.", theme.FontRegular, theme.FontSizeRegular * 0.8f, instructionPos, Anchor.TopLeft, new Color(1, 1, 1, 0.7f));
+
+				Vector2 buttonRegionTopLeft = UI.PrevBounds.BottomLeft + Vector2.down * DrawSettings.VerticalButtonSpacing;
+				float buttonRegionWidth = UI.PrevBounds.Width;
+				int buttonIndex = UI.HorizontalButtonGroup(new[] { "CANCEL", "SELECT ZIP" }, theme.MainMenuButtonTheme, buttonRegionTopLeft, buttonRegionWidth, DrawSettings.HorizontalButtonSpacing, 0, Anchor.TopLeft);
+				
+				UI.ModifyPanel(panelID, UI.GetCurrentBoundsScope().Centre, UI.GetCurrentBoundsScope().Size + Vector2.one * 2, ColHelper.MakeCol255(37, 37, 43));
+
+				if (buttonIndex == 0 || KeyboardShortcuts.CancelShortcutTriggered()) // Cancel
+				{
+					activePopup = PopupKind.None;
+				}
+				else if (buttonIndex == 1) // Select ZIP
+				{
+					ImportProjectFromZip();
+					activePopup = PopupKind.None;
+				}
+			}
+		}
+
+		static void DrawExportProjectPopup()
+		{
+			DrawSettings.UIThemeDLS theme = DrawSettings.ActiveUITheme;
+
+			UI.StartNewLayer();
+			UI.DrawFullscreenPanel(theme.MenuBackgroundOverlayCol);
+
+			using (UI.BeginBoundsScope(true))
+			{
+				Draw.ID panelID = UI.ReservePanel();
+				UI.DrawText($"Export '{SelectedProjectName}' as ZIP", theme.FontRegular, theme.FontSizeRegular, UI.Centre, Anchor.Centre, Color.white);
+				
+				Vector2 instructionPos = UI.PrevBounds.BottomLeft + Vector2.down * DrawSettings.VerticalButtonSpacing;
+				UI.DrawText("Choose where to save the exported project ZIP file.", theme.FontRegular, theme.FontSizeRegular * 0.8f, instructionPos, Anchor.TopLeft, new Color(1, 1, 1, 0.7f));
+
+				Vector2 buttonRegionTopLeft = UI.PrevBounds.BottomLeft + Vector2.down * DrawSettings.VerticalButtonSpacing;
+				float buttonRegionWidth = UI.PrevBounds.Width;
+				int buttonIndex = UI.HorizontalButtonGroup(new[] { "CANCEL", "EXPORT" }, theme.MainMenuButtonTheme, buttonRegionTopLeft, buttonRegionWidth, DrawSettings.HorizontalButtonSpacing, 0, Anchor.TopLeft);
+				
+				UI.ModifyPanel(panelID, UI.GetCurrentBoundsScope().Centre, UI.GetCurrentBoundsScope().Size + Vector2.one * 2, ColHelper.MakeCol255(37, 37, 43));
+
+				if (buttonIndex == 0 || KeyboardShortcuts.CancelShortcutTriggered()) // Cancel
+				{
+					activePopup = PopupKind.None;
+				}
+				else if (buttonIndex == 1) // Export
+				{
+					ExportProjectToZip();
+					activePopup = PopupKind.None;
+				}
+			}
+		}
+
+		static void ImportProjectFromZip()
+		{
+			try
+			{
+#if UNITY_EDITOR
+				string zipPath = UnityEditor.EditorUtility.OpenFilePanel("Import Project ZIP", "", "zip");
+				if (!string.IsNullOrEmpty(zipPath))
+				{
+					ImportZipFile(zipPath);
+				}
+#else
+				// For runtime builds, you might want to use a different file dialog system
+				Debug.LogWarning("Import functionality requires implementation for runtime builds");
+#endif
+			}
+			catch (System.Exception ex)
+			{
+				Debug.LogError($"Failed to import project: {ex.Message}");
+			}
+		}
+
+		static void ExportProjectToZip()
+		{
+			try
+			{
+#if UNITY_EDITOR
+				string defaultFileName = $"{SelectedProjectName}.zip";
+				string savePath = UnityEditor.EditorUtility.SaveFilePanel("Export Project as ZIP", "", defaultFileName, "zip");
+				if (!string.IsNullOrEmpty(savePath))
+				{
+					ExportToZipFile(savePath);
+				}
+#else
+				// For runtime builds, you might want to use a different file dialog system
+				Debug.LogWarning("Export functionality requires implementation for runtime builds");
+#endif
+			}
+			catch (System.Exception ex)
+			{
+				Debug.LogError($"Failed to export project: {ex.Message}");
+			}
+		}
+
+		static void ImportZipFile(string zipPath)
+		{
+			try
+			{
+				string projectsPath = SavePaths.ProjectsPath;
+				using (var archive = System.IO.Compression.ZipFile.OpenRead(zipPath))
+				{
+					// Get the project name from the first entry or use the zip file name
+					string projectName = System.IO.Path.GetFileNameWithoutExtension(zipPath);
+					
+					// Ensure unique project name
+					int counter = 1;
+					string originalName = projectName;
+					while (System.IO.Directory.Exists(System.IO.Path.Combine(projectsPath, projectName)))
+					{
+						projectName = $"{originalName}_{counter}";
+						counter++;
+					}
+
+					string projectPath = System.IO.Path.Combine(projectsPath, projectName);
+					archive.ExtractToDirectory(projectPath);
+					
+					RefreshLoadedProjects();
+					Debug.Log($"Successfully imported project: {projectName}");
+				}
+			}
+			catch (System.Exception ex)
+			{
+				Debug.LogError($"Failed to import ZIP file: {ex.Message}");
+			}
+		}
+
+		static void ExportToZipFile(string savePath)
+		{
+			try
+			{
+				string projectPath = System.IO.Path.Combine(SavePaths.ProjectsPath, SelectedProjectName);
+				if (System.IO.Directory.Exists(projectPath))
+				{
+					// Delete existing file if it exists
+					if (System.IO.File.Exists(savePath))
+					{
+						System.IO.File.Delete(savePath);
+					}
+
+					System.IO.Compression.ZipFile.CreateFromDirectory(projectPath, savePath);
+					Debug.Log($"Successfully exported project '{SelectedProjectName}' to: {savePath}");
+				}
+				else
+				{
+					Debug.LogError($"Project directory not found: {projectPath}");
+				}
+			}
+			catch (System.Exception ex)
+			{
+				Debug.LogError($"Failed to export to ZIP file: {ex.Message}");
+			}
+		}
+
 		static void DrawAboutScreen()
 		{
 			ButtonTheme theme = DrawSettings.ActiveUITheme.MainMenuButtonTheme;
@@ -540,7 +721,9 @@ namespace DLS.Graphics
 			DeleteConfirmation,
 			NamePopup_RenameProject,
 			NamePopup_DuplicateProject,
-			NamePopup_NewProject
+			NamePopup_NewProject,
+			ZipPopup_ImportProject,
+			ZipPopup_ExportProject
 		}
 	}
 }
