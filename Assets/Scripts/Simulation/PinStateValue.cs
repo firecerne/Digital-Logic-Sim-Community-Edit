@@ -303,11 +303,11 @@ namespace DLS.Simulation
             (uint a, uint b) AND = (a & other.a, (uint)(b.Data & other.b.Data));
             uint bitsNew = Simulator.RandomBool() ? OR.a : AND.a;
 
-            bitsNew = (bitsNew & ~OR.b) | (OR.b);
+            bitsNew = (bitsNew & ~OR.b) | (OR.a & OR.b);
 
             uint tristateNew = AND.b;
 
-            set = bitsNew != a && (tristateNew != b.Data);
+            set = bitsNew != a || (tristateNew != b.Data);
 
             a = bitsNew;
             b = new BitVector32((int)tristateNew);
@@ -324,7 +324,7 @@ namespace DLS.Simulation
 
             bitsNew = BitArrayHelper.NonMutativeOR(
                 BitArrayHelper.NonMutativeAND(bitsNew, BitArrayHelper.NonMutativeNOT(OR.b)),
-                OR.b);
+                BitArrayHelper.NonMutativeAND(OR.a, OR.b));
 
             BitArray tristatesNew = AND.b;
             set = !bitsNew.Equals(BigValues) && !tristatesNew.Equals(BigTristates);

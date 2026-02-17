@@ -61,7 +61,7 @@ namespace DLS.Game
                         Vector2 chipSize = subchip.Size;
                         Vector2 chipPos = subchip.Position;
 
-                        float halfWidth = chipSize.x / 2f;
+                        float halfWidth = (chipSize.x / 2f) * (faceRight ? 1 : -1);
                         float halfHeight = chipSize.y / 2f;
                         float inset = DrawSettings.SubChipPinInset;
                         float outlineOffset = DrawSettings.ChipOutlineWidth / 2f;
@@ -88,7 +88,7 @@ namespace DLS.Game
                                 break;
 
                             case 3: // Left edge (X fixed)
-                                x = -halfWidth - outlineOffset + inset;
+                                x = halfWidth - outlineOffset + inset;
                                 y = LocalPosY;
                                 break;
 

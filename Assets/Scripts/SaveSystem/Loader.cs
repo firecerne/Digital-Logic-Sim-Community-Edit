@@ -22,6 +22,16 @@ namespace DLS.SaveSystem
 			return AppSettings.Default();
 		}
 
+		public static ShortcutSettings LoadShortcutSettings()
+		{
+			if(File.Exists(SavePaths.ShortcutSettingsPath))
+			{
+				string shortcutsString = File.ReadAllText (SavePaths.ShortcutSettingsPath);
+				return Serializer.DeserializeShortcutSettings(shortcutsString);
+			}
+			return ShortcutSettings.Default();
+		}
+
 		public static Project LoadProject(string projectName)
 		{
 			ProjectDescription projectDescription = LoadProjectDescription(projectName);
@@ -101,7 +111,8 @@ namespace DLS.SaveSystem
 				string chipSaveString = File.ReadAllText(chipPath);
 
 				ChipDescription chipDesc = Serializer.DeserializeChipDescription(chipSaveString);
-				loadedChips[i] = chipDesc;
+				SavedDescriptionCorrector.CorrectChipDescription(chipDesc);
+                loadedChips[i] = chipDesc;
 				customChipNameHashset.Add(chipDesc.Name);
 			}
 

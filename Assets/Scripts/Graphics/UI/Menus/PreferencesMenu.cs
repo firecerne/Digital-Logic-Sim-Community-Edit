@@ -1,6 +1,7 @@
 using System;
 using DLS.Description;
 using DLS.Game;
+using Seb.Helpers;
 using Seb.Types;
 using Seb.Vis;
 using Seb.Vis.UI;
@@ -99,6 +100,10 @@ namespace DLS.Graphics
 			Color labelCol = Color.white;
 			Color headerCol = new(0.46f, 1, 0.54f);
 			Vector2 topLeft = UI.Centre + new Vector2(-menuWidth / 2, verticalOffset);
+			
+			// Increase y by a bit to make room for menu seletion
+			topLeft.y += entrySize.y;
+
 			Vector2 labelPosCurr = topLeft;
 
 			using (UI.BeginBoundsScope(true))
@@ -229,16 +234,26 @@ namespace DLS.Graphics
 			bool inPrefsMenu = UIDrawer.ActiveMenu == UIDrawer.MenuType.Preferences;
 			bool anyChange = false;
 
-			if (KeyboardShortcuts.ToggleGridShortcutTriggered)
+			if (KeyboardShortcuts.LockModeShortcutTriggered())
 			{
-				Project.ActiveProject.ToggleGridDisplay();
+				InputHelper.LockMode = !InputHelper.LockMode;
 				anyChange = true;
 			}
 
-			if (KeyboardShortcuts.SimPauseToggleShortcutTriggered)
+			// Don't allow other shortcuts if in lock mode
+			if (!InputHelper.LockMode)
 			{
-				Project.ActiveProject.description.Prefs_SimPaused = !Project.ActiveProject.description.Prefs_SimPaused;
-				anyChange = true;
+				if (KeyboardShortcuts.ToggleGridShortcutTriggered())
+				{
+					Project.ActiveProject.ToggleGridDisplay();
+					anyChange = true;
+				}
+
+				if (KeyboardShortcuts.SimPauseToggleShortcutTriggered())
+				{
+					Project.ActiveProject.description.Prefs_SimPaused = !Project.ActiveProject.description.Prefs_SimPaused;
+					anyChange = true;
+				}
 			}
 
 			if (anyChange)

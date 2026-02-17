@@ -18,17 +18,24 @@ namespace DLS.Graphics
 
 		const string shortcutTextCol = "<color=#666666ff>";
 
-		static readonly string[] menuButtonNames =
-		{
-			$"NEW CHIP     {shortcutTextCol}Ctrl+N",
-			$"SAVE CHIP    {shortcutTextCol}Ctrl+S",
-			$"FIND CHIP    {shortcutTextCol}Ctrl+F",
-			$"ADD SPECIAL  {shortcutTextCol}Ctrl+B",
-			$"LIBRARY      {shortcutTextCol}Ctrl+L",
-			$"STATS        {shortcutTextCol}Ctrl+T", // Ctrl+'T' from the T in Stats
-			$"PREFS        {shortcutTextCol}Ctrl+P",
-			$"QUIT         {shortcutTextCol}Ctrl+Q"
-		};
+		static string[] menuButtonNames => new string[]{
+			MenuHelper.PadWithSpacesAndInsertColorString("NEW CHIP",shortcutTextCol,
+				MenuHelper.GetStringRepresentationOfShortcut(Main.ActiveShortcutSettings.CreateNewChipShortcutTriggered), 19),
+			MenuHelper.PadWithSpacesAndInsertColorString("SAVE CHIP", shortcutTextCol,
+				MenuHelper.GetStringRepresentationOfShortcut(Main.ActiveShortcutSettings.SaveShortcutTriggered), 19),
+            MenuHelper.PadWithSpacesAndInsertColorString("FIND CHIP", shortcutTextCol,
+                MenuHelper.GetStringRepresentationOfShortcut(Main.ActiveShortcutSettings.SearchShortcutTriggered), 19),
+            MenuHelper.PadWithSpacesAndInsertColorString("ADD SPECIAL", shortcutTextCol,
+                MenuHelper.GetStringRepresentationOfShortcut(Main.ActiveShortcutSettings.SpecialChipsShortcutTriggered), 19),
+            MenuHelper.PadWithSpacesAndInsertColorString("LIBRARY", shortcutTextCol,
+                MenuHelper.GetStringRepresentationOfShortcut(Main.ActiveShortcutSettings.LibraryShortcutTriggered), 19),
+            MenuHelper.PadWithSpacesAndInsertColorString("STATS", shortcutTextCol,
+                MenuHelper.GetStringRepresentationOfShortcut(Main.ActiveShortcutSettings.StatsShortcutTriggered), 19),
+			MenuHelper.PadWithSpacesAndInsertColorString("PREFS", shortcutTextCol,
+                MenuHelper.GetStringRepresentationOfShortcut(Main.ActiveShortcutSettings.PreferencesShortcutTriggered), 19),
+            MenuHelper.PadWithSpacesAndInsertColorString("QUIT", shortcutTextCol,
+                MenuHelper.GetStringRepresentationOfShortcut(Main.ActiveShortcutSettings.QuitToMainMenuShortcutTriggered), 19),
+        };
 
 		const int NewChipButtonIndex = 0;
 		const int SaveChipButtonIndex = 1;
@@ -56,6 +63,8 @@ namespace DLS.Graphics
 
 		public static void DrawUI(Project project)
 		{
+			if (InputHelper.LockMode) return; // Don't draw bottom bar if in lock mode
+			
 			DrawBottomBar(project);
 
 			if (UIDrawer.ActiveMenu == UIDrawer.MenuType.BottomBarMenuPopup)
@@ -103,7 +112,7 @@ namespace DLS.Graphics
 					UIDrawer.SetActiveMenu(UIDrawer.MenuType.None);
 				}
 
-				if (KeyboardShortcuts.CancelShortcutTriggered)
+				if (KeyboardShortcuts.CancelShortcutTriggered())
 				{
 					UIDrawer.SetActiveMenu(UIDrawer.MenuType.None);
 				}
@@ -324,7 +333,7 @@ namespace DLS.Graphics
 						activeCollection = null;
 					}
 				}
-				else if (KeyboardShortcuts.CancelShortcutTriggered || (InputHelper.IsAnyMouseButtonDownThisFrame_IgnoreConsumed() && Time.frameCount != collectionInteractFrame) || UIDrawer.ActiveMenu != UIDrawer.MenuType.None)
+				else if (KeyboardShortcuts.CancelShortcutTriggered() || (InputHelper.IsAnyMouseButtonDownThisFrame_IgnoreConsumed() && Time.frameCount != collectionInteractFrame) || UIDrawer.ActiveMenu != UIDrawer.MenuType.None)
 				{
 					activeCollection = null;
 				}
@@ -416,15 +425,15 @@ namespace DLS.Graphics
 		{
 			if (MenuButtonsAndShortcutsEnabled)
 			{
-				if (KeyboardShortcuts.CreateNewChipShortcutTriggered) CreateNewChip();
-				if (KeyboardShortcuts.SaveShortcutTriggered) OpenSaveMenu();
-				if (KeyboardShortcuts.LibraryShortcutTriggered) OpenLibraryMenu();
+				if (KeyboardShortcuts.CreateNewChipShortcutTriggered()) CreateNewChip();
+				if (KeyboardShortcuts.SaveShortcutTriggered()) OpenSaveMenu();
+				if (KeyboardShortcuts.LibraryShortcutTriggered()) OpenLibraryMenu();
 			}
 
-			if (KeyboardShortcuts.StatsShortcutTriggered) OpenStatsMenu();
-			if (KeyboardShortcuts.PreferencesShortcutTriggered) OpenPreferencesMenu();
-			if (KeyboardShortcuts.QuitToMainMenuShortcutTriggered) ExitToMainMenu();
-			if (KeyboardShortcuts.SpecialChipsShortcutTriggered) OpenAddSpecialMenu();
+			if (KeyboardShortcuts.StatsShortcutTriggered()) OpenStatsMenu();
+			if (KeyboardShortcuts.PreferencesShortcutTriggered()) OpenPreferencesMenu();
+			if (KeyboardShortcuts.QuitToMainMenuShortcutTriggered()) ExitToMainMenu();
+			if (KeyboardShortcuts.SpecialChipsShortcutTriggered()) OpenAddSpecialMenu();
 		}
 
 		public static void Reset()

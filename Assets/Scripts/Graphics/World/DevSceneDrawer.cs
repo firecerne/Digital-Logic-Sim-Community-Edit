@@ -313,11 +313,11 @@ namespace DLS.Graphics
 
 
 			// Draw outline and body
-			Draw.Quad(pos, desc.Size + Vector2.one * ChipOutlineWidth, outlineCol);
-			Draw.Quad(pos, desc.Size, chipCol);
+			Draw.Quad(pos, subchip.Size + Vector2.one * ChipOutlineWidth, outlineCol);
+			Draw.Quad(pos, subchip.Size, chipCol);
 
 			// Mouse over detection
-			if (InputHelper.MouseInsideBounds_World(pos, desc.Size))
+			if (InputHelper.MouseInsideBounds_World(pos, subchip.Size))
 			{
 				// If mouse is over one of this chip's pins, then prioritize keeping the pin highlighted (so interaction is not too fiddly)
 				if (InteractionState.PinUnderMouse == null || InteractionState.PinUnderMouse.parent != subchip)
@@ -330,10 +330,11 @@ namespace DLS.Graphics
 			if (isKeyChip || desc.NameLocation != NameDisplayLocation.Hidden)
 			{
 				// Display on single line if name fits comfortably, otherwise use 'formatted' version (split across multiple lines)
-				string displayName = isKeyChip ? subchip.activationKeyString : subchip.MultiLineName;
-				if (Draw.CalculateTextBoundsSize(subchip.Description.Name, FontSizeChipName, FontBold).x < subchip.Size.x - PinRadius * 2.5f)
+				string displayName = isKeyChip ? InputHelper.UintToKeyName(subchip.InternalData[0]) : subchip.MultiLineName;
+				string nameToCheckFit = isKeyChip ? InputHelper.UintToKeyName(subchip.InternalData[0]) : subchip.Description.Name;
+				if (Draw.CalculateTextBoundsSize(nameToCheckFit, FontSizeChipName, FontBold).x < subchip.Size.x - PinRadius * 2.5f)
 				{
-					displayName = subchip.Description.Name;
+					displayName = nameToCheckFit;
 				}
 
 				bool nameCentre = desc.NameLocation == NameDisplayLocation.Centre || isKeyChip;
