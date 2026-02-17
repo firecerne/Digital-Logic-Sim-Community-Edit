@@ -99,7 +99,6 @@ namespace DLS.Simulation
 				{
 					Simulator.rng.NextBytes(randomBytes);
 					InternalState[i] = BitConverter.ToUInt32(randomBytes) & 0x00FF00FF; // Limit to 8 first bits, otherwise the value is too big
-                }
 				}
 			}
 
