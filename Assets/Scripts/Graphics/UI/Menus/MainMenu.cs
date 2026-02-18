@@ -671,7 +671,7 @@ namespace DLS.Graphics
 			}
 			catch (System.Exception ex)
 			{
-				Debug.LogError($"Failed to import project: {ex.Message}");
+				Debug.LogError($"Failed to import project: {ex.Message}\n{ex.StackTrace}");
 			}
 			return null;
 		}
@@ -695,15 +695,27 @@ namespace DLS.Graphics
 					ExportToZipFile(savePath);
 				}
 #else
-				// Fallback: Export to default location
-				string defaultPath = System.IO.Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Desktop), $"{SelectedProjectName}.zip");
+				// Fallback: Export to default location (Documents folder for better cross-platform compatibility)
+				string documentsPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
+				// If Documents folder doesn't exist, fallback to Desktop
+				if (!System.IO.Directory.Exists(documentsPath))
+				{
+					documentsPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Desktop);
+				}
+				// If Desktop also doesn't exist, use current directory
+				if (!System.IO.Directory.Exists(documentsPath))
+				{
+					documentsPath = System.Environment.CurrentDirectory;
+				}
+				
+				string defaultPath = System.IO.Path.Combine(documentsPath, $"{SelectedProjectName}.zip");
 				ExportToZipFile(defaultPath);
 				Debug.Log($"Project exported to: {defaultPath}");
 #endif
 			}
 			catch (System.Exception ex)
 			{
-				Debug.LogError($"Failed to export project: {ex.Message}");
+				Debug.LogError($"Failed to export project: {ex.Message}\n{ex.StackTrace}");
 			}
 		}
 
@@ -714,9 +726,9 @@ namespace DLS.Graphics
 				string projectsPath = SavePaths.ProjectsPath;
 				string tempPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), System.Guid.NewGuid().ToString());
 				
+				// Extract ZIP to temporary location
 				using (var archive = System.IO.Compression.ZipFile.OpenRead(zipPath))
 				{
-					// Extract to temporary location first
 					archive.ExtractToDirectory(tempPath);
 				}
 				
@@ -732,34 +744,54 @@ namespace DLS.Graphics
 					counter++;
 				}
 
+				// Find the actual project content using SavePaths structure validation
+				string sourceContentPath = tempPath;
+				
+				// Check if extracted directory contains valid DLS project structure
+				string projectFileName = SavePaths.ProjectFileName;
+				string chipsDirectoryName = System.IO.Path.GetFileName(SavePaths.GetChipsPath("temp"));
+				
+				bool hasProjectFile = System.IO.File.Exists(System.IO.Path.Combine(sourceContentPath, projectFileName));
+				bool hasChipsDir = System.IO.Directory.Exists(System.IO.Path.Combine(sourceContentPath, chipsDirectoryName));
+				
+				// If not found in root, look in first non-metadata subdirectory
+				if (!hasProjectFile && !hasChipsDir)
+				{
+					string[] subDirs = System.IO.Directory.GetDirectories(tempPath);
+					foreach (string subDir in subDirs)
+					{
+						string dirName = System.IO.Path.GetFileName(subDir);
+						// Skip metadata folders
+						if (dirName.StartsWith("_") || dirName.StartsWith(".") || dirName.Equals("__MACOSX", System.StringComparison.OrdinalIgnoreCase))
+							continue;
+							
+						// Check if this subdirectory has project structure
+						bool subHasProjectFile = System.IO.File.Exists(System.IO.Path.Combine(subDir, projectFileName));
+						bool subHasChipsDir = System.IO.Directory.Exists(System.IO.Path.Combine(subDir, chipsDirectoryName));
+						
+						if (subHasProjectFile || subHasChipsDir)
+						{
+							sourceContentPath = subDir;
+							break;
+						}
+					}
+				}
+				
+				// Verify we found valid project content
+				hasProjectFile = System.IO.File.Exists(System.IO.Path.Combine(sourceContentPath, projectFileName));
+				hasChipsDir = System.IO.Directory.Exists(System.IO.Path.Combine(sourceContentPath, chipsDirectoryName));
+				
+				if (!hasProjectFile && !hasChipsDir)
+				{
+					Debug.LogError("Could not find valid project content in ZIP file");
+					return null;
+				}
+
 				string finalProjectPath = System.IO.Path.Combine(projectsPath, projectName);
 				System.IO.Directory.CreateDirectory(finalProjectPath);
 				
-				// Move ALL contents from temp directory to final location, excluding metadata folders
-				string[] allFiles = System.IO.Directory.GetFiles(tempPath, "*", System.IO.SearchOption.AllDirectories);
-				string[] allDirs = System.IO.Directory.GetDirectories(tempPath, "*", System.IO.SearchOption.AllDirectories);
-				
-				// First, create all directories (excluding metadata folders)
-				foreach (string dirPath in allDirs)
-				{
-					string relativePath = System.IO.Path.GetRelativePath(tempPath, dirPath);
-					if (!relativePath.StartsWith("_") && !relativePath.StartsWith(".") && !relativePath.Contains("/_") && !relativePath.Contains("/."))
-					{
-						string destDir = System.IO.Path.Combine(finalProjectPath, relativePath);
-						System.IO.Directory.CreateDirectory(destDir);
-					}
-				}
-				
-				// Then, move all files (excluding metadata files)
-				foreach (string filePath in allFiles)
-				{
-					string relativePath = System.IO.Path.GetRelativePath(tempPath, filePath);
-					if (!relativePath.StartsWith("_") && !relativePath.StartsWith(".") && !relativePath.Contains("/_") && !relativePath.Contains("/."))
-					{
-						string destFile = System.IO.Path.Combine(finalProjectPath, relativePath);
-						System.IO.File.Move(filePath, destFile);
-					}
-				}
+				// Copy all project content preserving structure
+				CopyProjectContent(sourceContentPath, finalProjectPath);
 				
 				// Clean up temp directory
 				try
@@ -781,78 +813,171 @@ namespace DLS.Graphics
 			}
 		}
 
+		static bool IsMetadataFolder(string folderName)
+		{
+			return folderName.StartsWith("_") || 
+				   folderName.StartsWith(".") || 
+				   folderName.Equals("__MACOSX", System.StringComparison.OrdinalIgnoreCase);
+		}
+
+		static void CopyProjectContent(string sourcePath, string destPath)
+		{
+			// Copy all files
+			string[] files = System.IO.Directory.GetFiles(sourcePath, "*", System.IO.SearchOption.AllDirectories);
+			foreach (string filePath in files)
+			{
+				string relativePath = System.IO.Path.GetRelativePath(sourcePath, filePath);
+				
+				// Skip metadata files
+				if (IsMetadataFile(relativePath)) continue;
+				
+				string destFilePath = System.IO.Path.Combine(destPath, relativePath);
+				string destDir = System.IO.Path.GetDirectoryName(destFilePath);
+				
+				// Create directory if it doesn't exist
+				if (!System.IO.Directory.Exists(destDir))
+				{
+					System.IO.Directory.CreateDirectory(destDir);
+				}
+				
+				// Copy the file
+				System.IO.File.Copy(filePath, destFilePath, true);
+			}
+			
+			// Create empty directories that don't contain files
+			string[] dirs = System.IO.Directory.GetDirectories(sourcePath, "*", System.IO.SearchOption.AllDirectories);
+			foreach (string dirPath in dirs)
+			{
+				string relativePath = System.IO.Path.GetRelativePath(sourcePath, dirPath);
+				
+				// Skip metadata directories
+				if (IsMetadataPath(relativePath)) continue;
+				
+				string destDirPath = System.IO.Path.Combine(destPath, relativePath);
+				if (!System.IO.Directory.Exists(destDirPath))
+				{
+					System.IO.Directory.CreateDirectory(destDirPath);
+				}
+			}
+		}
+
+		static bool IsMetadataFile(string relativePath)
+		{
+			return relativePath.Contains("__MACOSX") ||
+				   relativePath.Contains("/.DS_Store") ||
+				   relativePath.Contains("\\.DS_Store") ||
+				   relativePath.StartsWith(".") ||
+				   relativePath.Contains("/.") ||
+				   relativePath.Contains("\\.");
+		}
+
+		static bool IsMetadataPath(string relativePath)
+		{
+			string[] pathParts = relativePath.Split(System.IO.Path.DirectorySeparatorChar, System.IO.Path.AltDirectorySeparatorChar);
+			foreach (string part in pathParts)
+			{
+				if (IsMetadataFolder(part))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
 		static void ExportToZipFile(string savePath)
 		{
 			try
 			{
 				string projectPath = System.IO.Path.Combine(SavePaths.ProjectsPath, SelectedProjectName);
-				if (System.IO.Directory.Exists(projectPath))
-				{
-					// Delete existing file if it exists
-					if (System.IO.File.Exists(savePath))
-					{
-						System.IO.File.Delete(savePath);
-					}
-
-					// Log what we're about to export
-					string[] allFiles = System.IO.Directory.GetFiles(projectPath, "*", System.IO.SearchOption.AllDirectories);
-					string[] allDirs = System.IO.Directory.GetDirectories(projectPath, "*", System.IO.SearchOption.AllDirectories);
-					Debug.Log($"Exporting {allFiles.Length} files and {allDirs.Length} directories from project: {SelectedProjectName}");
-					Debug.Log($"Exporting these directories:\n{string.Join("\n", allDirs)}");
-					
-					// Also check what's directly in the project root
-					string[] rootFiles = System.IO.Directory.GetFiles(projectPath);
-					string[] rootDirs = System.IO.Directory.GetDirectories(projectPath);
-					Debug.Log($"Root directory has {rootFiles.Length} files and {rootDirs.Length} subdirectories");
-					foreach (string file in rootFiles)
-					{
-						Debug.Log($"Root file: {System.IO.Path.GetFileName(file)}");
-					}
-					
-					// Log sample of all files found
-					Debug.Log($"Sample of files to be exported (first 10):");
-					for (int i = 0; i < System.Math.Min(allFiles.Length, 10); i++)
-					{
-						string relativePath = System.IO.Path.GetRelativePath(projectPath, allFiles[i]);
-						Debug.Log($"  {relativePath}");
-					}
-					// Create ZIP manually to ensure all files are included
-					using (var archive = System.IO.Compression.ZipFile.Open(savePath, System.IO.Compression.ZipArchiveMode.Create))
-					{
-						// Add all files
-						foreach (string filePath in allFiles)
-						{
-							string relativePath = System.IO.Path.GetRelativePath(projectPath, filePath);
-							// Convert to forward slashes for ZIP compatibility
-							relativePath = relativePath.Replace(System.IO.Path.DirectorySeparatorChar, '/');
-							
-							Debug.Log($"Adding file: {relativePath}");
-							archive.CreateEntryFromFile(filePath, relativePath);
-						}
-						
-						// Add empty directories (if any)
-						foreach (string dirPath in allDirs)
-						{
-							if (System.IO.Directory.GetFiles(dirPath).Length == 0 && System.IO.Directory.GetDirectories(dirPath).Length == 0)
-							{
-								string relativePath = System.IO.Path.GetRelativePath(projectPath, dirPath);
-								relativePath = relativePath.Replace(System.IO.Path.DirectorySeparatorChar, '/') + "/";
-								Debug.Log($"Adding empty directory: {relativePath}");
-								archive.CreateEntry(relativePath);
-							}
-						}
-					}
-					
-					Debug.Log($"Successfully exported project '{SelectedProjectName}' to: {savePath}");
-				}
-				else
+				if (!System.IO.Directory.Exists(projectPath))
 				{
 					Debug.LogError($"Project directory not found: {projectPath}");
+					return;
 				}
+
+				// Delete existing file if it exists
+				if (System.IO.File.Exists(savePath))
+				{
+					System.IO.File.Delete(savePath);
+				}
+
+				// Get all files and directories to export
+				string[] allFiles = System.IO.Directory.GetFiles(projectPath, "*", System.IO.SearchOption.AllDirectories);
+				string[] allDirs = System.IO.Directory.GetDirectories(projectPath, "*", System.IO.SearchOption.AllDirectories);
+				
+				Debug.Log($"Exporting {allFiles.Length} files and {allDirs.Length} directories from project: {SelectedProjectName}");
+
+				// Create ZIP manually to ensure complete project structure
+				using (var archive = System.IO.Compression.ZipFile.Open(savePath, System.IO.Compression.ZipArchiveMode.Create))
+				{
+					int filesAdded = 0;
+					int dirsAdded = 0;
+					
+					// Add all files
+					foreach (string filePath in allFiles)
+					{
+						try
+						{
+							string relativePath = System.IO.Path.GetRelativePath(projectPath, filePath);
+							// Normalize path separators for ZIP compatibility
+							relativePath = NormalizePath(relativePath);
+							
+							archive.CreateEntryFromFile(filePath, relativePath);
+							filesAdded++;
+						}
+						catch (System.Exception ex)
+						{
+							Debug.LogWarning($"Failed to add file {filePath} to ZIP: {ex.Message}");
+						}
+					}
+					
+					// Add empty directories
+					foreach (string dirPath in allDirs)
+					{
+						try
+						{
+							// Only add directory entry if it's empty
+							if (IsEmptyDirectory(dirPath))
+							{
+								string relativePath = System.IO.Path.GetRelativePath(projectPath, dirPath);
+								relativePath = NormalizePath(relativePath) + "/";
+								
+								archive.CreateEntry(relativePath);
+								dirsAdded++;
+							}
+						}
+						catch (System.Exception ex)
+						{
+							Debug.LogWarning($"Failed to add directory {dirPath} to ZIP: {ex.Message}");
+						}
+					}
+					
+					Debug.Log($"Successfully added {filesAdded} files and {dirsAdded} empty directories to ZIP");
+				}
+				
+				Debug.Log($"Successfully exported project '{SelectedProjectName}' to: {savePath}");
 			}
 			catch (System.Exception ex)
 			{
-				Debug.LogError($"Failed to export to ZIP file: {ex.Message}");
+				Debug.LogError($"Failed to export to ZIP file: {ex.Message}\n{ex.StackTrace}");
+			}
+		}
+
+		static string NormalizePath(string path)
+		{
+			// Convert to forward slashes for ZIP compatibility
+			return path.Replace('\\', '/');
+		}
+
+		static bool IsEmptyDirectory(string dirPath)
+		{
+			try
+			{
+				return System.IO.Directory.GetFiles(dirPath, "*", System.IO.SearchOption.AllDirectories).Length == 0;
+			}
+			catch
+			{
+				return false;
 			}
 		}
 
