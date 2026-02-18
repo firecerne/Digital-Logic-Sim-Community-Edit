@@ -9,6 +9,9 @@ using Seb.Helpers;
 using Seb.Vis;
 using Seb.Vis.UI;
 using UnityEngine;
+#if UNITY_STANDALONE_WIN && !UNITY_EDITOR
+using System.Windows.Forms;
+#endif
 
 namespace DLS.Graphics
 {
@@ -25,6 +28,7 @@ namespace DLS.Graphics
 		static readonly UIHandle ID_DisplayResolutionWheel = new("MainMenu_DisplayResolutionWheel");
 		static readonly UIHandle ID_FullscreenWheel = new("MainMenu_FullscreenWheel");
 		static readonly UIHandle ID_ProjectsScrollView = new("MainMenu_ProjectsScrollView");
+		static readonly UIHandle ID_ManualImportPathInput = new("MainMenu_ManualImportPathInput");
 
 		static readonly string[] SettingsWheelFullScreenOptions = { "OFF", "MAXIMIZED", "BORDERLESS", "EXCLUSIVE" };
 		static readonly FullScreenMode[] FullScreenModes = { FullScreenMode.Windowed, FullScreenMode.MaximizedWindow, FullScreenMode.FullScreenWindow, FullScreenMode.ExclusiveFullScreen };
@@ -142,6 +146,9 @@ namespace DLS.Graphics
 				case PopupKind.ZipPopup_ExportProject:
 					DrawExportProjectPopup();
 					break;
+				case PopupKind.ZipPopup_ManualImportPath:
+					DrawManualImportPathPopup();
+					break;
 			}
 		}
 
@@ -150,6 +157,7 @@ namespace DLS.Graphics
 			activeMenuScreen = MenuScreen.Main;
 			activePopup = PopupKind.None;
 			selectedProjectIndex = -1;
+			RefreshLoadedProjects();
 		}
 
 		static void DrawMainScreen()
@@ -190,6 +198,12 @@ namespace DLS.Graphics
 
 		static void DrawLoadProjectScreen()
 		{
+			// Ensure project data is loaded when drawing
+			if (allProjectDescriptions == null)
+			{
+				RefreshLoadedProjects();
+			}
+			
 			const int backButtonIndex = 0;
 			const int deleteButtonIndex = 1;
 			const int duplicateButtonIndex = 2;
@@ -206,7 +220,7 @@ namespace DLS.Graphics
 			ButtonTheme buttonTheme = DrawSettings.ActiveUITheme.MainMenuButtonTheme;
 
 			bool projectSelected = selectedProjectIndex >= 0 && selectedProjectIndex < allProjectDescriptions.Length;
-			bool compatibleProject = projectSelected && projectCompatibilities[selectedProjectIndex].compatible;
+			bool compatibleProject = projectSelected && selectedProjectIndex < projectCompatibilities.Length && projectCompatibilities[selectedProjectIndex].compatible;
 
 			for (int i = 0; i < openProjectButtonStates.Length; i++)
 			{
@@ -217,7 +231,7 @@ namespace DLS.Graphics
 			Vector2 buttonRegionPos = UI.PrevBounds.BottomLeft + Vector2.down * DrawSettings.VerticalButtonSpacing;
 			int buttonIndex = UI.HorizontalButtonGroup(openProjectButtonNames, openProjectButtonStates, buttonTheme, buttonRegionPos, UI.PrevBounds.Width, UILayoutHelper.DefaultSpacing, 0, Anchor.TopLeft);
 
-			if (projectSelected && !compatibleProject)
+			if (projectSelected && !compatibleProject && selectedProjectIndex < projectCompatibilities.Length)
 			{
 				Vector2 errorMessagePos = UI.PrevBounds.BottomLeft + Vector2.down * (DrawSettings.DefaultButtonSpacing * 2);
 				UI.DrawText(projectCompatibilities[selectedProjectIndex].message, buttonTheme.font, buttonTheme.fontSize, errorMessagePos, Anchor.TopLeft, Color.yellow);
@@ -237,6 +251,26 @@ namespace DLS.Graphics
 
 		static void DrawAllProjectsInScrollView(Vector2 topLeft, float width, bool isLayoutPass)
 		{
+			// Ensure project data is loaded
+			if (allProjectDescriptions == null || allProjectNames == null || projectCompatibilities == null)
+			{
+				RefreshLoadedProjects();
+			}
+			
+			// Always draw content, even if empty
+			if (allProjectDescriptions == null || allProjectDescriptions.Length == 0)
+			{
+				// Show "No projects found" message
+				if (!isLayoutPass)
+				{
+					DrawSettings.UIThemeDLS theme = DrawSettings.ActiveUITheme;
+					UI.DrawText("No projects found", theme.FontRegular, theme.FontSizeRegular, 
+						topLeft + new Vector2(width * 0.5f, 5), Anchor.CentreTop, 
+						new Color(1f, 1f, 1f, 0.5f));
+				}
+				return;
+			}
+
 			float spacing = 0;
 			bool enabled = activePopup == PopupKind.None;
 
@@ -245,7 +279,7 @@ namespace DLS.Graphics
 				ProjectDescription desc = allProjectDescriptions[i];
 				bool selected = i == selectedProjectIndex;
 				ButtonTheme buttonTheme = selected ? DrawSettings.ActiveUITheme.ProjectSelectionButtonSelected : DrawSettings.ActiveUITheme.ProjectSelectionButton;
-				if (!projectCompatibilities[i].compatible) buttonTheme.textCols.normal.a = 0.5f;
+				if (i < projectCompatibilities.Length && !projectCompatibilities[i].compatible) buttonTheme.textCols.normal.a = 0.5f;
 
 				if (UI.Button(desc.ProjectName, buttonTheme, topLeft, new Vector2(width, 0), enabled, false, true, Anchor.TopLeft))
 				{
@@ -259,9 +293,37 @@ namespace DLS.Graphics
 
 		static void RefreshLoadedProjects()
 		{
-			allProjectDescriptions = Loader.LoadAllProjectDescriptions();
-			allProjectNames = allProjectDescriptions.Select(d => d.ProjectName).ToArray();
-			projectCompatibilities = allProjectDescriptions.Select(d => CanOpenProject(d)).ToArray();
+			try
+			{
+				Debug.Log("Refreshing project list...");
+				allProjectDescriptions = Loader.LoadAllProjectDescriptions();
+				if (allProjectDescriptions == null)
+				{
+					Debug.LogWarning("LoadAllProjectDescriptions returned null, creating empty array");
+					allProjectDescriptions = new ProjectDescription[0];
+				}
+				else
+				{
+					Debug.Log($"Loaded {allProjectDescriptions.Length} project descriptions");
+				}
+				
+				allProjectNames = allProjectDescriptions.Select(d => d.ProjectName).ToArray();
+				projectCompatibilities = allProjectDescriptions.Select(d => CanOpenProject(d)).ToArray();
+				
+				// Ensure selected index is valid
+				if (selectedProjectIndex >= allProjectDescriptions.Length)
+				{
+					selectedProjectIndex = -1;
+				}
+			}
+			catch (System.Exception ex)
+			{
+				Debug.LogError($"Failed to load projects: {ex.Message}");
+				allProjectDescriptions = new ProjectDescription[0];
+				allProjectNames = new string[0];
+				projectCompatibilities = new (bool compatible, string message)[0];
+				selectedProjectIndex = -1;
+			}
 		}
 
 		static (bool canOpen, string failureReason) CanOpenProject(ProjectDescription projectDescription)
@@ -286,8 +348,10 @@ namespace DLS.Graphics
 		public static void BackToMain()
 		{
 			UI.GetInputFieldState(ID_ProjectNameInput).ClearText();
+			UI.GetInputFieldState(ID_ManualImportPathInput).ClearText();
 			activeMenuScreen = MenuScreen.Main;
 			activePopup = PopupKind.None;
+			RefreshLoadedProjects();
 		}
 
 
@@ -523,8 +587,23 @@ namespace DLS.Graphics
 				}
 				else if (buttonIndex == 1) // Select ZIP
 				{
-					ImportProjectFromZip();
+					string importedProjectName = ImportProjectFromZip();
 					activePopup = PopupKind.None;
+					if (!string.IsNullOrEmpty(importedProjectName))
+					{
+						RefreshLoadedProjects();
+						// Find the imported project in the list
+						selectedProjectIndex = -1;
+						for (int i = 0; i < allProjectNames.Length; i++)
+						{
+							if (string.Equals(allProjectNames[i], importedProjectName, StringComparison.CurrentCultureIgnoreCase))
+							{
+								selectedProjectIndex = i;
+								break;
+							}
+						}
+						UI.GetScrollbarState(ID_ProjectsScrollView).scrollY = 0; // scroll to top
+					}
 				}
 			}
 		}
@@ -542,7 +621,11 @@ namespace DLS.Graphics
 				UI.DrawText($"Export '{SelectedProjectName}' as ZIP", theme.FontRegular, theme.FontSizeRegular, UI.Centre, Anchor.Centre, Color.white);
 				
 				Vector2 instructionPos = UI.PrevBounds.BottomLeft + Vector2.down * DrawSettings.VerticalButtonSpacing;
-				UI.DrawText("Choose where to save the exported project ZIP file.", theme.FontRegular, theme.FontSizeRegular * 0.8f, instructionPos, Anchor.TopLeft, new Color(1, 1, 1, 0.7f));
+				#if UNITY_EDITOR || UNITY_STANDALONE_WIN
+					UI.DrawText("Choose where to save the exported project ZIP file.", theme.FontRegular, theme.FontSizeRegular * 0.8f, instructionPos, Anchor.TopLeft, new Color(1, 1, 1, 0.7f));
+				#else
+					UI.DrawText("Project will be exported to your desktop.", theme.FontRegular, theme.FontSizeRegular * 0.8f, instructionPos, Anchor.TopLeft, new Color(1, 1, 1, 0.7f));
+				#endif
 
 				Vector2 buttonRegionTopLeft = UI.PrevBounds.BottomLeft + Vector2.down * DrawSettings.VerticalButtonSpacing;
 				float buttonRegionWidth = UI.PrevBounds.Width;
@@ -562,7 +645,7 @@ namespace DLS.Graphics
 			}
 		}
 
-		static void ImportProjectFromZip()
+		static string ImportProjectFromZip()
 		{
 			try
 			{
@@ -570,17 +653,26 @@ namespace DLS.Graphics
 				string zipPath = UnityEditor.EditorUtility.OpenFilePanel("Import Project ZIP", "", "zip");
 				if (!string.IsNullOrEmpty(zipPath))
 				{
-					ImportZipFile(zipPath);
+					return ImportZipFile(zipPath);
+				}
+#elif UNITY_STANDALONE_WIN
+				string zipPath = ShowWindowsOpenFileDialog("Import Project ZIP", "ZIP files (*.zip)|*.zip");
+				if (!string.IsNullOrEmpty(zipPath))
+				{
+					return ImportZipFile(zipPath);
 				}
 #else
-				// For runtime builds, you might want to use a different file dialog system
-				Debug.LogWarning("Import functionality requires implementation for runtime builds");
+				// Fallback: Show input dialog for manual path entry
+				activePopup = PopupKind.ZipPopup_ManualImportPath;
+				UI.GetInputFieldState(ID_ManualImportPathInput).ClearText();
+				return null; // Will be handled in the popup
 #endif
 			}
 			catch (System.Exception ex)
 			{
 				Debug.LogError($"Failed to import project: {ex.Message}");
 			}
+			return null;
 		}
 
 		static void ExportProjectToZip()
@@ -594,9 +686,18 @@ namespace DLS.Graphics
 				{
 					ExportToZipFile(savePath);
 				}
+#elif UNITY_STANDALONE_WIN
+				string defaultFileName = $"{SelectedProjectName}.zip";
+				string savePath = ShowWindowsSaveFileDialog("Export Project as ZIP", defaultFileName, "ZIP files (*.zip)|*.zip");
+				if (!string.IsNullOrEmpty(savePath))
+				{
+					ExportToZipFile(savePath);
+				}
 #else
-				// For runtime builds, you might want to use a different file dialog system
-				Debug.LogWarning("Export functionality requires implementation for runtime builds");
+				// Fallback: Export to default location
+				string defaultPath = System.IO.Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Desktop), $"{SelectedProjectName}.zip");
+				ExportToZipFile(defaultPath);
+				Debug.Log($"Project exported to: {defaultPath}");
 #endif
 			}
 			catch (System.Exception ex)
@@ -605,35 +706,106 @@ namespace DLS.Graphics
 			}
 		}
 
-		static void ImportZipFile(string zipPath)
+		static string ImportZipFile(string zipPath)
 		{
 			try
 			{
 				string projectsPath = SavePaths.ProjectsPath;
+				string tempPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), System.Guid.NewGuid().ToString());
+				
 				using (var archive = System.IO.Compression.ZipFile.OpenRead(zipPath))
 				{
-					// Get the project name from the first entry or use the zip file name
-					string projectName = System.IO.Path.GetFileNameWithoutExtension(zipPath);
-					
-					// Ensure unique project name
-					int counter = 1;
-					string originalName = projectName;
-					while (System.IO.Directory.Exists(System.IO.Path.Combine(projectsPath, projectName)))
-					{
-						projectName = $"{originalName}_{counter}";
-						counter++;
-					}
-
-					string projectPath = System.IO.Path.Combine(projectsPath, projectName);
-					archive.ExtractToDirectory(projectPath);
-					
-					RefreshLoadedProjects();
-					Debug.Log($"Successfully imported project: {projectName}");
+					// Extract to temporary location first
+					archive.ExtractToDirectory(tempPath);
 				}
+				
+				// Find the actual project folder (ignore _MACOSX and other metadata folders)
+				string[] extractedDirs = System.IO.Directory.GetDirectories(tempPath);
+				string projectSourcePath = null;
+				
+				foreach (string dir in extractedDirs)
+				{
+					string dirName = System.IO.Path.GetFileName(dir);
+					if (!dirName.StartsWith("_") && !dirName.StartsWith("."))
+					{
+						// Check if this looks like a DLS project (has project files)
+						if (System.IO.Directory.GetFiles(dir, "*.json").Length > 0 || 
+						    System.IO.Directory.GetDirectories(dir).Length > 0)
+						{
+							projectSourcePath = dir;
+							break;
+						}
+					}
+				}
+				
+				// If no suitable folder found, use the temp directory contents directly
+				if (projectSourcePath == null)
+				{
+					projectSourcePath = tempPath;
+				}
+				
+				// Get project name from ZIP file name or folder name
+				string projectName = projectSourcePath == tempPath ? 
+					System.IO.Path.GetFileNameWithoutExtension(zipPath) :
+					System.IO.Path.GetFileName(projectSourcePath);
+				
+				// Ensure unique project name
+				int counter = 1;
+				string originalName = projectName;
+				while (System.IO.Directory.Exists(System.IO.Path.Combine(projectsPath, projectName)))
+				{
+					projectName = $"{originalName}_{counter}";
+					counter++;
+				}
+
+				string finalProjectPath = System.IO.Path.Combine(projectsPath, projectName);
+				
+				// Move the project content to final location
+				if (projectSourcePath == tempPath)
+				{
+					// Move all non-metadata content from temp directory
+					System.IO.Directory.CreateDirectory(finalProjectPath);
+					foreach (string file in System.IO.Directory.GetFiles(tempPath))
+					{
+						string fileName = System.IO.Path.GetFileName(file);
+						if (!fileName.StartsWith("."))
+						{
+							System.IO.File.Move(file, System.IO.Path.Combine(finalProjectPath, fileName));
+						}
+					}
+					foreach (string dir in extractedDirs)
+					{
+						string dirName = System.IO.Path.GetFileName(dir);
+						if (!dirName.StartsWith("_") && !dirName.StartsWith("."))
+						{
+							string destDir = System.IO.Path.Combine(finalProjectPath, dirName);
+							System.IO.Directory.Move(dir, destDir);
+						}
+					}
+				}
+				else
+				{
+					// Move the entire project folder
+					System.IO.Directory.Move(projectSourcePath, finalProjectPath);
+				}
+				
+				// Clean up temp directory
+				try
+				{
+					System.IO.Directory.Delete(tempPath, true);
+				}
+				catch
+				{
+					// Ignore cleanup errors
+				}
+				
+				Debug.Log($"Successfully imported project: {projectName}");
+				return projectName;
 			}
 			catch (System.Exception ex)
 			{
 				Debug.LogError($"Failed to import ZIP file: {ex.Message}");
+				return null;
 			}
 		}
 
@@ -661,6 +833,115 @@ namespace DLS.Graphics
 			catch (System.Exception ex)
 			{
 				Debug.LogError($"Failed to export to ZIP file: {ex.Message}");
+			}
+		}
+
+#if UNITY_STANDALONE_WIN && !UNITY_EDITOR
+		static string ShowWindowsOpenFileDialog(string title, string filter)
+		{
+			try
+			{
+				using (var dialog = new System.Windows.Forms.OpenFileDialog())
+				{
+					dialog.Title = title;
+					dialog.Filter = filter;
+					dialog.Multiselect = false;
+					if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+					{
+						return dialog.FileName;
+					}
+				}
+			}
+			catch (System.Exception ex)
+			{
+				Debug.LogError($"Windows file dialog error: {ex.Message}");
+			}
+			return null;
+		}
+
+		static string ShowWindowsSaveFileDialog(string title, string fileName, string filter)
+		{
+			try
+			{
+				using (var dialog = new System.Windows.Forms.SaveFileDialog())
+				{
+					dialog.Title = title;
+					dialog.FileName = fileName;
+					dialog.Filter = filter;
+					if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+					{
+						return dialog.FileName;
+					}
+				}
+			}
+			catch (System.Exception ex)
+			{
+				Debug.LogError($"Windows file dialog error: {ex.Message}");
+			}
+			return null;
+		}
+#endif
+		static void DrawManualImportPathPopup()
+		{
+			DrawSettings.UIThemeDLS theme = DrawSettings.ActiveUITheme;
+
+			UI.StartNewLayer();
+			UI.DrawFullscreenPanel(theme.MenuBackgroundOverlayCol);
+
+			using (UI.BeginBoundsScope(true))
+			{
+				Draw.ID panelID = UI.ReservePanel();
+				UI.DrawText("Import Project from ZIP", theme.FontRegular, theme.FontSizeRegular, UI.Centre, Anchor.Centre, Color.white);
+				
+				Vector2 instructionPos = UI.PrevBounds.BottomLeft + Vector2.down * DrawSettings.VerticalButtonSpacing;
+				UI.DrawText("Enter the full path to the ZIP file:", theme.FontRegular, theme.FontSizeRegular * 0.8f, instructionPos, Anchor.TopLeft, new Color(1, 1, 1, 0.7f));
+
+				// Input field for file path
+				InputFieldTheme inputTheme = theme.ChipNameInputField;
+				Vector2 inputSize = new Vector2(60, 3);
+				Vector2 inputPos = UI.PrevBounds.BottomLeft + Vector2.down * DrawSettings.VerticalButtonSpacing;
+				InputFieldState pathState = UI.InputField(ID_ManualImportPathInput, inputTheme, inputPos, inputSize, "", Anchor.TopLeft, 1f, null, true);
+
+				Vector2 buttonRegionTopLeft = UI.PrevBounds.BottomLeft + Vector2.down * DrawSettings.VerticalButtonSpacing;
+				float buttonRegionWidth = UI.PrevBounds.Width;
+				bool canImport = !string.IsNullOrWhiteSpace(pathState.text) && System.IO.File.Exists(pathState.text) && pathState.text.ToLower().EndsWith(".zip");
+				bool[] buttonStates = { true, canImport };
+				int buttonIndex = UI.HorizontalButtonGroup(new[] { "CANCEL", "IMPORT" }, buttonStates, theme.MainMenuButtonTheme, buttonRegionTopLeft, buttonRegionWidth, DrawSettings.HorizontalButtonSpacing, 0, Anchor.TopLeft);
+				
+				if (!canImport && !string.IsNullOrWhiteSpace(pathState.text))
+				{
+					Vector2 errorPos = UI.PrevBounds.BottomLeft + Vector2.down * DrawSettings.VerticalButtonSpacing;
+					UI.DrawText("Please enter a valid path to a .zip file", theme.FontRegular, theme.FontSizeRegular * 0.8f, errorPos, Anchor.TopLeft, Color.red);
+				}
+				
+				UI.ModifyPanel(panelID, UI.GetCurrentBoundsScope().Centre, UI.GetCurrentBoundsScope().Size + Vector2.one * 2, ColHelper.MakeCol255(37, 37, 43));
+
+				if (buttonIndex == 0 || KeyboardShortcuts.CancelShortcutTriggered()) // Cancel
+				{
+					pathState.ClearText();
+					activePopup = PopupKind.None;
+				}
+				else if (buttonIndex == 1) // Import
+				{
+					string importedProjectName = ImportZipFile(pathState.text);
+					pathState.ClearText();
+					activePopup = PopupKind.None;
+					if (!string.IsNullOrEmpty(importedProjectName))
+					{
+						RefreshLoadedProjects();
+						// Find the imported project in the list
+						selectedProjectIndex = -1;
+						for (int i = 0; i < allProjectNames.Length; i++)
+						{
+							if (string.Equals(allProjectNames[i], importedProjectName, StringComparison.CurrentCultureIgnoreCase))
+							{
+								selectedProjectIndex = i;
+								break;
+							}
+						}
+						UI.GetScrollbarState(ID_ProjectsScrollView).scrollY = 0; // scroll to top
+					}
+				}
 			}
 		}
 
@@ -723,7 +1004,8 @@ namespace DLS.Graphics
 			NamePopup_DuplicateProject,
 			NamePopup_NewProject,
 			ZipPopup_ImportProject,
-			ZipPopup_ExportProject
+			ZipPopup_ExportProject,
+			ZipPopup_ManualImportPath
 		}
 	}
 }
