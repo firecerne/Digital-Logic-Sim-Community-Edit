@@ -1,6 +1,7 @@
 using System;
 using System.IO.Compression;
 using System.Linq;
+using System.Linq.Expressions;
 using DLS.Description;
 using DLS.Game;
 using DLS.SaveSystem;
@@ -719,35 +720,8 @@ namespace DLS.Graphics
 					archive.ExtractToDirectory(tempPath);
 				}
 				
-				// Find the actual project folder (ignore _MACOSX and other metadata folders)
-				string[] extractedDirs = System.IO.Directory.GetDirectories(tempPath);
-				string projectSourcePath = null;
-				
-				foreach (string dir in extractedDirs)
-				{
-					string dirName = System.IO.Path.GetFileName(dir);
-					if (!dirName.StartsWith("_") && !dirName.StartsWith("."))
-					{
-						// Check if this looks like a DLS project (has project files)
-						if (System.IO.Directory.GetFiles(dir, "*.json").Length > 0 || 
-						    System.IO.Directory.GetDirectories(dir).Length > 0)
-						{
-							projectSourcePath = dir;
-							break;
-						}
-					}
-				}
-				
-				// If no suitable folder found, use the temp directory contents directly
-				if (projectSourcePath == null)
-				{
-					projectSourcePath = tempPath;
-				}
-				
-				// Get project name from ZIP file name or folder name
-				string projectName = projectSourcePath == tempPath ? 
-					System.IO.Path.GetFileNameWithoutExtension(zipPath) :
-					System.IO.Path.GetFileName(projectSourcePath);
+				// Get project name from ZIP file name
+				string projectName = System.IO.Path.GetFileNameWithoutExtension(zipPath);
 				
 				// Ensure unique project name
 				int counter = 1;
@@ -759,34 +733,32 @@ namespace DLS.Graphics
 				}
 
 				string finalProjectPath = System.IO.Path.Combine(projectsPath, projectName);
+				System.IO.Directory.CreateDirectory(finalProjectPath);
 				
-				// Move the project content to final location
-				if (projectSourcePath == tempPath)
+				// Move ALL contents from temp directory to final location, excluding metadata folders
+				string[] allFiles = System.IO.Directory.GetFiles(tempPath, "*", System.IO.SearchOption.AllDirectories);
+				string[] allDirs = System.IO.Directory.GetDirectories(tempPath, "*", System.IO.SearchOption.AllDirectories);
+				
+				// First, create all directories (excluding metadata folders)
+				foreach (string dirPath in allDirs)
 				{
-					// Move all non-metadata content from temp directory
-					System.IO.Directory.CreateDirectory(finalProjectPath);
-					foreach (string file in System.IO.Directory.GetFiles(tempPath))
+					string relativePath = System.IO.Path.GetRelativePath(tempPath, dirPath);
+					if (!relativePath.StartsWith("_") && !relativePath.StartsWith(".") && !relativePath.Contains("/_") && !relativePath.Contains("/."))
 					{
-						string fileName = System.IO.Path.GetFileName(file);
-						if (!fileName.StartsWith("."))
-						{
-							System.IO.File.Move(file, System.IO.Path.Combine(finalProjectPath, fileName));
-						}
-					}
-					foreach (string dir in extractedDirs)
-					{
-						string dirName = System.IO.Path.GetFileName(dir);
-						if (!dirName.StartsWith("_") && !dirName.StartsWith("."))
-						{
-							string destDir = System.IO.Path.Combine(finalProjectPath, dirName);
-							System.IO.Directory.Move(dir, destDir);
-						}
+						string destDir = System.IO.Path.Combine(finalProjectPath, relativePath);
+						System.IO.Directory.CreateDirectory(destDir);
 					}
 				}
-				else
+				
+				// Then, move all files (excluding metadata files)
+				foreach (string filePath in allFiles)
 				{
-					// Move the entire project folder
-					System.IO.Directory.Move(projectSourcePath, finalProjectPath);
+					string relativePath = System.IO.Path.GetRelativePath(tempPath, filePath);
+					if (!relativePath.StartsWith("_") && !relativePath.StartsWith(".") && !relativePath.Contains("/_") && !relativePath.Contains("/."))
+					{
+						string destFile = System.IO.Path.Combine(finalProjectPath, relativePath);
+						System.IO.File.Move(filePath, destFile);
+					}
 				}
 				
 				// Clean up temp directory
@@ -822,7 +794,55 @@ namespace DLS.Graphics
 						System.IO.File.Delete(savePath);
 					}
 
-					System.IO.Compression.ZipFile.CreateFromDirectory(projectPath, savePath);
+					// Log what we're about to export
+					string[] allFiles = System.IO.Directory.GetFiles(projectPath, "*", System.IO.SearchOption.AllDirectories);
+					string[] allDirs = System.IO.Directory.GetDirectories(projectPath, "*", System.IO.SearchOption.AllDirectories);
+					Debug.Log($"Exporting {allFiles.Length} files and {allDirs.Length} directories from project: {SelectedProjectName}");
+					Debug.Log($"Exporting these directories:\n{string.Join("\n", allDirs)}");
+					
+					// Also check what's directly in the project root
+					string[] rootFiles = System.IO.Directory.GetFiles(projectPath);
+					string[] rootDirs = System.IO.Directory.GetDirectories(projectPath);
+					Debug.Log($"Root directory has {rootFiles.Length} files and {rootDirs.Length} subdirectories");
+					foreach (string file in rootFiles)
+					{
+						Debug.Log($"Root file: {System.IO.Path.GetFileName(file)}");
+					}
+					
+					// Log sample of all files found
+					Debug.Log($"Sample of files to be exported (first 10):");
+					for (int i = 0; i < System.Math.Min(allFiles.Length, 10); i++)
+					{
+						string relativePath = System.IO.Path.GetRelativePath(projectPath, allFiles[i]);
+						Debug.Log($"  {relativePath}");
+					}
+					// Create ZIP manually to ensure all files are included
+					using (var archive = System.IO.Compression.ZipFile.Open(savePath, System.IO.Compression.ZipArchiveMode.Create))
+					{
+						// Add all files
+						foreach (string filePath in allFiles)
+						{
+							string relativePath = System.IO.Path.GetRelativePath(projectPath, filePath);
+							// Convert to forward slashes for ZIP compatibility
+							relativePath = relativePath.Replace(System.IO.Path.DirectorySeparatorChar, '/');
+							
+							Debug.Log($"Adding file: {relativePath}");
+							archive.CreateEntryFromFile(filePath, relativePath);
+						}
+						
+						// Add empty directories (if any)
+						foreach (string dirPath in allDirs)
+						{
+							if (System.IO.Directory.GetFiles(dirPath).Length == 0 && System.IO.Directory.GetDirectories(dirPath).Length == 0)
+							{
+								string relativePath = System.IO.Path.GetRelativePath(projectPath, dirPath);
+								relativePath = relativePath.Replace(System.IO.Path.DirectorySeparatorChar, '/') + "/";
+								Debug.Log($"Adding empty directory: {relativePath}");
+								archive.CreateEntry(relativePath);
+							}
+						}
+					}
+					
 					Debug.Log($"Successfully exported project '{SelectedProjectName}' to: {savePath}");
 				}
 				else
