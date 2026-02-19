@@ -543,7 +543,6 @@ namespace DLS.Graphics
 					{
 						int address = y * 16 + x;
 						uint pixelState = simSource.InternalState[address];
-						float v = pixelState;
 						col = new Color(pixelState, pixelState, pixelState);
 					}
 
@@ -636,9 +635,9 @@ namespace DLS.Graphics
 			}
 
 			if (inBounds)
-				{
-					InteractionState.NotifyElementUnderMouse(display);
-				}
+			{
+				InteractionState.NotifyElementUnderMouse(display);
+			}
 
 			rootChip.IsSelected = clicked ? false : rootChip.IsSelected;
 
@@ -740,7 +739,6 @@ namespace DLS.Graphics
             bool inBounds = false;
             bool gettingClicked = false;
 
-            int currentSwitchHeadPos = 1;
             int nextSwitchHeadPos = 1;
 
 
@@ -756,9 +754,9 @@ namespace DLS.Graphics
 
             if (chipSource != null)
             {
-				bool currentState = (chipSource.InternalState[0] & 1) == 1 ? true : false;
-				currentSwitchHeadPos = currentState ? -1 : 1;
-                Bounds2D bounds = Bounds2D.CreateFromCentreAndSize(centre + Vector2.up * verticalOffset * currentSwitchHeadPos, switchDrawSize);
+				bool currentState = (chipSource.InternalState[0] & 1) == 1;
+				int currentSwitchHeadPos = currentState ? -1 : 1;
+                Bounds2D bounds = Bounds2D.CreateFromCentreAndSize(centre + verticalOffset * currentSwitchHeadPos * Vector2.up, switchDrawSize);
                 inBounds = bounds.PointInBounds(InputHelper.MousePosWorld);
                 gettingClicked = inBounds && InputHelper.IsMouseDownThisFrame(MouseButton.Left) && controller.CanInteractWithButton;
 				bool nextState = gettingClicked ? !currentState : currentState;
