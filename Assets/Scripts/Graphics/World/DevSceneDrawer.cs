@@ -233,7 +233,7 @@ namespace DLS.Graphics
 
 			int charCount;
 
-			if (pin.Pin.State.IsValueBiggerThanInt() || (((pin.GetStateDecimalDisplayValue()&(1<<31)) == (1<<31)) && pin.pinValueDisplayMode!=PinValueDisplayMode.SignedDecimal) )
+			if (pin.Pin.State.IsValueBiggerThanInt() || ((pin.GetStateDecimalDisplayValue()&(1<<31)) == 1<<31 && pin.pinValueDisplayMode!=PinValueDisplayMode.SignedDecimal) )
 			{
 				charCount = 7;
 				CopyToCharBuffer(pin, "TOO BIG");
@@ -688,9 +688,9 @@ namespace DLS.Graphics
 			}
 
 			if (inBounds)
-				{
-					InteractionState.NotifyElementUnderMouse(display);
-				}
+			{
+				InteractionState.NotifyElementUnderMouse(display);
+			}
 
 			rootChip.IsSelected = clicked ? false : rootChip.IsSelected;
 
@@ -1203,92 +1203,42 @@ namespace DLS.Graphics
 			Draw.Point(pinPos, PinRadius, pinCol);
 
 			// ---- input/output arrow ----
-
-			Vector2 dir = pin.face switch
-			{
-				0 => Vector2.down,
-				1 => Vector2.left,
-				2 => Vector2.up,
-				3 => Vector2.right,
-				_ => Vector2.zero,
-			};
-			if (pin.IsSourcePin)
-			{
-				dir = -dir;
-
-			}
-			float pinThickness = PinRadius * 2f;
-			float arrowLength = pinThickness * 0.35f;
-			float arrowWidth = arrowLength * 1.2f;
-			Vector2 perp = new Vector2(-dir.y, dir.x);
-			float edgeOffset = pinThickness / 4f;
-			Vector2 centerOffset = dir * edgeOffset * (pin.IsSourcePin ? 1 : -1);
-			Vector2 arrowCenter = pinPos + centerOffset;
-			Vector2 tip = arrowCenter + dir * (arrowLength / 2f);
-			Vector2 baseCenter = arrowCenter - dir * (arrowLength / 2f);
-			Vector2 baseLeft = baseCenter + perp * (arrowWidth / 2f);
-			Vector2 baseRight = baseCenter - perp * (arrowWidth / 2f);
-
 			// Draws input/output indicators on subchip pins only
-			bool isInputToCustomChip = pin.parent is SubChipInstance;
-			if (isInputToCustomChip)
+			if (pin.parent is not SubChipInstance) return;
+			
+			//set up display mode based on settings
+			int pinIndicatorMode = Project.ActiveProject.description.Perfs_PinIndicators;
+			bool drawIndicator = false;
+			switch (pinIndicatorMode)
 			{
-                // Check if pin is connect to any wire for the Is Disconnected setting
-                
-                List<WireInstance> wireList = Project.ActiveProject.controller.ActiveDevChip.Wires;
-                bool isConnected = false;
-                for (int i = wireList.Count - 1; i >= 0; i--)
-                {
-                    WireInstance wire = wireList[i];
-                    if (PinAddress.Equals(wire.SourcePin.Address, pin.Address) || PinAddress.Equals(wire.TargetPin.Address, pin.Address))
-                    {
-                        isConnected = true;
-                        break;
-                    }
-
-                }
-                //set up display mode based on settings
-                int pinIndicatorMode = Project.ActiveProject.description.Perfs_PinIndicators;
-                bool drawIndicator = false;
-                switch (pinIndicatorMode)
-                {
-                    case 1: // "On Hover"
-                        drawIndicator = mouseOverPin;
-                        break;
-                    case 2: // "Tab To Toggle"
-                        drawIndicator = Project.ActiveProject.PinNameDisplayIsTabToggledOn;
-                        break;
-                    case 3: // "If Pin is not connected"
-                        drawIndicator = !isConnected;
-                        break;
-                    case 4: // "Always"
-                        drawIndicator = true;
-                        break;
-
-                }
-                if (drawIndicator)
-
-                {
-						Draw.Point(pinPos, PinRadius, new Color(34f / 255f, 34f / 255f, 34f / 255f, 1f));
-						float angle = 0;
-						float wedgeSpan = 0f;
-
-						if (!pin.IsSourcePin)
-						{
-							wedgeSpan = 100f; //edit angle of input
-							angle = Mathf.Atan2(-dir.y, -dir.x) * Mathf.Rad2Deg;
-						}
-						else
-						{
-							wedgeSpan = 150f; //edits angle of output
-							angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-						}
-						float angleStart = angle - wedgeSpan / 2f;
-						float angleEnd = angle + wedgeSpan / 2f;
-						Draw.WedgePolygon(pinPos, PinRadius, angleStart, angleEnd, ActiveTheme.PinCol, pin.face, pin.IsSourcePin);
-					}
-				}
+				case 1: // "On Hover"
+					drawIndicator = mouseOverPin;
+					break;
+				case 2: // "Tab To Toggle"
+					drawIndicator = Project.ActiveProject.PinNameDisplayIsTabToggledOn;
+					break;
+				case 3: // "If Pin is not connected"
+					var isConnected = IsConnected(pin);
+					drawIndicator = !isConnected;
+					break;
+				case 4: // "Always"
+					drawIndicator = true;
+					break;
 			}
+
+			if (!drawIndicator) return;
+
+			Draw.Point(pinPos, PinRadius, new Color(34f / 255f, 34f / 255f, 34f / 255f, 1f));
+			Vector2 dir = pin.FacingDir;
+			float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+
+			bool pinIsSourcePin = pin.IsSourcePin;
+			var wedgeSpan = pinIsSourcePin ? 75f : 50f; //edits angle of input/output
+			float angleStart = angle - wedgeSpan;
+			float angleEnd = angle + wedgeSpan;
+			Draw.WedgePolygon(pinPos, PinRadius, angleStart, angleEnd, ActiveTheme.PinCol, pin.face, pinIsSourcePin);
+		}
+
 		static void DrawMultiBitPin(PinInstance pin)
         {
             Vector2 pinPos = pin.GetWorldPos();
@@ -1329,26 +1279,13 @@ namespace DLS.Graphics
 			if (pin.bitCount >= 64 && !mouseOverPin)
 			{
 				Vector2 depthIndicatorSize = isHorizontal ? new(pinHeight, pinWidth / 8f) : new(pinWidth / 8f, pinHeight);
-				Draw.Quad(pinPos + pin.FacingDir * 0.25f * pinWidth, depthIndicatorSize, ActiveTheme.PinSizeIndicatorColors[pin.bitCount.GetTier()]);
+				Draw.Quad(pinPos + 0.25f * pinWidth * pin.FacingDir, depthIndicatorSize, ActiveTheme.PinSizeIndicatorColors[pin.bitCount.GetTier()]);
 			}
 
             // Draws input/output indicators on subchip pins only
             bool isOnCustomChip = pin.parent is SubChipInstance;
 			if (isOnCustomChip)
 			{
-                // Check if pin is connect to any wire 
-                List<WireInstance> wireList = Project.ActiveProject.controller.ActiveDevChip.Wires;
-                bool isConnected = false;
-                for (int i = wireList.Count - 1; i >= 0; i--)
-				{
-					WireInstance wire = wireList[i];
-                    if (PinAddress.Equals(wire.SourcePin.Address, pin.Address) || PinAddress.Equals(wire.TargetPin.Address, pin.Address))
-					{
-						isConnected = true;
-						break;
-                    }
-					
-				}
                 //set up display mode based on settings
                 int pinIndicatorMode = Project.ActiveProject.description.Perfs_PinIndicators;
                 bool drawIndicator = false;
@@ -1361,6 +1298,7 @@ namespace DLS.Graphics
                         drawIndicator = Project.ActiveProject.PinNameDisplayIsTabToggledOn;
                         break;
                     case 3: // "If Pin is not connected"
+	                    bool isConnected = IsConnected(pin);
                         drawIndicator = !isConnected;
                         break;
                     case 4: // "Always"
@@ -1387,8 +1325,8 @@ namespace DLS.Graphics
 
                     float edgeOffset = pinThickness / 4f;
 
-                    //Shifts arrow based on if input/output to ensure its not hidden behind subchip
-                    Vector2 centerOffset = dir * edgeOffset * (pin.IsSourcePin ? 1 : -1);
+                    //Shifts arrow based on if input/output to ensure it's not hidden behind subChip
+                    Vector2 centerOffset = edgeOffset * (pin.IsSourcePin ? 1 : -1) * dir;
                     Vector2 arrowCenter = pinPos + centerOffset;
 
                     Vector2 tip = arrowCenter + dir * (arrowLength / 2f);
@@ -1398,10 +1336,27 @@ namespace DLS.Graphics
                     Draw.Triangle(tip, baseLeft, baseRight, new Color(34f / 255f, 34f / 255f, 34f / 255f, 1f));
                 }
 			}
-
-
         }
-        public static void DrawGrid(Color gridCol)
+
+		/// Check if pin is connect to any wire for the Is Disconnected setting
+		static bool IsConnected(PinInstance pin)
+		{
+			List<WireInstance> wireList = Project.ActiveProject.controller.ActiveDevChip.Wires;
+			bool isConnected = false;
+			for (int i = wireList.Count - 1; i >= 0; i--)
+			{
+				WireInstance wire = wireList[i];
+				if (PinAddress.Equals(wire.SourcePin.Address, pin.Address) || PinAddress.Equals(wire.TargetPin.Address, pin.Address))
+				{
+					isConnected = true;
+					break;
+				}
+			}
+
+			return isConnected;
+		}
+
+		public static void DrawGrid(Color gridCol)
 		{
 			float thickness = GridThickness;
 
@@ -1461,7 +1416,7 @@ namespace DLS.Graphics
 			int drawPriority_signalHigh = wireIsHigh ? 1000 : 0;
 
 			// Draw multi-bit wires above single bit wires
-			int drawPriority_bitCount = (int)wire.bitCount * 1000;
+			int drawPriority_bitCount = wire.bitCount * 1000;
 
 			// If a wire is connected to another wire, it should be drawn beneath it
 			// (mainly important for multi-bit wires, since these look strange otherwise)
