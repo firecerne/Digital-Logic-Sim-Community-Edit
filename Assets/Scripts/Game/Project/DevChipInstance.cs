@@ -218,9 +218,29 @@ namespace DLS.Game
 		{
 			LastSavedDescription = savedDescription;
 
+			ApplyPinLayout(savedDescription);
 			RegenerateParentChipNamesHash();
 
 			SimChip.combinationalChipCaches.Remove(savedDescription.Name);
+		}
+
+		private void ApplyPinLayout(ChipDescription savedDescription)
+		{
+			var devInputPins = GetInputPins();
+			var newInputs = savedDescription.InputPins;
+			for (int i = 0; i < devInputPins.Length; i++)
+			{
+				devInputPins[i].Pin.face = newInputs[i].Face;
+				devInputPins[i].Pin.LocalOffset = newInputs[i].LocalOffset;
+			}
+			
+			var devOutputPins = GetOutputPins();
+			var newOutputs = savedDescription.OutputPins;
+			for (int i = 0; i < devOutputPins.Length; i++)
+			{
+				devOutputPins[i].Pin.face = newOutputs[i].Face;
+				devOutputPins[i].Pin.LocalOffset = newOutputs[i].LocalOffset;
+			}
 		}
 
 		public void AddNewSubChip(SubChipInstance subChip, bool isLoading)
@@ -535,9 +555,9 @@ namespace DLS.Game
 
 		public IEnumerable<SubChipInstance> GetSubchips() => Elements.OfType<SubChipInstance>();
 
-		public IEnumerable<DevPinInstance> GetOutputPins()
+		public DevPinInstance[] GetOutputPins()
 		{
-			return Elements.OfType<DevPinInstance>().Where(p => !p.IsInputPin);
+			return Elements.OfType<DevPinInstance>().Where(p => !p.IsInputPin).ToArray();
 		}
 
 		void RegenerateParentChipNamesHash()

@@ -12,11 +12,12 @@ namespace DLS.Description
 		public PinBitCount BitCount;
 		public PinColour Colour;
 		public PinValueDisplayMode ValueDisplayMode;
-        public int face; // Which edge of the chip the pin is on: 0 = top, 1 = right, 2 = bottom, 3 = left
+        public int Face; // Which edge of the chip the pin is on: 0 = top, 1 = right, 2 = bottom, 3 = left
         public float LocalOffset; //offset on chip edge for pin location
 		
 
-        public PinDescription(string name, int id, Vector2 position, PinBitCount bitCount, PinColour colour, PinValueDisplayMode valueDisplayMode, float localoff = 0)
+        public PinDescription(string name, int id, Vector2 position, PinBitCount bitCount, PinColour colour,
+	        PinValueDisplayMode valueDisplayMode, float offset = 0, int face = 3)
 		{
 			Name = name;
 			ID = id;
@@ -24,20 +25,8 @@ namespace DLS.Description
 			BitCount = bitCount;
 			Colour = colour;
 			ValueDisplayMode = valueDisplayMode;
-            LocalOffset = localoff;
-			face = 1;
-        }
-
-		public PinDescription(string name, int id, Vector2 position, PinBitCount bitCount, PinColour colour, PinValueDisplayMode valueDisplayMode, float localoff, int side)
-		{
-            Name = name;
-            ID = id;
-            Position = position;
-            BitCount = bitCount;
-            Colour = colour;
-            ValueDisplayMode = valueDisplayMode;
-            LocalOffset = localoff;
-			face = side;
+            LocalOffset = offset;
+			Face = face;
         }
 	}
 
@@ -81,9 +70,9 @@ namespace DLS.Description
 		public int GetTier()
 		{
 			if (BitCount <= 64) return 0;
-			else if (BitCount <= 512) return 1;
-			else if (BitCount <= 4096) return 2;
-			else return 3;
+			if (BitCount <= 512) return 1;
+			if (BitCount <= 4096) return 2;
+			return 3;
 		}
 
         public static bool operator ==(PinBitCount a, PinBitCount b) => a.BitCount == b.BitCount;

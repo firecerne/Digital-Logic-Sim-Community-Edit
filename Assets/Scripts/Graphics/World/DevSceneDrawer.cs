@@ -1056,7 +1056,7 @@ namespace DLS.Graphics
                 Vector2 pinPos = pin.GetWorldPos();
                 if (pin.bitCount == PinBitCount.Bit1)
                 {
-                    Draw.Quad(pinPos, Vector2.one * PinRadius * 2.4f, Color.red);
+                    Draw.Quad(pinPos, PinRadius * 2.4f * Vector2.one, Color.red);
                 }
                 else
                 {
@@ -1179,11 +1179,12 @@ namespace DLS.Graphics
 					}
 				}
 			}
+        
 		static void DrawMultiBitPin(PinInstance pin)
         {
             Vector2 pinPos = pin.GetWorldPos();
 
-            bool isHorizontal = pin.face == 0 || pin.face == 2;
+            bool isHorizontal = pin.FacingDir == Vector2.up || pin.FacingDir == Vector2.down;
             float pinWidth = PinRadius * 2 * 0.95f;
             float pinHeight = SubChipInstance.PinHeightFromBitCount(pin.bitCount);
             Vector2 pinSize = isHorizontal ? new Vector2(pinHeight, pinWidth) : new Vector2(pinWidth, pinHeight);
@@ -1219,7 +1220,7 @@ namespace DLS.Graphics
 			if (pin.bitCount >= 64 && !mouseOverPin)
 			{
 				Vector2 depthIndicatorSize = isHorizontal ? new(pinHeight, pinWidth / 8f) : new(pinWidth / 8f, pinHeight);
-				Draw.Quad(pinPos + pin.FacingDir * 0.25f * pinWidth, depthIndicatorSize, ActiveTheme.PinSizeIndicatorColors[pin.bitCount.GetTier()]);
+				Draw.Quad(pinPos + 0.25f * pinWidth * pin.FacingDir, depthIndicatorSize, ActiveTheme.PinSizeIndicatorColors[pin.bitCount.GetTier()]);
 			}
 
             // Draws input/output indicators on subchip pins only
@@ -1288,9 +1289,8 @@ namespace DLS.Graphics
                     Draw.Triangle(tip, baseLeft, baseRight, new Color(34f / 255f, 34f / 255f, 34f / 255f, 1f));
                 }
 			}
-
-
         }
+		
         public static void DrawGrid(Color gridCol)
 		{
 			float thickness = GridThickness;
