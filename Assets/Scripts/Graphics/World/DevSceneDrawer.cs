@@ -1111,6 +1111,11 @@ namespace DLS.Graphics
             Vector2 pinPos = pin.GetWorldPos();
 
             Vector2 dir = pin.FacingDir;
+            bool isDevPin = pin.parent is DevPinInstance;
+            if (isDevPin)
+            {
+	            dir = pin.IsSourcePin ? Vector2.right : Vector2.left;
+            }
             bool isHorizontal = dir == Vector2.up || dir == Vector2.down;
             float pinWidth = PinRadius * 2 * 0.95f;
             float pinHeight = SubChipInstance.PinHeightFromBitCount(pin.bitCount);
@@ -1143,7 +1148,7 @@ namespace DLS.Graphics
 			}
 
             // Draws input/output indicators on subchip pins only
-            if (pin.parent is not SubChipInstance) return;
+            if (isDevPin) return;
             
             //set up display mode based on settings
             int pinIndicatorMode = Project.ActiveProject.description.Perfs_PinIndicators;
