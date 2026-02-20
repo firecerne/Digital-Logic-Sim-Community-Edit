@@ -693,7 +693,7 @@ namespace DLS.Graphics
 				}
 			}
 
-			if (simSource != null) simSource.OutputPins[3].State.SmallSet(addr == null ? 0 : addr.Value);
+			simSource?.OutputPins[3].State.SmallSet(addr ?? 0);
 
 			return (bounds, inBounds, pressed);
 
@@ -818,7 +818,7 @@ namespace DLS.Graphics
 			Draw.Point(devPin.StateDisplayPosition, DevPinStateDisplayRadius, stateCol);
 
 			// Draw pin and handle
-			DrawPin(devPin.Pin);
+			DrawSingleBitPin(devPin.Pin);
 			DrawPinHandle(devPin, devPin.HandlePosition, devPin.GetHandleSize());
 		}
 
@@ -874,7 +874,7 @@ namespace DLS.Graphics
 			}
 
 			// Draw pin and handle
-			DrawPin(devPin.Pin);
+			DrawMultiBitPin(devPin.Pin);
 			DrawPinHandle(devPin, devPin.HandlePosition, devPin.GetHandleSize());
 		}
 
@@ -1070,32 +1070,10 @@ namespace DLS.Graphics
 			Draw.Point(pinPos, PinRadius, pinCol);
 
 			// ---- input/output arrow ----
-			// Draws input/output indicators on subchip pins only
-			if (pin.parent is not SubChipInstance) return;
-			
-			//set up display mode based on settings
-			int pinIndicatorMode = Project.ActiveProject.description.Perfs_PinIndicators; //TODO: Fetch once
-			bool drawIndicator = false;
-			switch (pinIndicatorMode)
-			{
-				case 1: // "On Hover"
-					drawIndicator = mouseOverPin;
-					break;
-				case 2: // "Tab To Toggle"
-					drawIndicator = Project.ActiveProject.PinNameDisplayIsTabToggledOn;
-					break;
-				case 3: // "If Pin is not connected"
-					var isConnected = IsConnected(pin);
-					drawIndicator = !isConnected;
-					break;
-				case 4: // "Always"
-					drawIndicator = true;
-					break;
-			}
+			// Draw input/output indicators on subChip pins only
+			if (!ShouldDrawIndicator(pin, mouseOverPin)) return;
 
-			if (!drawIndicator) return;
-
-			Draw.Point(pinPos, PinRadius, new Color(34f / 255f, 34f / 255f, 34f / 255f, 1f)); //TODO: Don't draw twice and get rid of magic color
+			Draw.Point(pinPos, PinRadius, ActiveTheme.PinDirectionIndicatorColor);
 			Vector2 dir = pin.FacingDir;
 			float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
 
@@ -1111,8 +1089,7 @@ namespace DLS.Graphics
             Vector2 pinPos = pin.GetWorldPos();
 
             Vector2 dir = pin.FacingDir;
-            bool isDevPin = pin.parent is DevPinInstance;
-            if (isDevPin)
+            if (pin.parent is DevPinInstance)
             {
 	            dir = pin.IsSourcePin ? Vector2.right : Vector2.left;
             }
@@ -1140,37 +1117,15 @@ namespace DLS.Graphics
             Draw.Quad(pinPos, pinSize, pinCol);
 
 
-			// Draw pin indicator
+			// Draw pin size indicator
 			if (pin.bitCount >= 64 && !mouseOverPin)
 			{
 				Vector2 depthIndicatorSize = isHorizontal ? new(pinHeight, pinWidth / 8f) : new(pinWidth / 8f, pinHeight);
 				Draw.Quad(pinPos + 0.25f * pinWidth * dir, depthIndicatorSize, ActiveTheme.PinSizeIndicatorColors[pin.bitCount.GetTier()]);
 			}
 
-            // Draws input/output indicators on subchip pins only
-            if (isDevPin) return;
-            
-            //set up display mode based on settings
-            int pinIndicatorMode = Project.ActiveProject.description.Perfs_PinIndicators;
-            bool drawIndicator = false;
-            switch (pinIndicatorMode)
-            {
-	            case 1: // "On Hover"
-		            drawIndicator = mouseOverPin;
-		            break;
-	            case 2: // "Tab To Toggle"
-		            drawIndicator = Project.ActiveProject.PinNameDisplayIsTabToggledOn;
-		            break;
-	            case 3: // "If Pin is not connected"
-		            bool isConnected = IsConnected(pin);
-		            drawIndicator = !isConnected;
-		            break;
-	            case 4: // "Always"
-		            drawIndicator = true;
-		            break;   
-            }
-
-            if (!drawIndicator) return;
+            // Draw input/output direction indicators on subChip pins only
+            if (!ShouldDrawIndicator(pin, mouseOverPin)) return;
 
             float pinThickness = isHorizontal ? pinSize.y : pinSize.x;
             float arrowLength = pinThickness / 2f;
@@ -1188,14 +1143,13 @@ namespace DLS.Graphics
             Vector2 baseCenter = arrowCenter - dir * edgeOffset;
             Vector2 baseLeft = baseCenter + perp * arrowLength;
             Vector2 baseRight = baseCenter - perp * arrowLength;
-            Draw.Triangle(tip, baseLeft, baseRight, new Color(34f / 255f, 34f / 255f, 34f / 255f, 1f));
+            Draw.Triangle(tip, baseLeft, baseRight, ActiveTheme.PinDirectionIndicatorColor);
         }
-
-		// TODO: Dont fetch for every pin and so on. -> Tune performance
+		
 		/// Check if pin is connect to any wire for the Is Disconnected setting
 		static bool IsConnected(PinInstance pin)
 		{
-			List<WireInstance> wireList = Project.ActiveProject.controller.ActiveDevChip.Wires;
+			List<WireInstance> wireList = controller.ActiveDevChip.Wires;
 			bool isConnected = false;
 			for (int i = wireList.Count - 1; i >= 0; i--)
 			{
@@ -1208,6 +1162,32 @@ namespace DLS.Graphics
 			}
 
 			return isConnected;
+		}
+
+		/// <summary>
+		/// Should an indicator of the input/ output direction of the given pin be drawn?
+		/// </summary>
+		/// <returns>False if pin is <see cref="DevPinInstance"/>, or the indicator mode doesn't match</returns>
+		/// <exception cref="NotImplementedException"></exception>
+		static bool ShouldDrawIndicator(PinInstance pin, bool mouseOverPin)
+		{
+			if (pin.parent is not SubChipInstance) return false;
+			
+			int pinIndicatorMode = Project.ActiveProject.description.Perfs_PinIndicators;
+			return pinIndicatorMode switch
+			{
+				0 => // "Never"
+					false,
+				1 => // "On Hover"
+					mouseOverPin,
+				2 => // "Tab To Toggle"
+					Project.ActiveProject.PinNameDisplayIsTabToggledOn,
+				3 => // "If Pin is not connected"
+					!IsConnected(pin),
+				4 => // "Always"
+					true,
+				_ => throw new NotImplementedException($"Pin indicator mode {pinIndicatorMode} is not implemented.")
+			};
 		}
 
 		public static void DrawGrid(Color gridCol)
