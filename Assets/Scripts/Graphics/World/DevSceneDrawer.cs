@@ -894,7 +894,7 @@ namespace DLS.Graphics
 
         public static void DrawDevPin(DevPinInstance devPin)
 		{
-			if (devPin.BitCount == (uint)1)
+			if (devPin.BitCount == 1)
 			{
 				Draw1BitDevPin(devPin);
 			}
@@ -1221,21 +1221,14 @@ namespace DLS.Graphics
         {
             Vector2 pinPos = pin.GetWorldPos();
 
-            bool isHorizontal = pin.FacingDir == Vector2.up || pin.FacingDir == Vector2.down;
+            Vector2 dir = pin.FacingDir;
+            bool isHorizontal = dir == Vector2.up || dir == Vector2.down;
             float pinWidth = PinRadius * 2 * 0.95f;
             float pinHeight = SubChipInstance.PinHeightFromBitCount(pin.bitCount);
             Vector2 pinSize = isHorizontal ? new Vector2(pinHeight, pinWidth) : new Vector2(pinWidth, pinHeight);
 
             // Determine direction for selection offset (used for mouse interaction)
-            Vector2 offsetDir = Vector2.zero;
-            switch (pin.face)
-            {
-                case 1: offsetDir = Vector2.left; break;  // right face
-                case 3: offsetDir = Vector2.right; break; // left face
-            }
-
-
-            Vector2 pinSelectionBoundsPos = pinPos + offsetDir * 0.02f;
+            Vector2 pinSelectionBoundsPos = pinPos -dir * 0.02f;
             bool mouseOverPin = !InteractionState.MouseIsOverUI &&
                                 InputHelper.MouseInsideBounds_World(pinSelectionBoundsPos, pinSize);
             if (mouseOverPin)
@@ -1257,63 +1250,51 @@ namespace DLS.Graphics
 			if (pin.bitCount >= 64 && !mouseOverPin)
 			{
 				Vector2 depthIndicatorSize = isHorizontal ? new(pinHeight, pinWidth / 8f) : new(pinWidth / 8f, pinHeight);
-				Draw.Quad(pinPos + 0.25f * pinWidth * pin.FacingDir, depthIndicatorSize, ActiveTheme.PinSizeIndicatorColors[pin.bitCount.GetTier()]);
+				Draw.Quad(pinPos + 0.25f * pinWidth * dir, depthIndicatorSize, ActiveTheme.PinSizeIndicatorColors[pin.bitCount.GetTier()]);
 			}
 
             // Draws input/output indicators on subchip pins only
-            bool isOnCustomChip = pin.parent is SubChipInstance;
-			if (isOnCustomChip)
-			{
-                //set up display mode based on settings
-                int pinIndicatorMode = Project.ActiveProject.description.Perfs_PinIndicators;
-                bool drawIndicator = false;
-                switch (pinIndicatorMode)
-                {
-                    case 1: // "On Hover"
-                        drawIndicator = mouseOverPin;
-                        break;
-                    case 2: // "Tab To Toggle"
-                        drawIndicator = Project.ActiveProject.PinNameDisplayIsTabToggledOn;
-                        break;
-                    case 3: // "If Pin is not connected"
-	                    bool isConnected = IsConnected(pin);
-                        drawIndicator = !isConnected;
-                        break;
-                    case 4: // "Always"
-                        drawIndicator = true;
-                        break;   
-                }
-                if (drawIndicator)
-				{
-                    Vector2 dir;
-                    switch (pin.face)
-                    {
-                        case 0: dir = Vector2.down; break;
-                        case 1: dir = Vector2.left; break;
-                        case 2: dir = Vector2.up; break;
-                        case 3: dir = Vector2.right; break;
-                        default: dir = Vector2.zero; break;
-                    }
-                    if (pin.IsSourcePin) { dir = -dir; }
-                    float pinThickness = isHorizontal ? pinSize.y : pinSize.x;
-                    float arrowLength = pinThickness / 2f;
-                    float arrowWidth = arrowLength * 2f;
-                    Vector2 perp = new Vector2(-dir.y, dir.x);
+            if (pin.parent is not SubChipInstance) return;
+            
+            //set up display mode based on settings
+            int pinIndicatorMode = Project.ActiveProject.description.Perfs_PinIndicators;
+            bool drawIndicator = false;
+            switch (pinIndicatorMode)
+            {
+	            case 1: // "On Hover"
+		            drawIndicator = mouseOverPin;
+		            break;
+	            case 2: // "Tab To Toggle"
+		            drawIndicator = Project.ActiveProject.PinNameDisplayIsTabToggledOn;
+		            break;
+	            case 3: // "If Pin is not connected"
+		            bool isConnected = IsConnected(pin);
+		            drawIndicator = !isConnected;
+		            break;
+	            case 4: // "Always"
+		            drawIndicator = true;
+		            break;   
+            }
 
+            if (!drawIndicator) return;
 
-                    float edgeOffset = pinThickness / 4f;
+            float pinThickness = isHorizontal ? pinSize.y : pinSize.x;
+            float arrowLength = pinThickness / 2f;
+            float edgeOffset = pinThickness / 4f;
 
-                    //Shifts arrow based on if input/output to ensure it's not hidden behind subChip
-                    Vector2 centerOffset = edgeOffset * (pin.IsSourcePin ? 1 : -1) * dir;
-                    Vector2 arrowCenter = pinPos + centerOffset;
+            dir = -dir;
+            if (pin.IsSourcePin) { dir = -dir; }
 
-                    Vector2 tip = arrowCenter + dir * (arrowLength / 2f);
-                    Vector2 baseCenter = arrowCenter - dir * (arrowLength / 2f);
-                    Vector2 baseLeft = baseCenter + perp * (arrowWidth / 2f);
-                    Vector2 baseRight = baseCenter - perp * (arrowWidth / 2f);
-                    Draw.Triangle(tip, baseLeft, baseRight, new Color(34f / 255f, 34f / 255f, 34f / 255f, 1f));
-                }
-			}
+            Vector2 perp = new Vector2(-dir.y, dir.x);
+            //Shifts arrow based on if input/output to ensure it's not hidden behind subChip
+            Vector2 centerOffset = edgeOffset * (pin.IsSourcePin ? 1 : -1) * dir;
+            Vector2 arrowCenter = pinPos + centerOffset;
+
+            Vector2 tip = arrowCenter + dir * edgeOffset;
+            Vector2 baseCenter = arrowCenter - dir * edgeOffset;
+            Vector2 baseLeft = baseCenter + perp * arrowLength;
+            Vector2 baseRight = baseCenter - perp * arrowLength;
+            Draw.Triangle(tip, baseLeft, baseRight, new Color(34f / 255f, 34f / 255f, 34f / 255f, 1f));
         }
 
 		/// Check if pin is connect to any wire for the Is Disconnected setting
