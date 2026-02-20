@@ -6,6 +6,7 @@ using Seb.Helpers;
 using Seb.Types;
 using Seb.Vis;
 using UnityEngine;
+using static DLS.Graphics.DrawSettings;
 
 namespace DLS.Graphics
 {
@@ -106,7 +107,7 @@ namespace DLS.Graphics
 			Color scaleCol = new(0.4f, 1, 0.2f);
 			float deltaScale = (mouseDownPos - InputHelper.MousePosWorld).magnitude;
 			deltaScale *= Vector2.Dot((InputHelper.MousePosWorld - mouseDownPos).normalized, (displayPosInitial - mouseDownPos).normalized);
-			float targetScale = Mathf.Max(DrawSettings.GridSize, displayScaleInitial - deltaScale);
+			float targetScale = Mathf.Max(GridSize, displayScaleInitial - deltaScale);
 
 			if (!Project.ActiveProject.ShouldSnapToGrid)
 			{
@@ -228,7 +229,7 @@ namespace DLS.Graphics
 						DisplayUnderMouse = display;
 
 						float cornerDst = bounds.DstToCorner(InputHelper.MousePosWorld);
-						float cornerDstThresholdForScaleMode = Mathf.Min(displayMinAxisSize * 0.2f, DrawSettings.GridSize * 1.5f);
+						float cornerDstThresholdForScaleMode = Mathf.Min(displayMinAxisSize * 0.2f, GridSize * 1.5f);
 						bool enterScaleMode = cornerDst < cornerDstThresholdForScaleMode;
 
 						if (enterScaleMode)
@@ -292,7 +293,7 @@ namespace DLS.Graphics
 		static void DrawPlacementCornerIndicator(Vector2 corner, Vector2 dirA, Vector2 dirB, Color col)
 		{
 			const float pad = 0.0f;
-			const float len = DrawSettings.GridSize;
+			const float len = GridSize;
 			const float thick = 0.01f;
 
 			Vector2 origin = corner - (dirA + dirB) * pad;
@@ -365,7 +366,7 @@ namespace DLS.Graphics
 
                     if (snapX && dir.x != 0)
                     {
-                        desiredSize.x = GridHelper.SnapToGridForceEven(desiredSize.x) - DrawSettings.ChipOutlineWidth;
+                        desiredSize.x = GridHelper.SnapToGridForceEven(desiredSize.x) - ChipOutlineWidth;
                     }
 
                     chip.updateMinSize();
@@ -449,7 +450,28 @@ namespace DLS.Graphics
 
 	        selectedPin.LocalOffset = offsetAlongFace;
 
-	        isPinPositionValid = !DoesPinOverlap(selectedPin, out _);
+	        isPinPositionValid = !DoesPinOverlap(selectedPin, out PinInstance overlappedPin);
+
+	        //makes pins red if too close
+	        if (!isPinPositionValid)
+	        {
+		        Vector2 pinPos = overlappedPin.GetWorldPos();
+		        if (overlappedPin.bitCount == PinBitCount.Bit1)
+		        {
+			        Draw.Quad(pinPos, PinRadius * 2.4f * Vector2.one, Color.red);
+		        }
+		        else
+		        {
+			        float pinWidth = PinRadius * 2 * 0.95f;
+			        float overlappedPinHeight = SubChipInstance.PinHeightFromBitCount(overlappedPin.bitCount);
+
+			        Vector2 pinSize = (overlappedPin.face == 0 || overlappedPin.face == 2)
+				        ? new Vector2(overlappedPinHeight, pinWidth)  // horizontal pin
+				        : new Vector2(pinWidth, overlappedPinHeight); // vertical pin
+
+			        Draw.Quad(pinPos, pinSize * 1.2f, Color.red);
+		        }
+	        }
 
 	        if (!InputHelper.IsMouseUpThisFrame(MouseButton.Left)) return;
 
