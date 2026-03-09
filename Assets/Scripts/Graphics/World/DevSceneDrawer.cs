@@ -193,7 +193,7 @@ namespace DLS.Graphics
 		public static void DrawPinLabel(PinInstance pin)
 		{
 			string text = pin.Name;
-			if (string.IsNullOrWhiteSpace(text)) return;
+			if (string.IsNullOrWhiteSpace(text) || text.Contains("Hidden")) return;
 
 			var facingDir = pin.parent is DevPinInstance devPin ? devPin.faceDir : pin.FacingDir;
 			Vector2 offset = (PinRadius + 0.05f) * facingDir;
