@@ -4,6 +4,8 @@ namespace DLS.Description
 {
     public struct ShortcutSettings
     {
+	    public string LastSavedModdedVersion;
+	    
         public Shortcut MainMenu_NewProjectShortcutTriggered;
         public Shortcut MainMenu_OpenProjectShortcutTriggered;
         public Shortcut MainMenu_SettingsShortcutTriggered;
