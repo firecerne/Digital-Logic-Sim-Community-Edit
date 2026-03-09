@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using DLS.Description;
 using DLS.Game;
@@ -18,17 +17,30 @@ namespace DLS.Graphics
 		static string interactionContextName;
 		static bool bottomBarItemIsCollection;
 		static Vector2 mouseOpenMenuPos;
+		static Vector2 mouseOpenSubMenuPos;
 
 		static MenuEntry[] activeContextMenuEntries;
+		static MenuEntry[] activeSubMenuEntries;
 		static readonly MenuEntry dividerMenuEntry = new(menuDividerString, null, null);
 		static bool wasMouseOverMenu;
+		static bool hasLastClickOpenedSubMenu;
 		static string contextMenuHeader;
+
+		const float TextOffsetX = 0.45f;
+		const float MenuDividerHeight = 0.15f;
+		const float MenuDividerMarginY = 0.5f;
+		const float ButtonHeight = 2;
+		const float OutlineThickness = 0.5f;
+		const float BottomBarHeight = ButtonHeight + OutlineThickness * 2;
 
 		static readonly MenuEntry[] pinColEntries = ((PinColour[])Enum.GetValues(typeof(PinColour))).Select(col =>
 			new MenuEntry(Format(Enum.GetName(typeof(PinColour), col)), () => SetCol(col), CanSetCol)
 		).ToArray();
 
-
+		static readonly MenuEntry[] orientationEntries = ((Orientation[])Enum.GetValues(typeof(Orientation))).Select(orientation =>
+			new MenuEntry(Format(Enum.GetName(typeof(Orientation), orientation)), () => SetOrientation(orientation), CanSetOrientation)
+		).ToArray();
+		
 		static readonly MenuEntry deleteEntry = new(Format("DELETE"), Delete, CanDelete);
 		static readonly MenuEntry openChipEntry = new(Format("OPEN"), OpenChip, CanOpenChip);
 		static readonly MenuEntry labelChipEntry = new(Format("LABEL"), OpenChipLabelPopup, CanLabelChip);
@@ -80,13 +92,11 @@ namespace DLS.Graphics
 		};
 
         static readonly MenuEntry[] entries_builtinConstantChip =
-{
+		{
             new(Format("EDIT"), OpenConstantEditMenu, CanEditCurrentChip),
             labelChipEntry,
             deleteEntry
         };
-
-
 
         static readonly MenuEntry[] entries_subChipOutput = pinColEntries;
 
@@ -94,14 +104,16 @@ namespace DLS.Graphics
 		{
 			new(Format("EDIT"), OpenPinEditMenu, CanEditCurrentChip),
 			new(Format("DELETE"), Delete, CanDelete),
-			dividerMenuEntry
+			dividerMenuEntry,
+			new(Format("ORIENTATION >"), OpenOrientationSubMenu, CanSetOrientation)
 		}.Concat(pinColEntries).ToArray();
 
-		static readonly MenuEntry[] entries_outputDevPin =
+		static readonly MenuEntry[] entries_outputDevPin = new[]
 		{
 			entries_inputDevPin[0],
-			entries_inputDevPin[1]
-		};
+			entries_inputDevPin[1],
+			dividerMenuEntry
+		}.Concat(orientationEntries).ToArray();
 
 		static readonly MenuEntry[] entries_wire =
 		{
@@ -126,6 +138,7 @@ namespace DLS.Graphics
 		};
 
 		public static bool IsOpen { get; private set; }
+		public static bool IsSubMenuOpen { get; private set; }
 		public static IInteractable interactionContext { get; private set; }
 
 
@@ -147,11 +160,21 @@ namespace DLS.Graphics
 				HandleOpenMenuInput();
 
 				// Draw
-				if (IsOpen) DrawContextMenu(activeContextMenuEntries);
+				if (IsOpen)
+				{
+					var contextMenuInfo = DrawContextMenu();
+					
+					if (IsSubMenuOpen) DrawSubMenu(contextMenuInfo);
+				}
 
 				// Close menu input
 				if (InputHelper.IsMouseDownThisFrame(MouseButton.Left) || KeyboardShortcuts.CancelShortcutTriggered())
 				{
+					if (hasLastClickOpenedSubMenu)
+					{
+						hasLastClickOpenedSubMenu = false;
+						return;
+					}
 					CloseContextMenu();
 				}
 			}
@@ -275,75 +298,189 @@ namespace DLS.Graphics
 			IsOpen = true;
 		}
 
-
-		static void DrawContextMenu(MenuEntry[] menuEntries)
+		static ContextMenuInfo DrawContextMenu()
 		{
 			Draw.StartLayer(Vector2.zero, 1, true);
 
-			const float textOffsetX = 0.45f;
 			ButtonTheme theme = DrawSettings.ActiveUITheme.MenuPopupButtonTheme;
 			ButtonTheme headerTheme = DrawSettings.ActiveUITheme.MenuPopupButtonTheme;
 			headerTheme.buttonCols.inactive = ColHelper.MakeCol(0.18f);
 			headerTheme.textCols.inactive = Color.white;
 
-			float menuWidth = Draw.CalculateTextBoundsSize(menuEntries[0].Text, theme.fontSize, theme.font).x + 1;
+			// Calculates how wide the menu entries should be. Total width of panel is slightly increased when finishing drawing.
+			MenuEntry longestEntry = GetLongestMenuEntry(activeContextMenuEntries);
+			float menuWidth = Draw.CalculateTextBoundsSize(longestEntry.Text, theme.fontSize, theme.font).x + 1;
 			float menuWidthHeader = Draw.CalculateTextBoundsSize(contextMenuHeader, theme.fontSize, theme.font).x + 1;
 			menuWidth = Mathf.Max(menuWidth, menuWidthHeader);
 
 			Draw.ID panelID = UI.ReservePanel();
-			Vector2 buttonSize = new(menuWidth, 2);
-
+			Vector2 buttonSize = new(menuWidth, ButtonHeight);
 
 			Vector2 pos = mouseOpenMenuPos;
-			if (pos.x + menuWidth > UI.Width)
+			var clampRight = pos.x + menuWidth + OutlineThickness > UI.Width;
+			if (clampRight)
 			{
-				pos.x = UI.Width - menuWidth;
+				pos.x = UI.Width - menuWidth - OutlineThickness;
 			}
 
-			bool expandDown = pos.y >= UI.Height * 0.35f;
-			float dirY = expandDown ? -1 : 1;
-			Anchor anchor = expandDown ? Anchor.TopLeft : Anchor.BottomLeft;
+			float menuHeight = GetMenuHeight(activeContextMenuEntries);
+			bool clampBottom = pos.y - menuHeight < BottomBarHeight;
+			if (clampBottom)
+			{
+				pos.y = BottomBarHeight + OutlineThickness / 2;
+			}
+			float dirY = clampBottom ? 1 : -1;
+			Anchor anchor = clampBottom ? Anchor.BottomLeft : Anchor.TopLeft;
 
+			float openX = pos.x;
+			float openY = pos.y;
+			Vector2 menuSize = new(menuWidth, 0);
 			using (UI.BeginBoundsScope(true))
 			{
-				for (int i = 0; i < menuEntries.Length; i++)
+				for (int i = 0; i < activeContextMenuEntries.Length; i++)
 				{
-					int index = expandDown ? i : menuEntries.Length - i - 1;
-					MenuEntry entry = menuEntries[index];
+					int index = clampBottom ? activeContextMenuEntries.Length - i - 1 : i;
+					MenuEntry entry = activeContextMenuEntries[index];
 
-					if (index == 0 && expandDown) DrawHeader();
+					if (index == 0 && !clampBottom) DrawHeader();
 
 					if (entry.Text == menuDividerString)
 					{
-						pos.y += 0.5f * dirY;
-						UI.DrawPanel(pos, new Vector2(menuWidth, 0.15f), ColHelper.MakeCol(0.6f), Anchor.CentreLeft);
-						pos.y += 0.5f * dirY;
+						pos.y += MenuDividerMarginY * dirY;
+						UI.DrawPanel(pos, new Vector2(menuWidth, MenuDividerHeight), ColHelper.MakeCol(0.6f), Anchor.CentreLeft);
+						pos.y += MenuDividerMarginY * dirY;
 					}
 					else
 					{
-						if (UI.Button(entry.Text, theme, pos, buttonSize, entry.IsEnabled(), false, false, anchor, true, textOffsetX))
+						if (UI.Button(entry.Text, theme, pos, buttonSize, entry.IsEnabled(), false, false, anchor, true, TextOffsetX))
+						{
+							entry.OnPress();
+							mouseOpenSubMenuPos = pos;
+						}
+
+						pos.y += buttonSize.y * dirY;
+					}
+
+					if (index == 0 && clampBottom) DrawHeader();
+				}
+
+				Bounds2D bounds = UI.GetCurrentBoundsScope();
+				menuSize.y = bounds.Height;
+				UI.ModifyPanel(panelID, bounds.Centre, menuSize + Vector2.one * OutlineThickness, ColHelper.MakeCol(0.91f));
+			}
+
+			wasMouseOverMenu = UI.MouseInsideBounds(UI.PrevBounds);
+			return new(menuSize, new Vector2(openX, openY), clampRight, clampBottom);
+
+			void DrawHeader()
+			{
+				UI.Button(contextMenuHeader, headerTheme, pos, buttonSize, false, false, false, anchor, true, TextOffsetX);
+				pos.y += buttonSize.y * dirY;
+			}
+		}
+		
+		static void DrawSubMenu(ContextMenuInfo activeContextMenu)
+		{
+			Draw.StartLayer(Vector2.zero, 1, true);
+			ButtonTheme theme = DrawSettings.ActiveUITheme.MenuPopupButtonTheme;
+
+			// Calculates how wide the menu entries should be. Total width of panel is slightly increased when finishing drawing.
+			MenuEntry longestEntry = GetLongestMenuEntry(activeSubMenuEntries);
+			float menuWidth = Draw.CalculateTextBoundsSize(longestEntry.Text, theme.fontSize, theme.font).x + 1;
+
+			Draw.ID panelID = UI.ReservePanel();
+			Vector2 buttonSize = new(menuWidth, ButtonHeight);
+
+			Vector2 pos = new Vector2(activeContextMenu.OpenedPosition.x + activeContextMenu.Size.x, mouseOpenSubMenuPos.y);
+			if (activeContextMenu.ClampToBottom)
+			{
+				pos.y += ButtonHeight;
+			}
+			var shouldOpenToLeft = activeContextMenu.OpenedToLeft ||
+			                       pos.x + menuWidth + OutlineThickness > UI.Width;
+			if (shouldOpenToLeft)
+			{
+				pos.x = activeContextMenu.OpenedPosition.x - menuWidth - OutlineThickness;
+			}
+
+			float menuHeight = GetMenuHeight(activeSubMenuEntries, false);
+			bool clampToBottom = pos.y - menuHeight - OutlineThickness < BottomBarHeight;
+			if (clampToBottom)
+			{
+				pos.y = BottomBarHeight + OutlineThickness / 2;
+			}
+			float dirY = clampToBottom ? 1 : -1;
+			Anchor anchor = clampToBottom ? Anchor.BottomLeft : Anchor.TopLeft;
+			using (UI.BeginBoundsScope(true))
+			{
+				for (int i = 0; i < activeSubMenuEntries.Length; i++)
+				{
+					int index = clampToBottom ? activeSubMenuEntries.Length - i - 1 : i;
+					MenuEntry entry = activeSubMenuEntries[index];
+
+					if (entry.Text == menuDividerString)
+					{
+						pos.y += MenuDividerMarginY * dirY;
+						UI.DrawPanel(pos, new Vector2(menuWidth, MenuDividerHeight), ColHelper.MakeCol(0.6f), Anchor.CentreLeft);
+						pos.y += MenuDividerMarginY * dirY;
+					}
+					else
+					{
+						if (UI.Button(entry.Text, theme, pos, buttonSize, entry.IsEnabled(), false, false, anchor, true, TextOffsetX))
 						{
 							entry.OnPress();
 						}
 
 						pos.y += buttonSize.y * dirY;
 					}
-
-					if (index == 0 && !expandDown) DrawHeader();
 				}
 
 				Bounds2D bounds = UI.GetCurrentBoundsScope();
 				Vector2 menuSize = new(menuWidth, bounds.Height);
-				UI.ModifyPanel(panelID, bounds.Centre, menuSize + Vector2.one * 0.5f, ColHelper.MakeCol(0.91f));
+				UI.ModifyPanel(panelID, bounds.Centre, menuSize + Vector2.one * OutlineThickness, ColHelper.MakeCol(0.91f));
 			}
 
 			wasMouseOverMenu = UI.MouseInsideBounds(UI.PrevBounds);
+		}
 
-			void DrawHeader()
+		static MenuEntry GetLongestMenuEntry(MenuEntry[] entries)
+		{
+			MenuEntry result = default;
+			int maxLength = -1;
+			for (int i = 0; i < entries.Length; i++)
 			{
-				UI.Button(contextMenuHeader, headerTheme, pos, buttonSize, false, false, false, anchor, true, textOffsetX);
-				pos.y += buttonSize.y * dirY;
+				var length = entries[i].Text.Length;
+				if (length > maxLength)
+				{
+					maxLength = length;
+					result = entries[i];
+				}
 			}
+
+			return result;
+		}
+
+		static float GetMenuHeight(MenuEntry[] entries, bool hasHeader = true)
+		{
+			float height = 0f;
+
+			if (hasHeader)
+			{
+				height += ButtonHeight;
+			}
+			for (int i = 0; i < entries.Length; i++)
+			{
+				if (entries[i].Text == menuDividerString)
+				{
+					height += MenuDividerMarginY + MenuDividerMarginY + MenuDividerHeight;
+				}
+				else
+				{
+					height += ButtonHeight;
+				}
+			}
+
+			return height;
 		}
 
 		static bool IsCustomChip() => !Project.ActiveProject.chipLibrary.IsBuiltinChip(interactionContextName);
@@ -469,13 +606,39 @@ namespace DLS.Graphics
 		public static void CloseContextMenu()
 		{
 			IsOpen = false;
+			IsSubMenuOpen = false;
 		}
 
 		public static bool HasFocus() => IsOpen && wasMouseOverMenu;
 
 		public static void UnstarBottomBarEntry()
 		{
-			Project.ActiveProject.SetStarred(interactionContextName, false, bottomBarItemIsCollection, true);
+			Project.ActiveProject.SetStarred(interactionContextName, false, bottomBarItemIsCollection);
+		}
+
+		static void SetOrientation(Orientation orientation)
+		{
+			if (interactionContext is PinInstance { parent: DevPinInstance devPin }) devPin.SetOrientation(orientation);
+			CloseContextMenu();
+		}
+
+		static bool CanSetOrientation()
+		{
+			if (!Project.ActiveProject.CanEditViewedChip) return false;
+			return interactionContext is PinInstance { parent: DevPinInstance };
+		}
+
+		private static void OpenOrientationSubMenu()
+		{
+			SetSubMenuOpen(orientationEntries);
+		}
+
+		private static void SetSubMenuOpen(MenuEntry[] entries)
+		{
+			mouseOpenSubMenuPos = UI.ScreenToUISpace(InputHelper.MousePos);
+			IsSubMenuOpen = true;
+			hasLastClickOpenedSubMenu = true;
+			activeSubMenuEntries = entries;
 		}
 
 		public readonly struct MenuEntry
@@ -489,6 +652,22 @@ namespace DLS.Graphics
 				Text = text;
 				OnPress = onPress;
 				IsEnabled = isEnabled;
+			}
+		}
+
+		public readonly struct ContextMenuInfo
+		{
+			public readonly Vector2 Size;
+			public readonly Vector2 OpenedPosition;
+			public readonly bool OpenedToLeft;
+			public readonly bool ClampToBottom;
+
+			public ContextMenuInfo(Vector2 size, Vector2 openedPosition, bool openedToLeft, bool clampToBottom)
+			{
+				Size = size;
+				OpenedPosition = openedPosition;
+				OpenedToLeft = openedToLeft;
+				ClampToBottom = clampToBottom;
 			}
 		}
 	}

@@ -37,6 +37,10 @@ namespace DLS.Game
 		public static Func<bool> DeleteShortcutTriggered;
 		public static Func<bool> SimNextStepShortcutTriggered;
 		public static Func<bool> SimPauseToggleShortcutTriggered;
+		
+		// ---- Chip interaction shortcuts ----
+		public static Func<bool> RotateElementClockwiseShortcutTriggered;
+		public static Func<bool> RotateElementCounterClockwiseShortcutTriggered;
 
 		// ---- Dev shortcuts ----
 		public static Func<bool> OpenSaveDataFolderShortcutTriggered;
@@ -90,6 +94,9 @@ namespace DLS.Game
             LoadShortcut(out SimPauseToggleShortcutTriggered, shortcutSettings.SimPauseToggleShortcutTriggered);
 
             LoadShortcut(out OpenSaveDataFolderShortcutTriggered, shortcutSettings.OpenSaveDataFolderShortcutTriggered);
+            
+            LoadShortcut(out RotateElementClockwiseShortcutTriggered, shortcutSettings.RotateElementClockwiseShortcutTriggered);
+            LoadShortcut(out RotateElementCounterClockwiseShortcutTriggered, shortcutSettings.RotateElementCounterClockwiseShortcutTriggered);
         }
 
         public static void LoadShortcut(out Func<bool> shortcutFunction, Shortcut shortcut)

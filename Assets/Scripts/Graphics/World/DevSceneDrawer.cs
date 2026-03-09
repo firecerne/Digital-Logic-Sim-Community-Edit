@@ -195,11 +195,12 @@ namespace DLS.Graphics
 			string text = pin.Name;
 			if (string.IsNullOrWhiteSpace(text)) return;
 
-			Vector2 offset = (PinRadius + 0.05f) * pin.FacingDir;
+			var facingDir = pin.parent is DevPinInstance devPin ? devPin.faceDir : pin.FacingDir;
+			Vector2 offset = (PinRadius + 0.05f) * facingDir;
 			FontType font = FontBold;
 
 			Vector2 size = Draw.CalculateTextBoundsSize(text, FontSizePinLabel, font) + LabelBackgroundPadding;
-			Vector2 centre = pin.GetWorldPos() + pin.FacingDir * size/2 + offset;
+			Vector2 centre = pin.GetWorldPos() + facingDir * size/2 + offset;
 
 			Draw.Quad(centre, size, ActiveTheme.PinLabelCol);
 			Draw.Text(font, text, FontSizePinLabel, centre, Anchor.TextFirstLineCentre, Color.white);
@@ -832,13 +833,13 @@ namespace DLS.Graphics
 
 			const float squareDisplayScaleT = 0.9f;
 			Vector2 squareDisplaySize = Vector2.one * (MultiBitPinStateDisplaySquareSize * squareDisplayScaleT);
-			Vector2 inputGridSize = devPin.StateGridSize;
-			Vector2 inputGridSizeWithoutOutline = inputGridSize - Vector2.one * DevPinStateDisplayOutline;
+			bool isPinHorizontal = devPin.IsHorizontal;
+			Vector2 inputGridSize = isPinHorizontal ?
+				devPin.StateGridSize:
+				new Vector2(devPin.StateGridSize.y, devPin.StateGridSize.x);
 			Vector2 centre = devPin.StateDisplayPosition;
 
-			Vector2 topLeft = new(centre.x - inputGridSizeWithoutOutline.x / 2, centre.y + inputGridSizeWithoutOutline.y / 2);
 			Draw.Quad(centre, inputGridSize, Color.black);
-			int currBitIndex = devPin.BitCount - 1;
 
 			bool mouseOverStateGrid = InputHelper.MouseInsideBounds_World(centre, inputGridSize);
 			bool isInteractable = controller.CanInteractWithPinStateDisplay && devPin.IsInputPin;
@@ -847,11 +848,19 @@ namespace DLS.Graphics
 			// (individual toggles are tested for mouse input below, but this is a catch-all for when mouse is in gap in between)
 			if (mouseOverStateGrid && isInteractable) InteractionState.NotifyUnspecifiedElementUnderMouse();
 
+			int currBitIndex = devPin.BitCount - 1;
+			Vector2 inputGridSizeWithoutOutline = inputGridSize - Vector2.one * DevPinStateDisplayOutline;
+			var cornerOffset = inputGridSizeWithoutOutline / 2;
+			Vector2 topLeft = new(centre.x - cornerOffset.x, centre.y + cornerOffset.y);
+			Vector2 bottomLeft = new(centre.x - cornerOffset.x, centre.y - cornerOffset.y);
+			
 			for (int y = 0; y < stateGridDim.y; y++)
 			{
 				for (int x = 0; x < stateGridDim.x; x++)
 				{
-					Vector2 pos = topLeft + MultiBitPinStateDisplaySquareSize * new Vector2(x + 0.5f, -(y + 0.5f));
+					Vector2 pos = isPinHorizontal ?
+							topLeft + MultiBitPinStateDisplaySquareSize * new Vector2(x + 0.5f, -(y + 0.5f)): 
+							bottomLeft + MultiBitPinStateDisplaySquareSize * new Vector2(y + 0.5f, (x + 0.5f));
 
 					// Highlight on hover, toggle on press
 					bool mouseOverStateToggle = InputHelper.MouseInsideBounds_World(pos, squareDisplaySize);
@@ -1052,7 +1061,8 @@ namespace DLS.Graphics
         static void DrawSingleBitPin(PinInstance pin)
 		{
 			Vector2 pinPos = pin.GetWorldPos();
-			Vector2 pinSelectionBoundsPos = pinPos + pin.ForwardDir * 0.02f;
+			Vector2 dir = pin.parent is DevPinInstance devPin ? devPin.faceDir : pin.FacingDir;
+			Vector2 pinSelectionBoundsPos = pinPos + dir * 0.02f;
 			float pinSelectionBoundsRadius = PinRadius + 0.015f;
 
 			bool mouseOverPin = !InteractionState.MouseIsOverUI && InputHelper.MouseInsidePoint_World(pinSelectionBoundsPos, pinSelectionBoundsRadius);
@@ -1074,7 +1084,7 @@ namespace DLS.Graphics
 			if (!ShouldDrawIndicator(pin, mouseOverPin)) return;
 
 			Draw.Point(pinPos, PinRadius, ActiveTheme.PinDirectionIndicatorColor);
-			Vector2 dir = pin.FacingDir;
+			dir = pin.FacingDir;
 			float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
 
 			bool pinIsSourcePin = pin.IsSourcePin;
@@ -1088,11 +1098,7 @@ namespace DLS.Graphics
         {
             Vector2 pinPos = pin.GetWorldPos();
 
-            Vector2 dir = pin.FacingDir;
-            if (pin.parent is DevPinInstance)
-            {
-	            dir = pin.IsSourcePin ? Vector2.right : Vector2.left;
-            }
+            Vector2 dir = pin.parent is DevPinInstance devPin ? devPin.faceDir : pin.FacingDir;
             bool isHorizontal = dir == Vector2.up || dir == Vector2.down;
             float pinWidth = PinRadius * 2 * 0.95f;
             float pinHeight = SubChipInstance.PinHeightFromBitCount(pin.bitCount);

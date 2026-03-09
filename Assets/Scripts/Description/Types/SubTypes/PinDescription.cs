@@ -14,10 +14,10 @@ namespace DLS.Description
 		public PinValueDisplayMode ValueDisplayMode;
         public int Face; // Which edge of the chip the pin is on: 0 = top, 1 = right, 2 = bottom, 3 = left
         public float LocalOffset; //offset on chip edge for pin location
-		
+        public Vector2 DevPinFacingDirection;
 
         public PinDescription(string name, int id, Vector2 position, PinBitCount bitCount, PinColour colour,
-	        PinValueDisplayMode valueDisplayMode, float offset = 0, int face = 3)
+	        PinValueDisplayMode valueDisplayMode, Vector2 devPinFacingDirection, float offset = 0, int face = 3)
 		{
 			Name = name;
 			ID = id;
@@ -27,7 +27,8 @@ namespace DLS.Description
 			ValueDisplayMode = valueDisplayMode;
             LocalOffset = offset;
 			Face = face;
-        }
+			DevPinFacingDirection = devPinFacingDirection;
+		}
 	}
 
 	public struct PinBitCount
@@ -116,5 +117,13 @@ namespace DLS.Description
 		UnsignedDecimal,
 		SignedDecimal,
 		HEX
+	}
+
+	public enum Orientation : byte
+	{
+		Top,
+		Right,
+		Bottom,
+		Left,
 	}
 }

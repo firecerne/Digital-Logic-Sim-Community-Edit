@@ -82,7 +82,7 @@ namespace DLS.Game
 
 		public static ChipDescription CreateOutPin(PinBitCount pinBitCount)
 		{
-            PinDescription[] inPin = { CreatePinDescription("OUT", 0, pinBitCount, 1) };
+            PinDescription[] inPin = { CreatePinDescription("OUT", 0, pinBitCount, 1, false) };
 
             ChipDescription OutChip = CreateBuiltinChipDescription(ChipType.Out_Pin, Vector2.zero, Color.clear, inPin, null, null,
                 NameDisplayLocation.Hidden, name: ChipTypeHelper.GetDevPinName(false, pinBitCount));
@@ -569,7 +569,7 @@ namespace DLS.Game
 			string name = ChipTypeHelper.GetBusName(bitCount);
 
 			PinDescription[] inputs = { CreatePinDescription(name + " (Hidden)", 0, bitCount) };
-			PinDescription[] outputs = { CreatePinDescription(name, 1, bitCount, 1) };
+			PinDescription[] outputs = { CreatePinDescription(name, 1, bitCount, 1, false) };
 
 			Color col = GetColor(new(0.1f, 0.1f, 0.1f));
 
@@ -636,7 +636,7 @@ namespace DLS.Game
 			};
 		}
 
-		static PinDescription CreatePinDescription(string name, int id, ushort bitCount = 1, int face = 3) =>
+		static PinDescription CreatePinDescription(string name, int id, ushort bitCount = 1, int face = 3, bool faceRight = true) =>
 			new(
 				name,
 				id,
@@ -644,6 +644,7 @@ namespace DLS.Game
 				new(bitCount),
 				PinColour.Red,
 				PinValueDisplayMode.Off,
+				faceRight ? Vector2.right : Vector2.left,
 				face: face
 			);
 
