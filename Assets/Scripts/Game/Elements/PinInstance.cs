@@ -19,8 +19,7 @@ namespace DLS.Game
 		public PinStateValue State; // sim state
 		public PinStateValue PlayerInputState;
 		public PinColour Colour;
-		bool faceRight;
-		public float LocalPosY;
+		public float LocalOffset;
 		public string Name;
 		public int face;
         public readonly int ID;
@@ -36,17 +35,13 @@ namespace DLS.Game
 			Colour = desc.Colour;
 
             IsBusPin = parent is SubChipInstance { IsBus: true };
-			faceRight = isSourcePin;
-			desc.face = faceRight ? 1 : 3; // 1 for right, 3 for left
-			face = faceRight ? 1 : 3;
-            State.SetAllDisconnected();
+			face = desc.Face;
             ID = desc.ID;
-            LocalPosY = desc.LocalOffset;
+            LocalOffset = desc.LocalOffset;
 			State.MakeFromPinBitCount(bitCount);
 			PlayerInputState.MakeFromPinBitCount(bitCount);
 		}
 
-		public Vector2 ForwardDir => faceRight ? Vector2.right : Vector2.left;
         public Vector2 FacingDir => face == 1 ? Vector2.right : face == 3 ? Vector2.left : face == 2 ? Vector2.down : Vector2.up;
 
         public Vector2 GetWorldPos()
@@ -60,7 +55,7 @@ namespace DLS.Game
                         Vector2 chipSize = subChip.Size;
                         Vector2 chipPos = subChip.Position;
 
-                        float halfWidth = chipSize.x / 2f * (faceRight ? 1 : -1);
+                        float halfWidth = chipSize.x / 2f;
                         float halfHeight = chipSize.y / 2f;
                         float inset = DrawSettings.SubChipPinInset;
                         float outlineOffset = DrawSettings.ChipOutlineWidth / 2f;
@@ -72,23 +67,23 @@ namespace DLS.Game
                         switch (face)
                         {
                             case 0: // Top edge (Y fixed)
-                                x = LocalPosY;
+                                x = LocalOffset;
                                 y = halfHeight + outlineOffset - inset;
                                 break;
 
                             case 1: // Right edge (X fixed)
                                 x = halfWidth + outlineOffset - inset;
-                                y = LocalPosY;
+                                y = LocalOffset;
                                 break;
 
                             case 2: // Bottom edge (Y fixed)
-                                x = LocalPosY;
+                                x = LocalOffset;
                                 y = -halfHeight - outlineOffset + inset;
                                 break;
 
                             case 3: // Left edge (X fixed)
-                                x = halfWidth - outlineOffset + inset;
-                                y = LocalPosY;
+                                x = -halfWidth - outlineOffset + inset;
+                                y = LocalOffset;
                                 break;
 
                             default:
@@ -104,7 +99,7 @@ namespace DLS.Game
 
         public void SetBusFlip(bool flipped)
 		{
-			faceRight = IsSourcePin ^ flipped;
+			face = IsSourcePin ^ flipped ? 1 : 3;
 		}
 
 		public Color GetColLow() => DrawSettings.ActiveTheme.StateLowCol[(int)Colour];

@@ -137,7 +137,8 @@ namespace DLS.Graphics
 					MakeCol255(153, 102, 51), // Depth 1
 					MakeCol255(255, 0, 0), // Depth 2
 					MakeCol255(255, 153, 0) // Depth 3
-                }
+                },
+				PinDirectionIndicatorColor = MakeCol255(34),
 			};
 		}
 
@@ -269,6 +270,7 @@ namespace DLS.Graphics
 			public Color[] FlatColors;
 			public Color[] FlatColorsHover;
 			public Color[] PinSizeIndicatorColors;
+			public Color PinDirectionIndicatorColor;
 		}
 
 		public class UIThemeDLS

@@ -48,10 +48,6 @@ namespace DLS.Game
 
 			InputPins = CreatePinInstances(description.InputPins, true);
 			OutputPins = CreatePinInstances(description.OutputPins, false);
-			if (HasCustomLayout)
-			{
-				LoadCustomLayout(description);
-			}
 			AllPins = InputPins.Concat(OutputPins).ToArray();
 			LoadOutputPinColours(subChipDesc.OutputPinColourInfo);
 
@@ -73,7 +69,7 @@ namespace DLS.Game
 					SetKeyChipActivationChar(InternalData[0]);
 				}
 
-				if (IsBus && InternalData.Length > 1)
+				else if (IsBus && InternalData.Length > 1)
 				{
 					foreach (PinInstance pin in AllPins)
 					{
@@ -95,8 +91,6 @@ namespace DLS.Game
 				}
 				if (!HasCustomLayout)
 				{
-					// If no custom layout, then calculate the default layout
-
 					CalculatePinLayout(pins);
 				}
 				return pins;
@@ -157,10 +151,9 @@ namespace DLS.Game
 			}
 			else
 			{
-                PinInstance[] combinedPins = InputPins.Concat(OutputPins).ToArray();
-                CustomLayout(combinedPins);
-
-            }
+				PinInstance[] combinedPins = InputPins.Concat(OutputPins).ToArray();
+				CustomLayout(combinedPins);
+			}
         }
 
         void CalculatePinLayout(PinInstance[] pins)
@@ -168,7 +161,7 @@ namespace DLS.Game
 			// If only one pin, it should be placed in the centre
 			if (pins.Length == 1)
 			{
-				pins[0].LocalPosY = 0;
+				pins[0].LocalOffset = 0;
 				return;
 			}
 
@@ -183,9 +176,8 @@ namespace DLS.Game
 				PinInstance pin = pins[i];
 
 				float pinGridY = info.pinGridY[i];
-				pin.LocalPosY = startY + pinGridY * DrawSettings.GridSize;
+				pin.LocalOffset = startY + pinGridY * DrawSettings.GridSize;
 			}
-
 
 			// ---- Second pass: evenly distribute the remaining space between the pins ----
 			float spaceRemaining = Size.y - info.chipHeight;
@@ -195,7 +187,7 @@ namespace DLS.Game
 				float spacingBetweenPins = spaceRemaining / (pins.Length - 1);
 				for (int i = 1; i < pins.Length; i++)
 				{
-					pins[i].LocalPosY -= spacingBetweenPins * i;
+					pins[i].LocalOffset -= spacingBetweenPins * i;
 				}
 			}
 		}
@@ -219,45 +211,46 @@ namespace DLS.Game
                 float GetMaxBound(PinInstance pin) => chipSpan / 2f - GetHalfHeight(pin);
 
                 void Clamp(PinInstance pin)
-                    => pin.LocalPosY = Mathf.Clamp(pin.LocalPosY, GetMinBound(pin), GetMaxBound(pin));
+                    => pin.LocalOffset = Mathf.Clamp(pin.LocalOffset, GetMinBound(pin), GetMaxBound(pin));
 
                 foreach (var pin in facePins)
                     Clamp(pin);
 
                 // Sweeps negative to positive (left to right / bottom to top)
-                var sweepLowToHigh = facePins.OrderBy(p => p.LocalPosY).ToList();
+                var sweepLowToHigh = facePins.OrderBy(p => p.LocalOffset).ToList();
                 for (int i = 1; i < sweepLowToHigh.Count; i++)
                 {
                     var prev = sweepLowToHigh[i - 1];
                     var curr = sweepLowToHigh[i];
 
                     float spacing = GetRequiredSpacing(prev, curr);
-                    float delta = curr.LocalPosY - prev.LocalPosY;
+                    float delta = curr.LocalOffset - prev.LocalOffset;
 
                     if (delta < spacing)
                     {
-                        curr.LocalPosY = prev.LocalPosY + spacing;
+                        curr.LocalOffset = prev.LocalOffset + spacing;
                         Clamp(curr);
                     }
                 }
                 // now sweep positive to negative (right to left / top to bottom) to ensure both ends are within chip
-                var sweepHighToLow = facePins.OrderByDescending(p => p.LocalPosY).ToList();
+                var sweepHighToLow = facePins.OrderByDescending(p => p.LocalOffset).ToList();
                 for (int i = 1; i < sweepHighToLow.Count; i++)
                 {
                     var prev = sweepHighToLow[i - 1];
                     var curr = sweepHighToLow[i];
 
                     float spacing = GetRequiredSpacing(prev, curr);
-                    float delta = prev.LocalPosY - curr.LocalPosY;
+                    float delta = prev.LocalOffset - curr.LocalOffset;
 
                     if (delta < spacing)
                     {
-                        curr.LocalPosY = prev.LocalPosY - spacing;
+                        curr.LocalOffset = prev.LocalOffset - spacing;
                         Clamp(curr);
                     }
                 }
             }
         }
+
         public void SetCustomLayout(bool SetCustom) => HasCustomLayout = SetCustom;
 
 		// Min chip height based on input and output pins
@@ -572,25 +565,5 @@ namespace DLS.Game
 				}
 			}
 		}
-		void LoadCustomLayout(ChipDescription chipDesc)
-		{
-            void ApplyLayout(PinInstance pin, PinDescription[] descriptions)
-            {
-                var desc = Array.Find(descriptions, d => d.ID == pin.ID);
-                if (desc.ID != 0) // found a matching description
-                {
-                    pin.face = desc.face;
-
-                    pin.LocalPosY = desc.LocalOffset;
-                
-                }
-            }
-
-            foreach (var pin in InputPins)
-                ApplyLayout(pin, chipDesc.InputPins);
-
-            foreach (var pin in OutputPins)
-                ApplyLayout(pin, chipDesc.OutputPins);
-        }
     }
 }

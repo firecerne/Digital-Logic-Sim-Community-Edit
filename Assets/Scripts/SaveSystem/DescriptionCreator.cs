@@ -18,61 +18,10 @@ namespace DLS.SaveSystem
 			Vector2 size = hasSavedDesc ? descOld.Size : Vector2.zero;
 			string name = hasSavedDesc ? descOld.Name : string.Empty;
 
+            PinDescription[] inputPins = OrderPins(chip.GetInputPins()).Select(CreatePinDescription).ToArray();
+            PinDescription[] outputPins = OrderPins(chip.GetOutputPins()).Select(CreatePinDescription).ToArray();
 
-            // Create pin and subchip descriptions
-
-            PinDescription[] inputPins = new PinDescription[chip.GetInputPins().Length];
-            PinDescription[] outputPins = new PinDescription[chip.GetOutputPins().Count()];
-
-			// Restores custom layout customization position of pins. Useful on modification detection when exiting a chip.
-            if (hasSavedDesc)
-			{
-                if (chip.GetInputPins().Length != descOld.InputPins.Length || chip.GetOutputPins().Count() != descOld.OutputPins.Length)
-				{
-                    inputPins = OrderPins(chip.GetInputPins()).Select(CreatePinDescription).ToArray();
-                    outputPins = OrderPins(chip.GetOutputPins()).Select(CreatePinDescription).ToArray();
-                }
-
-				else
-				{
-					DevPinInstance[] inpins = OrderPins(chip.GetInputPins()).ToArray();
-                    DevPinInstance[] outpins = OrderPins(chip.GetOutputPins()).ToArray();
-
-					int[] inputOldIDs = descOld.InputPins.Select(input => input.ID).ToArray();
-                    int[] outputOldIDs = descOld.OutputPins.Select(output => output.ID).ToArray();
-
-                    for (int i = 0; i < inpins.Length; i++)
-					{
-						if (inputOldIDs.Contains(inpins[i].ID))
-						{
-                            inputPins[i] = CreatePinDescriptionAndConserveCustomInfo(inpins[i], descOld.InputPins.Where(p => p.ID.Equals(inpins[i].ID)).First());
-						}
-						else
-						{
-                            inputPins[i] = CreatePinDescription(inpins[i]);
-						}
-					}
-
-                    for (int i = 0; i < outpins.Length; i++)
-                    {
-                        if (outputOldIDs.Contains(outpins[i].ID))
-                        {
-                            outputPins[i] = CreatePinDescriptionAndConserveCustomInfo(outpins[i], descOld.OutputPins.Where(p => p.ID.Equals(outpins[i].ID)).First());
-                        }
-                        else
-                        {
-                            outputPins[i] = CreatePinDescription(outpins[i]);
-                        }
-                    }
-                }
-
-            }
-			else
-			{
-				inputPins = OrderPins(chip.GetInputPins()).Select(CreatePinDescription).ToArray();
-				outputPins = OrderPins(chip.GetOutputPins()).Select(CreatePinDescription).ToArray();
-			}
-			SubChipDescription[] subchips = chip.GetSubchips().Select(CreateSubChipDescription).ToArray();
+			SubChipDescription[] subChips = chip.GetSubchips().Select(CreateSubChipDescription).ToArray();
 			Vector2 minChipsSize = SubChipInstance.CalculateMinChipSize(inputPins, outputPins, name);
 			size = Vector2.Max(minChipsSize, size);
 
@@ -82,13 +31,14 @@ namespace DLS.SaveSystem
 			return new ChipDescription
 			{
 				DLSVersion = Main.DLSVersion.ToString(),
+				LastSavedModdedVersion = Main.DLSVersion_ModdedID.ToString(),
 				Name = name,
 				NameLocation = hasSavedDesc ? descOld.NameLocation : NameDisplayLocation.Centre,
 				Size = size,
 				Colour = hasSavedDesc ? descOld.Colour : RandomInitialChipColour(),
 				ShouldBeCached = hasSavedDesc ? descOld.ShouldBeCached : false,
 
-				SubChips = subchips,
+				SubChips = subChips,
 				InputPins = inputPins,
 				OutputPins = outputPins,
 				Wires = chip.Wires.Select(CreateWireDescription).ToArray(),
@@ -102,7 +52,6 @@ namespace DLS.SaveSystem
 		{
 			return pins.OrderByDescending(p => p.Position.y).ThenBy(p => p.Position.x);
 		}
-
 
 		public static SubChipDescription CreateSubChipDescription(SubChipInstance subChip)
 		{
@@ -164,7 +113,7 @@ namespace DLS.SaveSystem
 			for (int i = 0; i < wirePoints.Length; i++)
 			{
 				// Don't need to save start/end points (just leave as zero) since they get their positions from the pins they're connected to (unless starting/ending at another wire).
-				// Benefit of leaving zero is that if a subchip is opened and modified (for example a pin is added, so pin spacing changes), then when opening this chip again, it won't
+				// Benefit of leaving zero is that if a subChip is opened and modified (for example a pin is added, so pin spacing changes), then when opening this chip again, it won't
 				// immediately think it has unsaved changes (and unnecessarily notify the player), just because the start/end points of wires going to those modified pins has changed.
 				if (i == 0 && !wire.SourceConnectionInfo.IsConnectedAtWire) continue;
 				if (i == wirePoints.Length - 1 && !wire.TargetConnectionInfo.IsConnectedAtWire) continue;
@@ -211,21 +160,12 @@ namespace DLS.SaveSystem
 				devPin.ID,
 				devPin.Position,
 				devPin.Pin.bitCount,
-				// Don't save colour info for output pin since it changes based on received input, so would just trigger unecessary 'unsaved changes' warnings
-				devPin.IsInputPin ? devPin.Pin.Colour : default,
-				devPin.pinValueDisplayMode
-			);
-
-		static PinDescription CreatePinDescriptionAndConserveCustomInfo(DevPinInstance devPin, PinDescription pinDescription) =>
-			new(
-				devPin.Pin.Name,
-				devPin.ID,
-				devPin.Position,
-				devPin.Pin.bitCount,
+				// Don't save colour info for output pin since it changes based on received input, so would just trigger unnecessary 'unsaved changes' warnings
 				devPin.IsInputPin ? devPin.Pin.Colour : default,
 				devPin.pinValueDisplayMode,
-				pinDescription.LocalOffset,
-				pinDescription.face
+				devPin.faceDir,
+				devPin.Pin.LocalOffset,
+				devPin.Pin.face
 			);
 
 		static Color RandomInitialChipColour()

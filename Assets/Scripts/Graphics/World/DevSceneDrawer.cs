@@ -195,11 +195,12 @@ namespace DLS.Graphics
 			string text = pin.Name;
 			if (string.IsNullOrWhiteSpace(text)) return;
 
-			Vector2 offset = (PinRadius + 0.05f) * pin.FacingDir;
+			var facingDir = pin.parent is DevPinInstance devPin ? devPin.faceDir : pin.FacingDir;
+			Vector2 offset = (PinRadius + 0.05f) * facingDir;
 			FontType font = FontBold;
 
 			Vector2 size = Draw.CalculateTextBoundsSize(text, FontSizePinLabel, font) + LabelBackgroundPadding;
-			Vector2 centre = pin.GetWorldPos() + pin.FacingDir * size/2 + offset;
+			Vector2 centre = pin.GetWorldPos() + facingDir * size/2 + offset;
 
 			Draw.Quad(centre, size, ActiveTheme.PinLabelCol);
 			Draw.Text(font, text, FontSizePinLabel, centre, Anchor.TextFirstLineCentre, Color.white);
@@ -543,7 +544,6 @@ namespace DLS.Graphics
 					{
 						int address = y * 16 + x;
 						uint pixelState = simSource.InternalState[address];
-						float v = pixelState;
 						col = new Color(pixelState, pixelState, pixelState);
 					}
 
@@ -636,9 +636,9 @@ namespace DLS.Graphics
 			}
 
 			if (inBounds)
-				{
-					InteractionState.NotifyElementUnderMouse(display);
-				}
+			{
+				InteractionState.NotifyElementUnderMouse(display);
+			}
 
 			rootChip.IsSelected = clicked ? false : rootChip.IsSelected;
 
@@ -694,7 +694,7 @@ namespace DLS.Graphics
 				}
 			}
 
-			if (simSource != null) simSource.OutputPins[3].State.SmallSet(addr == null ? 0 : addr.Value);
+			simSource?.OutputPins[3].State.SmallSet(addr ?? 0);
 
 			return (bounds, inBounds, pressed);
 
@@ -740,7 +740,6 @@ namespace DLS.Graphics
             bool inBounds = false;
             bool gettingClicked = false;
 
-            int currentSwitchHeadPos = 1;
             int nextSwitchHeadPos = 1;
 
 
@@ -756,9 +755,9 @@ namespace DLS.Graphics
 
             if (chipSource != null)
             {
-				bool currentState = (chipSource.InternalState[0] & 1) == 1 ? true : false;
-				currentSwitchHeadPos = currentState ? -1 : 1;
-                Bounds2D bounds = Bounds2D.CreateFromCentreAndSize(centre + Vector2.up * verticalOffset * currentSwitchHeadPos, switchDrawSize);
+				bool currentState = (chipSource.InternalState[0] & 1) == 1;
+				int currentSwitchHeadPos = currentState ? -1 : 1;
+                Bounds2D bounds = Bounds2D.CreateFromCentreAndSize(centre + verticalOffset * currentSwitchHeadPos * Vector2.up, switchDrawSize);
                 inBounds = bounds.PointInBounds(InputHelper.MousePosWorld);
                 gettingClicked = inBounds && InputHelper.IsMouseDownThisFrame(MouseButton.Left) && controller.CanInteractWithButton;
 				bool nextState = gettingClicked ? !currentState : currentState;
@@ -785,7 +784,7 @@ namespace DLS.Graphics
 
         public static void DrawDevPin(DevPinInstance devPin)
 		{
-			if (devPin.BitCount == (uint)1)
+			if (devPin.BitCount == 1)
 			{
 				Draw1BitDevPin(devPin);
 			}
@@ -820,7 +819,7 @@ namespace DLS.Graphics
 			Draw.Point(devPin.StateDisplayPosition, DevPinStateDisplayRadius, stateCol);
 
 			// Draw pin and handle
-			DrawPin(devPin.Pin);
+			DrawSingleBitPin(devPin.Pin);
 			DrawPinHandle(devPin, devPin.HandlePosition, devPin.GetHandleSize());
 		}
 
@@ -834,13 +833,13 @@ namespace DLS.Graphics
 
 			const float squareDisplayScaleT = 0.9f;
 			Vector2 squareDisplaySize = Vector2.one * (MultiBitPinStateDisplaySquareSize * squareDisplayScaleT);
-			Vector2 inputGridSize = devPin.StateGridSize;
-			Vector2 inputGridSizeWithoutOutline = inputGridSize - Vector2.one * DevPinStateDisplayOutline;
+			bool isPinHorizontal = devPin.IsHorizontal;
+			Vector2 inputGridSize = isPinHorizontal ?
+				devPin.StateGridSize:
+				new Vector2(devPin.StateGridSize.y, devPin.StateGridSize.x);
 			Vector2 centre = devPin.StateDisplayPosition;
 
-			Vector2 topLeft = new(centre.x - inputGridSizeWithoutOutline.x / 2, centre.y + inputGridSizeWithoutOutline.y / 2);
 			Draw.Quad(centre, inputGridSize, Color.black);
-			int currBitIndex = devPin.BitCount - 1;
 
 			bool mouseOverStateGrid = InputHelper.MouseInsideBounds_World(centre, inputGridSize);
 			bool isInteractable = controller.CanInteractWithPinStateDisplay && devPin.IsInputPin;
@@ -849,11 +848,19 @@ namespace DLS.Graphics
 			// (individual toggles are tested for mouse input below, but this is a catch-all for when mouse is in gap in between)
 			if (mouseOverStateGrid && isInteractable) InteractionState.NotifyUnspecifiedElementUnderMouse();
 
+			int currBitIndex = devPin.BitCount - 1;
+			Vector2 inputGridSizeWithoutOutline = inputGridSize - Vector2.one * DevPinStateDisplayOutline;
+			var cornerOffset = inputGridSizeWithoutOutline / 2;
+			Vector2 topLeft = new(centre.x - cornerOffset.x, centre.y + cornerOffset.y);
+			Vector2 bottomLeft = new(centre.x - cornerOffset.x, centre.y - cornerOffset.y);
+			
 			for (int y = 0; y < stateGridDim.y; y++)
 			{
 				for (int x = 0; x < stateGridDim.x; x++)
 				{
-					Vector2 pos = topLeft + MultiBitPinStateDisplaySquareSize * new Vector2(x + 0.5f, -(y + 0.5f));
+					Vector2 pos = isPinHorizontal ?
+							topLeft + MultiBitPinStateDisplaySquareSize * new Vector2(x + 0.5f, -(y + 0.5f)): 
+							bottomLeft + MultiBitPinStateDisplaySquareSize * new Vector2(y + 0.5f, (x + 0.5f));
 
 					// Highlight on hover, toggle on press
 					bool mouseOverStateToggle = InputHelper.MouseInsideBounds_World(pos, squareDisplaySize);
@@ -876,7 +883,7 @@ namespace DLS.Graphics
 			}
 
 			// Draw pin and handle
-			DrawPin(devPin.Pin);
+			DrawMultiBitPin(devPin.Pin);
 			DrawPinHandle(devPin, devPin.HandlePosition, devPin.GetHandleSize());
 		}
 
@@ -1049,33 +1056,13 @@ namespace DLS.Graphics
 			{
 				DrawMultiBitPin(pin);
 			}
-
-            //makes pins red if too close
-            if (CustomizationSceneDrawer.isDraggingPin && CustomizationSceneDrawer.selectedPin == pin && !CustomizationSceneDrawer.isPinPositionValid)
-            {
-                Vector2 pinPos = pin.GetWorldPos();
-                if (pin.bitCount == PinBitCount.Bit1)
-                {
-                    Draw.Quad(pinPos, Vector2.one * PinRadius * 2.4f, Color.red);
-                }
-                else
-                {
-                    float pinWidth = PinRadius * 2 * 0.95f;
-                    float pinHeight = SubChipInstance.PinHeightFromBitCount(pin.bitCount);
-
-                    Vector2 pinSize = pin.face == 0 || pin.face == 2
-                        ? new Vector2(pinHeight, pinWidth)  // horizontal pin
-                        : new Vector2(pinWidth, pinHeight); // vertical pin
-
-                    Draw.Quad(pinPos, pinSize * 1.2f, Color.red);
-                }
-            }
         }
 
         static void DrawSingleBitPin(PinInstance pin)
 		{
 			Vector2 pinPos = pin.GetWorldPos();
-			Vector2 pinSelectionBoundsPos = pinPos + pin.ForwardDir * 0.02f;
+			Vector2 dir = pin.parent is DevPinInstance devPin ? devPin.faceDir : pin.FacingDir;
+			Vector2 pinSelectionBoundsPos = pinPos + dir * 0.02f;
 			float pinSelectionBoundsRadius = PinRadius + 0.015f;
 
 			bool mouseOverPin = !InteractionState.MouseIsOverUI && InputHelper.MouseInsidePoint_World(pinSelectionBoundsPos, pinSelectionBoundsRadius);
@@ -1093,111 +1080,32 @@ namespace DLS.Graphics
 			Draw.Point(pinPos, PinRadius, pinCol);
 
 			// ---- input/output arrow ----
+			// Draw input/output indicators on subChip pins only
+			if (!ShouldDrawIndicator(pin, mouseOverPin)) return;
 
-			Vector2 dir = pin.face switch
-			{
-				0 => Vector2.down,
-				1 => Vector2.left,
-				2 => Vector2.up,
-				3 => Vector2.right,
-				_ => Vector2.zero,
-			};
-			if (pin.IsSourcePin)
-			{
-				dir = -dir;
+			Draw.Point(pinPos, PinRadius, ActiveTheme.PinDirectionIndicatorColor);
+			dir = pin.FacingDir;
+			float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
 
-			}
-			float pinThickness = PinRadius * 2f;
-			float arrowLength = pinThickness * 0.35f;
-			float arrowWidth = arrowLength * 1.2f;
-			Vector2 perp = new Vector2(-dir.y, dir.x);
-			float edgeOffset = pinThickness / 4f;
-			Vector2 centerOffset = dir * edgeOffset * (pin.IsSourcePin ? 1 : -1);
-			Vector2 arrowCenter = pinPos + centerOffset;
-			Vector2 tip = arrowCenter + dir * (arrowLength / 2f);
-			Vector2 baseCenter = arrowCenter - dir * (arrowLength / 2f);
-			Vector2 baseLeft = baseCenter + perp * (arrowWidth / 2f);
-			Vector2 baseRight = baseCenter - perp * (arrowWidth / 2f);
+			bool pinIsSourcePin = pin.IsSourcePin;
+			var wedgeSpan = pinIsSourcePin ? 75f : 50f; //edits angle of input/output
+			float angleStart = angle - wedgeSpan;
+			float angleEnd = angle + wedgeSpan;
+			Draw.WedgePolygon(pinPos, PinRadius, angleStart, angleEnd, ActiveTheme.PinCol, pin.face, pinIsSourcePin);
+		}
 
-			// Draws input/output indicators on subchip pins only
-			bool isInputToCustomChip = pin.parent is SubChipInstance;
-			if (isInputToCustomChip)
-			{
-                // Check if pin is connect to any wire for the Is Disconnected setting
-                
-                List<WireInstance> wireList = Project.ActiveProject.controller.ActiveDevChip.Wires;
-                bool isConnected = false;
-                for (int i = wireList.Count - 1; i >= 0; i--)
-                {
-                    WireInstance wire = wireList[i];
-                    if (PinAddress.Equals(wire.SourcePin.Address, pin.Address) || PinAddress.Equals(wire.TargetPin.Address, pin.Address))
-                    {
-                        isConnected = true;
-                        break;
-                    }
-
-                }
-                //set up display mode based on settings
-                int pinIndicatorMode = Project.ActiveProject.description.Perfs_PinIndicators;
-                bool drawIndicator = false;
-                switch (pinIndicatorMode)
-                {
-                    case 1: // "On Hover"
-                        drawIndicator = mouseOverPin;
-                        break;
-                    case 2: // "Tab To Toggle"
-                        drawIndicator = Project.ActiveProject.PinNameDisplayIsTabToggledOn;
-                        break;
-                    case 3: // "If Pin is not connected"
-                        drawIndicator = !isConnected;
-                        break;
-                    case 4: // "Always"
-                        drawIndicator = true;
-                        break;
-
-                }
-                if (drawIndicator)
-
-                {
-						Draw.Point(pinPos, PinRadius, new Color(34f / 255f, 34f / 255f, 34f / 255f, 1f));
-						float angle = 0;
-						float wedgeSpan = 0f;
-
-						if (!pin.IsSourcePin)
-						{
-							wedgeSpan = 100f; //edit angle of input
-							angle = Mathf.Atan2(-dir.y, -dir.x) * Mathf.Rad2Deg;
-						}
-						else
-						{
-							wedgeSpan = 150f; //edits angle of output
-							angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-						}
-						float angleStart = angle - wedgeSpan / 2f;
-						float angleEnd = angle + wedgeSpan / 2f;
-						Draw.WedgePolygon(pinPos, PinRadius, angleStart, angleEnd, ActiveTheme.PinCol, pin.face, pin.IsSourcePin);
-					}
-				}
-			}
 		static void DrawMultiBitPin(PinInstance pin)
         {
             Vector2 pinPos = pin.GetWorldPos();
 
-            bool isHorizontal = pin.face == 0 || pin.face == 2;
+            Vector2 dir = pin.parent is DevPinInstance devPin ? devPin.faceDir : pin.FacingDir;
+            bool isHorizontal = dir == Vector2.up || dir == Vector2.down;
             float pinWidth = PinRadius * 2 * 0.95f;
             float pinHeight = SubChipInstance.PinHeightFromBitCount(pin.bitCount);
             Vector2 pinSize = isHorizontal ? new Vector2(pinHeight, pinWidth) : new Vector2(pinWidth, pinHeight);
 
             // Determine direction for selection offset (used for mouse interaction)
-            Vector2 offsetDir = Vector2.zero;
-            switch (pin.face)
-            {
-                case 1: offsetDir = Vector2.left; break;  // right face
-                case 3: offsetDir = Vector2.right; break; // left face
-            }
-
-
-            Vector2 pinSelectionBoundsPos = pinPos + offsetDir * 0.02f;
+            Vector2 pinSelectionBoundsPos = pinPos + -dir * 0.02f;
             bool mouseOverPin = !InteractionState.MouseIsOverUI &&
                                 InputHelper.MouseInsideBounds_World(pinSelectionBoundsPos, pinSize);
             if (mouseOverPin)
@@ -1215,83 +1123,80 @@ namespace DLS.Graphics
             Draw.Quad(pinPos, pinSize, pinCol);
 
 
-			// Draw pin indicator
+			// Draw pin size indicator
 			if (pin.bitCount >= 64 && !mouseOverPin)
 			{
 				Vector2 depthIndicatorSize = isHorizontal ? new(pinHeight, pinWidth / 8f) : new(pinWidth / 8f, pinHeight);
-				Draw.Quad(pinPos + pin.FacingDir * 0.25f * pinWidth, depthIndicatorSize, ActiveTheme.PinSizeIndicatorColors[pin.bitCount.GetTier()]);
+				Draw.Quad(pinPos + 0.25f * pinWidth * dir, depthIndicatorSize, ActiveTheme.PinSizeIndicatorColors[pin.bitCount.GetTier()]);
 			}
 
-            // Draws input/output indicators on subchip pins only
-            bool isOnCustomChip = pin.parent is SubChipInstance;
-			if (isOnCustomChip)
-			{
-                // Check if pin is connect to any wire 
-                List<WireInstance> wireList = Project.ActiveProject.controller.ActiveDevChip.Wires;
-                bool isConnected = false;
-                for (int i = wireList.Count - 1; i >= 0; i--)
-				{
-					WireInstance wire = wireList[i];
-                    if (PinAddress.Equals(wire.SourcePin.Address, pin.Address) || PinAddress.Equals(wire.TargetPin.Address, pin.Address))
-					{
-						isConnected = true;
-						break;
-                    }
-					
-				}
-                //set up display mode based on settings
-                int pinIndicatorMode = Project.ActiveProject.description.Perfs_PinIndicators;
-                bool drawIndicator = false;
-                switch (pinIndicatorMode)
-                {
-                    case 1: // "On Hover"
-                        drawIndicator = mouseOverPin;
-                        break;
-                    case 2: // "Tab To Toggle"
-                        drawIndicator = Project.ActiveProject.PinNameDisplayIsTabToggledOn;
-                        break;
-                    case 3: // "If Pin is not connected"
-                        drawIndicator = !isConnected;
-                        break;
-                    case 4: // "Always"
-                        drawIndicator = true;
-                        break;   
-                }
-                if (drawIndicator)
-				{
-                    Vector2 dir;
-                    switch (pin.face)
-                    {
-                        case 0: dir = Vector2.down; break;
-                        case 1: dir = Vector2.left; break;
-                        case 2: dir = Vector2.up; break;
-                        case 3: dir = Vector2.right; break;
-                        default: dir = Vector2.zero; break;
-                    }
-                    if (pin.IsSourcePin) { dir = -dir; }
-                    float pinThickness = isHorizontal ? pinSize.y : pinSize.x;
-                    float arrowLength = pinThickness / 2f;
-                    float arrowWidth = arrowLength * 2f;
-                    Vector2 perp = new Vector2(-dir.y, dir.x);
+            // Draw input/output direction indicators on subChip pins only
+            if (!ShouldDrawIndicator(pin, mouseOverPin)) return;
 
+            float pinThickness = isHorizontal ? pinSize.y : pinSize.x;
+            float arrowLength = pinThickness / 2f;
+            float edgeOffset = pinThickness / 4f;
 
-                    float edgeOffset = pinThickness / 4f;
+            dir = -dir;
+            if (pin.IsSourcePin) { dir = -dir; }
 
-                    //Shifts arrow based on if input/output to ensure its not hidden behind subchip
-                    Vector2 centerOffset = dir * edgeOffset * (pin.IsSourcePin ? 1 : -1);
-                    Vector2 arrowCenter = pinPos + centerOffset;
+            Vector2 perp = new Vector2(-dir.y, dir.x);
+            //Shifts arrow based on if input/output to ensure its not hidden behind subchip
+            Vector2 centerOffset = edgeOffset * (pin.IsSourcePin ? 1 : -1) * dir;
+            Vector2 arrowCenter = pinPos + centerOffset;
 
-                    Vector2 tip = arrowCenter + dir * (arrowLength / 2f);
-                    Vector2 baseCenter = arrowCenter - dir * (arrowLength / 2f);
-                    Vector2 baseLeft = baseCenter + perp * (arrowWidth / 2f);
-                    Vector2 baseRight = baseCenter - perp * (arrowWidth / 2f);
-                    Draw.Triangle(tip, baseLeft, baseRight, new Color(34f / 255f, 34f / 255f, 34f / 255f, 1f));
-                }
-			}
-
-
+            Vector2 tip = arrowCenter + dir * edgeOffset;
+            Vector2 baseCenter = arrowCenter - dir * edgeOffset;
+            Vector2 baseLeft = baseCenter + perp * arrowLength;
+            Vector2 baseRight = baseCenter - perp * arrowLength;
+            Draw.Triangle(tip, baseLeft, baseRight, ActiveTheme.PinDirectionIndicatorColor);
         }
-        public static void DrawGrid(Color gridCol)
+		
+		/// Check if pin is connect to any wire for the Is Disconnected setting
+		static bool IsConnected(PinInstance pin)
+		{
+			List<WireInstance> wireList = controller.ActiveDevChip.Wires;
+			bool isConnected = false;
+			for (int i = wireList.Count - 1; i >= 0; i--)
+			{
+				WireInstance wire = wireList[i];
+				if (PinAddress.Equals(wire.SourcePin.Address, pin.Address) || PinAddress.Equals(wire.TargetPin.Address, pin.Address))
+				{
+					isConnected = true;
+					break;
+				}
+			}
+
+			return isConnected;
+		}
+
+		/// <summary>
+		/// Should an indicator of the input/ output direction of the given pin be drawn?
+		/// </summary>
+		/// <returns>False if pin is <see cref="DevPinInstance"/>, or the indicator mode doesn't match</returns>
+		/// <exception cref="NotImplementedException"></exception>
+		static bool ShouldDrawIndicator(PinInstance pin, bool mouseOverPin)
+		{
+			if (pin.parent is not SubChipInstance) return false;
+			
+			int pinIndicatorMode = Project.ActiveProject.description.Perfs_PinIndicators;
+			return pinIndicatorMode switch
+			{
+				0 => // "Never"
+					false,
+				1 => // "On Hover"
+					mouseOverPin,
+				2 => // "Tab To Toggle"
+					Project.ActiveProject.PinNameDisplayIsTabToggledOn,
+				3 => // "If Pin is not connected"
+					!IsConnected(pin),
+				4 => // "Always"
+					true,
+				_ => throw new NotImplementedException($"Pin indicator mode {pinIndicatorMode} is not implemented.")
+			};
+		}
+
+		public static void DrawGrid(Color gridCol)
 		{
 			float thickness = GridThickness;
 
