@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Linq;
 using DLS.Description;
 using DLS.Game;
@@ -8,11 +7,12 @@ namespace DLS.SaveSystem
 {
 	public static class UpgradeHelper
 	{
-
 		public static void ApplyVersionChanges(ChipDescription[] customChips, ChipDescription[] builtinChips)
 		{
 			Main.Version defaultVersion = new(2, 0, 0);
+			Main.Version defaultModdedVersion = new(1, 0, 0);
 			Main.Version version_2_1_4 = new(2, 1, 4);
+			Main.Version moddedVersion_1_3_0 = new(1, 3, 0); // Pin rotation
 
 			foreach (ChipDescription chipDesc in customChips)
 			{
@@ -21,10 +21,21 @@ namespace DLS.SaveSystem
 					chipVersion = defaultVersion;
 				}
 
+				if (!Main.Version.TryParse(chipDesc.LastSavedModdedVersion, out Main.Version moddedChipVersion))
+				{
+					moddedChipVersion = defaultModdedVersion;
+				}
+
 				if (chipVersion.ToInt() <= version_2_1_4.ToInt())
 				{
 					UpdateChipPre_2_1_5(chipDesc);
 					chipDesc.DLSVersion = version_2_1_4.ToString();
+				}
+
+				if (moddedChipVersion.ToInt() <= moddedVersion_1_3_0.ToInt())
+				{
+					UpdateChipPreModded_1_3_0(chipDesc);
+					chipDesc.LastSavedModdedVersion = moddedVersion_1_3_0.ToString();
 				}
 			}
 		}
@@ -102,6 +113,47 @@ namespace DLS.SaveSystem
 
 				return (PinColour)colourIndex;
 			}
+		}
+
+		private static void UpdateChipPreModded_1_3_0(ChipDescription chipDesc)
+		{
+			for (int i = 0; i < chipDesc.InputPins.Length; i++)
+			{
+				chipDesc.InputPins[i].DevPinFacingDirection = Vector2.right;
+				if (!chipDesc.HasCustomLayout)
+				{
+					chipDesc.InputPins[i].Face = 3;
+				}
+			}
+			
+			for (int i = 0; i < chipDesc.OutputPins.Length; i++)
+			{
+				chipDesc.OutputPins[i].DevPinFacingDirection = Vector2.left;
+			}
+		}
+
+		public static void ApplyVersionChangesToShortcuts(ref ShortcutSettings shortcutSettings)
+		{
+			Main.Version defaultModdedVersion = new(1, 2, 1);
+			Main.Version moddedVersion_1_3_0 = new(1, 3, 0); // Pin rotation
+
+			if (!Main.Version.TryParse(shortcutSettings.LastSavedModdedVersion, out Main.Version moddedVersion))
+			{
+				moddedVersion = defaultModdedVersion;
+			}
+			
+			if (moddedVersion.ToInt() <= moddedVersion_1_3_0.ToInt())
+			{
+				UpdateShortcutSettingsPreModded_1_3_0(ref shortcutSettings);
+				shortcutSettings.LastSavedModdedVersion = moddedVersion_1_3_0.ToString();
+			}
+		}
+
+		private static void UpdateShortcutSettingsPreModded_1_3_0(ref ShortcutSettings shortcutSettings)
+		{
+			var defaults = ShortcutSettings.Default();
+			shortcutSettings.RotateElementClockwiseShortcutTriggered = defaults.RotateElementClockwiseShortcutTriggered;
+			shortcutSettings.RotateElementCounterClockwiseShortcutTriggered = defaults.RotateElementCounterClockwiseShortcutTriggered;
 		}
 	}
 }

@@ -31,6 +31,7 @@ namespace DLS.SaveSystem
 			return new ChipDescription
 			{
 				DLSVersion = Main.DLSVersion.ToString(),
+				LastSavedModdedVersion = Main.DLSVersion_ModdedID.ToString(),
 				Name = name,
 				NameLocation = hasSavedDesc ? descOld.NameLocation : NameDisplayLocation.Centre,
 				Size = size,

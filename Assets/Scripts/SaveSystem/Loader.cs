@@ -27,7 +27,9 @@ namespace DLS.SaveSystem
 			if(File.Exists(SavePaths.ShortcutSettingsPath))
 			{
 				string shortcutsString = File.ReadAllText (SavePaths.ShortcutSettingsPath);
-				return Serializer.DeserializeShortcutSettings(shortcutsString);
+				ShortcutSettings shortcutSettings = Serializer.DeserializeShortcutSettings(shortcutsString);
+				UpgradeHelper.ApplyVersionChangesToShortcuts(ref shortcutSettings);
+				return shortcutSettings;
 			}
 			return ShortcutSettings.Default();
 		}
