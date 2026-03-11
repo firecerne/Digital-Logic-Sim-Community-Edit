@@ -214,7 +214,7 @@ namespace Seb.Helpers
 		{
 			get
 			{
-				if (_worldCam == null) _worldCam = Camera.main;
+				if (!_worldCam) _worldCam = Camera.main;
 				return _worldCam;
 			}
 		}
@@ -261,54 +261,70 @@ namespace Seb.Helpers
 
 		public static bool MouseInBounds_ScreenSpace(Vector2 centre, Vector2 size)
 		{
+#if UNITY_EDITOR
 			if (!Application.isPlaying) return false;
+#endif
 			Vector2 offset = MousePos - centre;
 			return Mathf.Abs(offset.x) < size.x / 2 && Mathf.Abs(offset.y) < size.y / 2;
 		}
 
 		public static bool MouseInBounds_ScreenSpace(Bounds2D bounds)
 		{
+#if UNITY_EDITOR
 			if (!Application.isPlaying) return false;
+#endif
 			return bounds.PointInBounds(MousePos);
 		}
 
 		public static bool MouseInPoint_ScreenSpace(Vector2 centre, float radius)
 		{
+#if UNITY_EDITOR
 			if (!Application.isPlaying) return false;
+#endif
 			Vector2 offset = MousePos - centre;
 			return offset.sqrMagnitude < radius * radius;
 		}
 
 		public static bool MouseInsidePoint_World(Vector2 centre, float radius)
 		{
+#if UNITY_EDITOR
 			if (!Application.isPlaying) return false;
+#endif
 			Vector2 offset = MousePosWorld - centre;
 			return offset.sqrMagnitude < radius * radius;
 		}
 
 		public static bool MouseInsideBounds_World(Vector2 centre, Vector2 size)
 		{
+#if UNITY_EDITOR
 			if (!Application.isPlaying) return false;
+#endif
 			Vector2 offset = MousePosWorld - centre;
 			return Mathf.Abs(offset.x) < size.x / 2 && Mathf.Abs(offset.y) < size.y / 2;
 		}
 
 		public static bool MouseInsideBounds_World(Bounds2D bounds)
 		{
+#if UNITY_EDITOR
 			if (!Application.isPlaying) return false;
+#endif
 			return bounds.PointInBounds(MousePosWorld);
 		}
 
 		public static bool IsMouseHeld(MouseButton button)
 		{
+#if UNITY_EDITOR
 			if (!Application.isPlaying) return false;
+#endif
 			return InputSource.IsMouseHeld(button);
 		}
 
 		// Check if mouse button was pressed this frame. Optionally consume the event, so it will return false for other callers this frame.
 		public static bool IsMouseDownThisFrame(MouseButton button, bool consumeEvent = false)
 		{
+#if UNITY_EDITOR
 			if (!Application.isPlaying) return false;
+#endif
 			if (MouseDownEventIsConsumed(button)) return false;
 
 			if (consumeEvent)
@@ -323,7 +339,9 @@ namespace Seb.Helpers
 		// Check if any mouse button was pressed this frame, even if the event was consumed.
 		public static bool IsAnyMouseButtonDownThisFrame_IgnoreConsumed()
 		{
+#if UNITY_EDITOR
 			if (!Application.isPlaying) return false;
+#endif
 			return InputSource.IsMouseDownThisFrame(MouseButton.Left) || InputSource.IsMouseDownThisFrame(MouseButton.Right) || InputSource.IsMouseDownThisFrame(MouseButton.Middle);
 		}
 
@@ -358,7 +376,9 @@ namespace Seb.Helpers
 
 		public static bool IsMouseUpThisFrame(MouseButton button)
 		{
+#if UNITY_EDITOR
 			if (!Application.isPlaying) return false;
+#endif
 			return InputSource.IsMouseUpThisFrame(button);
 		}
 
