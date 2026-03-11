@@ -1077,12 +1077,14 @@ namespace DLS.Graphics
 				pinCol = ActiveTheme.PinInvalidCol;
 			}
 
-			Draw.Point(pinPos, PinRadius, pinCol);
+			// Draw input/output indicators on subChip pins only
+			if (!ShouldDrawIndicator(pin, mouseOverPin))
+			{
+				Draw.Point(pinPos, PinRadius, pinCol);
+				return;
+			}
 
 			// ---- input/output arrow ----
-			// Draw input/output indicators on subChip pins only
-			if (!ShouldDrawIndicator(pin, mouseOverPin)) return;
-
 			Draw.Point(pinPos, PinRadius, ActiveTheme.PinDirectionIndicatorColor);
 			dir = pin.FacingDir;
 			float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
@@ -1105,7 +1107,7 @@ namespace DLS.Graphics
             Vector2 pinSize = isHorizontal ? new Vector2(pinHeight, pinWidth) : new Vector2(pinWidth, pinHeight);
 
             // Determine direction for selection offset (used for mouse interaction)
-            Vector2 pinSelectionBoundsPos = pinPos + -dir * 0.02f;
+            Vector2 pinSelectionBoundsPos = pinPos -dir * 0.02f;
             bool mouseOverPin = !InteractionState.MouseIsOverUI &&
                                 InputHelper.MouseInsideBounds_World(pinSelectionBoundsPos, pinSize);
             if (mouseOverPin)
@@ -1133,12 +1135,10 @@ namespace DLS.Graphics
             // Draw input/output direction indicators on subChip pins only
             if (!ShouldDrawIndicator(pin, mouseOverPin)) return;
 
-            float pinThickness = isHorizontal ? pinSize.y : pinSize.x;
-            float arrowLength = pinThickness / 2f;
-            float edgeOffset = pinThickness / 4f;
+            float arrowLength = pinWidth / 2f;
+            float edgeOffset = pinWidth / 4f;
 
-            dir = -dir;
-            if (pin.IsSourcePin) { dir = -dir; }
+            if (!pin.IsSourcePin) { dir = -dir; }
 
             Vector2 perp = new Vector2(-dir.y, dir.x);
             //Shifts arrow based on if input/output to ensure its not hidden behind subchip
