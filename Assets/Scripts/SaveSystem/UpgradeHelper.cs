@@ -80,26 +80,34 @@ namespace DLS.SaveSystem
 
 			if (isVersionEarlierThan_1_3_0)
 			{
+				// ---- Added setting to disable starring of new chips when saving ----
 				// Conserve original behavior (i.e. add new chips automatically to list of starred chips.)
 				projectDescription.Prefs_AddNewChipToStarredItems = true;
 				
-				// Add RGB LED's to "DISPLAY" chip collection, if no chip with the same name already exists.
-				List<ChipCollection> chipCollections = projectDescription.ChipCollections;
-				var chipCollectionToAddTo = chipCollections.FirstOrDefault(collection => collection.Name == "DISPLAY") ??
-				                        chipCollections.FirstOrDefault(collection => collection.Name == "OTHER");
-				string name = ChipTypeHelper.GetName(ChipType.DisplayLED_RGB);
-				if (!chipCollections.Any(collection => collection.Chips.Contains(name)))
-				{
-					chipCollectionToAddTo?.Chips.Add(name);
-				}
-				name = ChipTypeHelper.GetName(ChipType.DisplayLED_RGB_8Bit);
-				if (!chipCollections.Any(collection => collection.Chips.Contains(name)))
-				{
-					chipCollectionToAddTo?.Chips.Add(name);
-				}
+				// ---- Added RGB LED's with 1bit and 8bit color ----
+				AddNewBuiltinChipToCollection(ref projectDescription, ChipType.DisplayLED_RGB, "DISPLAY");
+				AddNewBuiltinChipToCollection(ref projectDescription, ChipType.DisplayLED_RGB_8Bit, "DISPLAY");
+				// ---- Added 15 segment displays ----
+				AddNewBuiltinChipToCollection(ref projectDescription, ChipType.FifteenSegmentDisplay, "DISPLAY");
 			}
 			projectDescription.DLSVersion_LastSavedModdedVersion = Main.DLSVersion_ModdedID.ToString();
         }
+
+		/// If no player created chip with the same name already exists, add it to the given chip collection.
+		/// Fall back to "OTHER" if collection was not found.
+		static void AddNewBuiltinChipToCollection(ref ProjectDescription projectDescription, ChipType chipType, string chipCollectionName)
+		{
+			string name = ChipTypeHelper.GetName(chipType);
+			if (projectDescription.AllCustomChipNames.Contains(name))
+			{
+				return;
+			}
+			List<ChipCollection> chipCollections = projectDescription.ChipCollections;
+			var chipCollectionToAddTo = chipCollections.FirstOrDefault(collection => collection.Name == chipCollectionName) ??
+			                            chipCollections.FirstOrDefault(collection => collection.Name == "OTHER");
+
+			chipCollectionToAddTo?.Chips.Add(name);
+		}
 
         static void UpdateChipPre_2_1_5(ChipDescription chipDesc)
 		{
@@ -142,6 +150,7 @@ namespace DLS.SaveSystem
 
 		private static void UpdateChipPreModded_1_3_0(ChipDescription chipDesc)
 		{
+			// ---- Added DevPin Rotation, apply defaults to input/output pins ----
 			for (int i = 0; i < chipDesc.InputPins.Length; i++)
 			{
 				chipDesc.InputPins[i].DevPinFacingDirection = Vector2.right;
