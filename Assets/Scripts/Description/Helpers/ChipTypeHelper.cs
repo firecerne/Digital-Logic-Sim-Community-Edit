@@ -28,8 +28,9 @@ namespace DLS.Description
 			{ ChipType.DisplayDot, "DOT DISPLAY" },
 			{ ChipType.SevenSegmentDisplay, "7-SEGMENT" },
 			{ ChipType.DisplayLED, "LED" },
+			{ ChipType.FifteenSegmentDisplay, "15-SEGMENT" },
 
-			{ ChipType.Buzzer, "BUZZER" },
+            { ChipType.Buzzer, "BUZZER" },
 
 			{ ChipType.SPS, "SPS" },
 			{ ChipType.RTC, "RTC" },

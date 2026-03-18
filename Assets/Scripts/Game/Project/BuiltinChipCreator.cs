@@ -41,7 +41,8 @@ namespace DLS.Game
 
 				// ---- Displays ----
 				CreateDisplay7Seg(),
-				CreateDisplayRGB(),
+				CreateDisplay16Seg(),
+                CreateDisplayRGB(),
 				CreateDisplayRGBTouch(),
 				CreateDisplayDot(),
 				CreateDisplayLED(),
@@ -430,8 +431,33 @@ namespace DLS.Game
 			};
 			return CreateBuiltinChipDescription(ChipType.SevenSegmentDisplay, size, col, inputPins, null, displays, NameDisplayLocation.Hidden, canBeCached: false);
 		}
+        static ChipDescription CreateDisplay15Seg()
+        {
+			PinDescription[] inputPins =
+			{
+				CreatePinDescription("A", 0, PinBitCount.Bit8),
+                CreatePinDescription("B", 1, PinBitCount.Bit8),
+                CreatePinDescription("COL", 2)
+			};
 
-		static ChipDescription CreateDisplayRGB()
+            Color col = GetColor(new(0.1f, 0.1f, 0.1f));
+            float height = 20 * GridSize;
+            Vector2 size = new(GridSize * 13, height);
+            float displayWidth = size.x - GridSize * 2;
+
+            DisplayDescription[] displays =
+            {
+                new()
+                {
+                    Position = Vector2.right * PinRadius / 3 * 0,
+                    Scale = displayWidth,
+                    SubChipID = -1
+                }
+            };
+            return CreateBuiltinChipDescription(ChipType.FifteenSegmentDisplay, size, col, inputPins, null, displays, NameDisplayLocation.Hidden, canBeCached: false);
+        }
+
+        static ChipDescription CreateDisplayRGB()
 		{
 			float height = GridSize * 21;
 			float width = height;
