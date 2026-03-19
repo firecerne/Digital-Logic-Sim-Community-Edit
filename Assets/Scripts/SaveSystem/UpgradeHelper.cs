@@ -70,8 +70,8 @@ namespace DLS.SaveSystem
 			if (isVersionEarlierThan_1_1_1)
 			{
 				projectDescription.DLSVersion_LastSavedModdedVersion = Main.DLSVersion_ModdedID.ToString();
-				projectDescription.pinBitCounts.Union(Project.PinBitCounts);
-				projectDescription.SplitMergePairs.Union(Project.SplitMergePairs);
+				projectDescription.pinBitCounts = projectDescription.pinBitCounts.Union(Project.PinBitCounts).ToList();
+				projectDescription.SplitMergePairs = projectDescription.SplitMergePairs.Union(Project.SplitMergePairs).ToList();
 			}
         }
 
