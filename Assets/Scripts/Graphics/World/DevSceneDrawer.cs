@@ -462,6 +462,20 @@ namespace DLS.Graphics
 
 				bounds = DrawDisplay_LED(posWorld, scaleWorld, col);
 			}
+			else if (display.DisplayType == ChipType.DisplayRGBLED)
+			{
+				bool simActive = sim != null;
+				Color col = Color.black;
+				const float saturation = 0.85f;
+				if (simActive)
+				{
+					col.r = sim.InputPins[0].FirstBitHigh ? saturation : 0;
+					col.g = sim.InputPins[1].FirstBitHigh ? saturation : 0;
+					col.b = sim.InputPins[2].FirstBitHigh ? saturation : 0;
+				}
+
+				bounds = DrawDisplay_RGB_LED(posWorld, scaleWorld, col);
+			}
 
 			else if (ChipTypeHelper.IsClickableDisplayType(display.DisplayType))
 			{
@@ -607,6 +621,18 @@ namespace DLS.Graphics
 			Draw.Quad(centre, pixelDrawSize, col);
 			
 			return Bounds2D.CreateFromCentreAndSize(centre, Vector2.one * scale);
+		}
+		
+		public static Bounds2D DrawDisplay_RGB_LED(Vector2 centre, float scale, Color col)
+		{
+			Vector2 size = Vector2.one * scale;
+			Draw.Quad(centre, size, Color.black);
+			
+			const float pixelSizeT = 0.975f;
+			Vector2 pixelDrawSize = size * pixelSizeT;
+			Draw.Quad(centre, pixelDrawSize, col);
+			
+			return Bounds2D.CreateFromCentreAndSize(centre, size);
 		}
 
 		public static Bounds2D DrawClickableDisplay(DisplayInstance display, Vector2 posParent, float parentScale, SubChipInstance rootChip, SimChip sim = null)
