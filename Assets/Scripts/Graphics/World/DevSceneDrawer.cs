@@ -463,7 +463,7 @@ namespace DLS.Graphics
 
 				bounds = DrawDisplay_LED(posWorld, scaleWorld, col);
 			}
-			else if (display.DisplayType == ChipType.DisplayRGBLED)
+			else if (display.DisplayType == ChipType.DisplayLED_RGB)
 			{
 				bool simActive = sim != null;
 				Color col = Color.black;
@@ -477,7 +477,19 @@ namespace DLS.Graphics
 
 				bounds = DrawDisplay_RGB_LED(posWorld, scaleWorld, col);
 			}
+			else if (display.DisplayType == ChipType.DisplayLED_RGB_8Bit)
+			{
+				bool simActive = sim != null;
+				Color col = Color.black;
+				if (simActive)
+				{
+					col.r = sim.InputPins[0].State.GetShortValues() / 255f;
+					col.g = sim.InputPins[1].State.GetShortValues() / 255f;
+					col.b = sim.InputPins[2].State.GetShortValues() / 255f;
+				}
 
+				bounds = DrawDisplay_RGB_LED(posWorld, scaleWorld, col);
+			}
 			else if (ChipTypeHelper.IsClickableDisplayType(display.DisplayType))
 			{
 				bounds = DrawClickableDisplay(display, posParent, parentScale, rootChip, sim);
