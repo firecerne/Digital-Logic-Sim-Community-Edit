@@ -59,7 +59,8 @@ namespace DLS.Game
 					ChipType.DisplayRGB,
 					ChipType.DisplayRGBTouch,
 					ChipType.DisplayLED,
-					ChipType.DisplayRGBLED
+					ChipType.DisplayLED_RGB,
+					ChipType.DisplayLED_RGB_8Bit
 				),
 				CreateChipCollection("MEMORY",
 					ChipType.Rom_256x16,

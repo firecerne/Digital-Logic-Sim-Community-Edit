@@ -81,11 +81,17 @@ namespace DLS.SaveSystem
 			if (isVersionEarlierThan_1_3_0)
 			{
 				List<ChipCollection> chipCollections = projectDescription.ChipCollections;
-				string name = ChipTypeHelper.GetName(ChipType.DisplayRGBLED);
+				var chipCollectionToAddTo = chipCollections.FirstOrDefault(collection => collection.Name == "DISPLAY") ??
+				                        chipCollections.FirstOrDefault(collection => collection.Name == "OTHER");
+				string name = ChipTypeHelper.GetName(ChipType.DisplayLED_RGB);
 				if (!chipCollections.Any(collection => collection.Chips.Contains(name)))
 				{
-					var displays = chipCollections.FirstOrDefault(collection => collection.Name == "DISPLAY");
-					displays?.Chips.Add(name);
+					chipCollectionToAddTo?.Chips.Add(name);
+				}
+				name = ChipTypeHelper.GetName(ChipType.DisplayLED_RGB_8Bit);
+				if (!chipCollections.Any(collection => collection.Chips.Contains(name)))
+				{
+					chipCollectionToAddTo?.Chips.Add(name);
 				}
 			}
 			projectDescription.DLSVersion_LastSavedModdedVersion = Main.DLSVersion_ModdedID.ToString();
