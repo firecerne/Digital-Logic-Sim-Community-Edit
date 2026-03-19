@@ -44,6 +44,7 @@ namespace DLS.Game
 				CreateDisplayDot(),
 				CreateDisplayLED(),
 				CreateDisplay_RGB_LED(),
+				CreateDisplay_RGB_LED_8BIT(),
 				
 				// ---- Audio ----
 				CreateBuzzer(),
@@ -631,7 +632,36 @@ namespace DLS.Game
 				}
 			};
 
-			return CreateBuiltinChipDescription(ChipType.DisplayRGBLED, size, col, inputPins, null, displays, NameDisplayLocation.Hidden, canBeCached: false);
+			return CreateBuiltinChipDescription(ChipType.DisplayLED_RGB, size, col, inputPins, null, displays, NameDisplayLocation.Hidden, canBeCached: false);
+		}
+		
+		static ChipDescription CreateDisplay_RGB_LED_8BIT()
+		{
+			PinDescription[] inputPins =
+			{
+				CreatePinDescription("R", 0, PinBitCount.Bit8),
+				CreatePinDescription("G", 1, PinBitCount.Bit8),
+				CreatePinDescription("B", 2, PinBitCount.Bit8)
+			};
+
+			float height = SubChipInstance.MinChipHeightForPins(inputPins, null);
+			float width = height;
+			float displayWidth = height - GridSize;
+
+			Color col = GetColor(new(0.1f, 0.1f, 0.1f));
+			Vector2 size = new(width, height);
+
+			DisplayDescription[] displays =
+			{
+				new()
+				{
+					Position = Vector2.zero,
+					Scale = displayWidth,
+					SubChipID = -1
+				}
+			};
+
+			return CreateBuiltinChipDescription(ChipType.DisplayLED_RGB_8Bit, size, col, inputPins, null, displays, NameDisplayLocation.Hidden, canBeCached: false);
 		}
 
 
