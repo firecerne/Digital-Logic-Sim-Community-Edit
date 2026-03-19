@@ -26,6 +26,7 @@ namespace DLS.Description
 			{ ChipType.DisplayDot, "DOT DISPLAY" },
 			{ ChipType.SevenSegmentDisplay, "7-SEGMENT" },
 			{ ChipType.DisplayLED, "LED" },
+			{ ChipType.DisplayRGBLED, "RGB LED" },
 
 			{ ChipType.Buzzer, "BUZZER" },
 
@@ -38,9 +39,7 @@ namespace DLS.Description
 			{ ChipType.Key, "KEY" },
             { ChipType.Button, "BUTTON" },
 			{ ChipType.Toggle, "DIPSWITCH" },
-
 		};
-
 
 		public static string GetName(ChipType type) => Names[type];
 
@@ -77,11 +76,11 @@ namespace DLS.Description
             return "BUS-TERMINUS-" + numBits;
         }
 
-
         public static bool IsDevPin(ChipType chipType)
 		{
 			return chipType == ChipType.In_Pin || chipType == ChipType.Out_Pin;
 		}
+        
 		public static bool IsClickableDisplayType(ChipType type) {
 			// Return true for any chiptype that is a clickable display 
 

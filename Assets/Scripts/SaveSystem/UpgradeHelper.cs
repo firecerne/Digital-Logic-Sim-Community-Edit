@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using DLS.Description;
 using DLS.Game;
@@ -44,12 +45,14 @@ namespace DLS.SaveSystem
 			Main.Version defaultModdedVersion = new(1, 0, 0);
 			Main.Version moddedVersion_1_1_0 = new(1, 1, 0); // Custom IN and OUTS version
 			Main.Version moddedVersion_1_1_1 = new(1, 1, 1); // New 16 and 32 bit pins
+			Main.Version moddedVersion_1_3_0 = new(1, 3, 0); // RGB LED
 
 
 			bool canParseModdedVersion = Main.Version.TryParse(projectDescription.DLSVersion_LastSavedModdedVersion, out Main.Version projectVersion);
 
 			bool isVersionEarlierThan_1_1_0 = !canParseModdedVersion || projectVersion.ToInt() < moddedVersion_1_1_0.ToInt();
 			bool isVersionEarlierThan_1_1_1 = !canParseModdedVersion || projectVersion.ToInt() < moddedVersion_1_1_1.ToInt();
+			bool isVersionEarlierThan_1_3_0 = !canParseModdedVersion || projectVersion.ToInt() < moddedVersion_1_3_0.ToInt();
 
 			bool isSplitMergeInvalid = projectDescription.SplitMergePairs == null || projectDescription.SplitMergePairs.Count == 0;
 			bool isPinBitCountInvalid = projectDescription.pinBitCounts == null || projectDescription.pinBitCounts.Count == 0;
@@ -73,6 +76,18 @@ namespace DLS.SaveSystem
 				projectDescription.pinBitCounts = projectDescription.pinBitCounts.Union(Project.PinBitCounts).ToList();
 				projectDescription.SplitMergePairs = projectDescription.SplitMergePairs.Union(Project.SplitMergePairs).ToList();
 			}
+
+			if (isVersionEarlierThan_1_3_0)
+			{
+				List<ChipCollection> chipCollections = projectDescription.ChipCollections;
+				string name = ChipTypeHelper.GetName(ChipType.DisplayRGBLED);
+				if (!chipCollections.Any(collection => collection.Chips.Contains(name)))
+				{
+					var displays = chipCollections.FirstOrDefault(collection => collection.Name == "DISPLAY");
+					displays?.Chips.Add(name);
+				}
+			}
+			projectDescription.DLSVersion_LastSavedModdedVersion = Main.DLSVersion_ModdedID.ToString();
         }
 
         static void UpdateChipPre_2_1_5(ChipDescription chipDesc)
