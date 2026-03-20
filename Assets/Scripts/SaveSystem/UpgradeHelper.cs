@@ -45,7 +45,7 @@ namespace DLS.SaveSystem
 			Main.Version defaultModdedVersion = new(1, 0, 0);
 			Main.Version moddedVersion_1_1_0 = new(1, 1, 0); // Custom IN and OUTS version
 			Main.Version moddedVersion_1_1_1 = new(1, 1, 1); // New 16 and 32 bit pins
-			Main.Version moddedVersion_1_3_0 = new(1, 3, 0); // RGB LED
+			Main.Version moddedVersion_1_3_0 = new(1, 3, 0); // Setting to automatically add new chips to starred items. RGB LED's
 
 
 			bool canParseModdedVersion = Main.Version.TryParse(projectDescription.DLSVersion_LastSavedModdedVersion, out Main.Version projectVersion);
@@ -79,6 +79,10 @@ namespace DLS.SaveSystem
 
 			if (isVersionEarlierThan_1_3_0)
 			{
+				// Conserve original behavior (i.e. add new chips automatically to list of starred chips.)
+				projectDescription.Prefs_AddNewChipToStarredItems = true;
+				
+				// Add RGB LED's to "DISPLAY" chip collection, if no chip with the same name already exists.
 				List<ChipCollection> chipCollections = projectDescription.ChipCollections;
 				var chipCollectionToAddTo = chipCollections.FirstOrDefault(collection => collection.Name == "DISPLAY") ??
 				                        chipCollections.FirstOrDefault(collection => collection.Name == "OTHER");
