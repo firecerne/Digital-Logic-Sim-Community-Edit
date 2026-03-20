@@ -38,7 +38,7 @@ namespace Seb.Vis
 			for (int i = startIndex; i < startIndex + count; i++)
 			{
 				TextDrawData data = allDrawData[i];
-				TextRenderer.LayoutSettings layoutSettings = new(data.fontSize * layerInfo.scale, data.lineSpacing * layerInfo.scale, 1 * layerInfo.scale, 1 * layerInfo.scale);
+				TextRenderer.LayoutSettings layoutSettings = new(data.fontSize * layerInfo.scale, data.lineSpacing * layerInfo.scale, layerInfo.scale, layerInfo.scale);
 				Vector2 pos = data.pos + layerInfo.offset;
 				Vector2 maskMin = data.maskMin + layerInfo.offset;
 				Vector2 maskMax = data.maskMax + layerInfo.offset;
