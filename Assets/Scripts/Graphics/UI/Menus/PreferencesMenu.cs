@@ -13,7 +13,7 @@ namespace DLS.Graphics
 	{
 		const float entrySpacing = 0.5f;
 		const float menuWidth = 55;
-		const float verticalOffset = 22;
+		const float verticalOffset = 24.8f;
 
 		public const int DisplayMode_Always = 0;
 		public const int DisplayMode_OnHover = 1;
@@ -51,6 +51,7 @@ namespace DLS.Graphics
 			"Active",
 			"Paused"
 		};
+
 		static readonly string[] PinIndicators =
         {
             "Off",
@@ -59,6 +60,12 @@ namespace DLS.Graphics
 			"On Disconnected",
 			"Always"
         };
+
+		static readonly string[] AutoStarNewChipsOptions =
+		{
+			"Off",
+			"On"
+		};
 
 		static readonly Vector2 entrySize = new(menuWidth, DrawSettings.SelectorWheelHeight);
 		public static readonly Vector2 settingFieldSize = new(entrySize.x / 3, entrySize.y);
@@ -73,7 +80,9 @@ namespace DLS.Graphics
 		static readonly UIHandle ID_SimFrequencyField = new("PREFS_SimTickTarget");
 		static readonly UIHandle ID_ClockSpeedInput = new("PREFS_ClockSpeed");
 		static readonly UIHandle ID_PinIndicators = new("PREFS_PinIndicators");
+		static readonly UIHandle ID_AutoStarNewChips = new("PREFS_AutoStarNewChips");
 
+		static readonly string autoStarNewChipsLabel = "Star saved chips";
         static readonly string showGridLabel = "Show grid" + CreateShortcutString("Ctrl+G");
 		static readonly string simStatusLabel = "Sim Status" + CreateShortcutString("Ctrl+Space");
 		static readonly Func<string, bool> integerInputValidator = ValidateIntegerInput;
@@ -88,8 +97,6 @@ namespace DLS.Graphics
 
 		public static void DrawMenu(Project project)
 		{
-			//HandleKeyboardShortcuts();
-
 			DrawSettings.UIThemeDLS theme = DrawSettings.ActiveUITheme;
 			MenuHelper.DrawBackgroundOverlay();
 			Draw.ID panelID = UI.ReservePanel();
@@ -114,9 +121,16 @@ namespace DLS.Graphics
 				int chipPinNamesMode = DrawNextWheel("Show chip pin names", PinDisplayOptions, ID_ChipPinNames);
 				int gridDisplayMode = DrawNextWheel(showGridLabel, GridDisplayOptions, ID_GridDisplay);
 				int pinIndicatorsMode = DrawNextWheel("Show Pin indicators",PinIndicators, ID_PinIndicators);
+				
                 DrawHeader("EDITING:");
 				int snappingMode = DrawNextWheel("Snap to grid", SnappingOptions, ID_Snapping);
 				int straightWireMode = DrawNextWheel("Straight wires", StraightWireOptions, ID_StraightWires);
+				
+				DrawHeader("SAVING:");
+				bool autoStarNewChips = MenuHelper.LabeledOptionsWheel(autoStarNewChipsLabel, labelCol, labelPosCurr,
+					entrySize, ID_AutoStarNewChips,
+					AutoStarNewChipsOptions, settingFieldSize.x, true) == 1;
+				AddSpacing();
 
 				DrawHeader("SIMULATION:");
 				bool pauseSim = MenuHelper.LabeledOptionsWheel(simStatusLabel, labelCol, labelPosCurr, entrySize, ID_SimStatus, SimulationStatusOptions, settingFieldSize.x, true) == 1;
@@ -156,6 +170,7 @@ namespace DLS.Graphics
 				project.description.Prefs_SimStepsPerClockTick = clockSpeed;
 				project.description.Prefs_SimPaused = pauseSim;
 				project.description.Perfs_PinIndicators = pinIndicatorsMode;
+				project.description.Prefs_AddNewChipToStarredItems = autoStarNewChips;
 
                 // Cancel / Confirm
                 if (result == MenuHelper.CancelConfirmResult.Cancel)
@@ -224,6 +239,7 @@ namespace DLS.Graphics
 			UI.GetWheelSelectorState(ID_StraightWires).index = projDesc.Prefs_StraightWires;
 			UI.GetWheelSelectorState(ID_SimStatus).index = projDesc.Prefs_SimPaused ? 1 : 0;
 			UI.GetWheelSelectorState(ID_PinIndicators).index = projDesc.Perfs_PinIndicators;
+			UI.GetWheelSelectorState(ID_AutoStarNewChips).index = projDesc.Prefs_AddNewChipToStarredItems ? 1 : 0;
             // -- Input fields
             UI.GetInputFieldState(ID_SimFrequencyField).SetText(projDesc.Prefs_SimTargetStepsPerSecond + "", false);
 			UI.GetInputFieldState(ID_ClockSpeedInput).SetText(projDesc.Prefs_SimStepsPerClockTick + "", false);
