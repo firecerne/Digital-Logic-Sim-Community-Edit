@@ -32,7 +32,7 @@ namespace DLS.Graphics
 		static string displayLabelString;
 		static string colHexCodeString;
 		static bool s_isCustomLayout;
-		static SubChipInstance s_customizeChip => ChipSaveMenu.ActiveCustomizeChip;
+		public static SubChipInstance s_CustomizeChip;
 		static ChipDescription s_customizeDescription => ChipSaveMenu.ActiveCustomizeDescription;
 
 		static readonly UIHandle ID_DisplaysScrollView = new("CustomizeMenu_DisplaysScroll");
@@ -46,12 +46,18 @@ namespace DLS.Graphics
 		
 		public static void OnMenuOpened()
 		{
+			s_CustomizeChip = CreatePreviewSubChipInstance(s_customizeDescription);
 			DevChipInstance chip = Project.ActiveProject.ViewedChip;
 			subChipsWithDisplays = chip.GetSubchips().Where(c => c.Description.HasDisplay()).OrderBy(c => c.Position.x).ThenBy(c => c.Position.y).ToArray();
-			CustomizationSceneDrawer.OnCustomizationMenuOpened();
 			displayLabelString = $"DISPLAYS ({subChipsWithDisplays.Length}):";
 
             InitUIFromChipDescription();
+		}
+
+		static SubChipInstance CreatePreviewSubChipInstance(ChipDescription desc)
+		{
+			SubChipDescription subChipDesc = new(desc.Name, 0, string.Empty, Vector2.zero, Array.Empty<OutputPinColourInfo>());
+			return new SubChipInstance(desc, subChipDesc);
 		}
 
 		public static void DrawMenu()
@@ -78,26 +84,26 @@ namespace DLS.Graphics
                 // Switch to default layout
                 SetCustomLayout(false);
                 // Reset pins on the preview instance
-                foreach (PinInstance pin in s_customizeChip.InputPins)
+                foreach (PinInstance pin in s_CustomizeChip.InputPins)
                 {
                     pin.face = 3;
                     pin.LocalOffset = 0;
                 }
-                foreach (PinInstance pin in s_customizeChip.OutputPins)
+                foreach (PinInstance pin in s_CustomizeChip.OutputPins)
                 {
                     pin.face = 1;
                     pin.LocalOffset = 0;
                 }
-                s_customizeChip.UpdateSize();
-                if (s_customizeChip.InstanceSize.x > s_customizeDescription.Size.x)
+                s_CustomizeChip.UpdateSize();
+                if (s_CustomizeChip.InstanceSize.x > s_customizeDescription.Size.x)
                 {
-                    s_customizeDescription.Size.x = s_customizeChip.InstanceSize.x;
+                    s_customizeDescription.Size.x = s_CustomizeChip.InstanceSize.x;
                 }
-                if (s_customizeChip.InstanceSize.y > s_customizeDescription.Size.y)
+                if (s_CustomizeChip.InstanceSize.y > s_customizeDescription.Size.y)
                 {
-                    s_customizeDescription.Size.y = s_customizeChip.InstanceSize.y;
+                    s_customizeDescription.Size.y = s_CustomizeChip.InstanceSize.y;
                 }
-                s_customizeChip.UpdatePinLayout();
+                s_CustomizeChip.UpdatePinLayout();
             }
             else if (layoutMode == 1 && !s_isCustomLayout)
             {
@@ -182,13 +188,13 @@ namespace DLS.Graphics
 			if (cancelConfirmButtonIndex == 0)
 			{
 				RevertChanges();
-				UIDrawer.SetActiveMenu(UIDrawer.MenuType.ChipSave);
+				CloseMenu();
 			}
 			// Confirm
 			else if (cancelConfirmButtonIndex == 1)
 			{
 				UpdateCustomizeDescription();
-				UIDrawer.SetActiveMenu(UIDrawer.MenuType.ChipSave);
+				CloseMenu();
 			}
 		}
 
@@ -203,7 +209,7 @@ namespace DLS.Graphics
 
 			// Don't allow adding same display multiple times
 			bool enabled = CustomizationSceneDrawer.SelectedDisplay == null || subChip.ID != CustomizationSceneDrawer.SelectedDisplay.Desc.SubChipID; // display is removed from list when selected, so check manually here
-			foreach (DisplayInstance d in s_customizeChip.Displays)
+			foreach (DisplayInstance d in s_CustomizeChip.Displays)
 			{
 				if (d.Desc.SubChipID == subChip.ID)
 				{
@@ -250,19 +256,19 @@ namespace DLS.Graphics
 
 		static void UpdateCustomizeDescription()
 		{
-			List<DisplayInstance> displays = s_customizeChip.Displays;
+			List<DisplayInstance> displays = s_CustomizeChip.Displays;
 			s_customizeDescription.Displays = displays.Select(s => s.Desc).ToArray();
 
             //Saves pin offset and faces
             for (int i = 0; i < s_customizeDescription.InputPins.Length; i++)
             {
-                s_customizeDescription.InputPins[i].LocalOffset = s_customizeChip.InputPins[i].LocalOffset;
-                s_customizeDescription.InputPins[i].Face = s_customizeChip.InputPins[i].face;
+                s_customizeDescription.InputPins[i].LocalOffset = s_CustomizeChip.InputPins[i].LocalOffset;
+                s_customizeDescription.InputPins[i].Face = s_CustomizeChip.InputPins[i].face;
             }
             for (int i = 0; i < s_customizeDescription.OutputPins.Length; i++)
             {
-                s_customizeDescription.OutputPins[i].LocalOffset = s_customizeChip.OutputPins[i].LocalOffset;
-                s_customizeDescription.OutputPins[i].Face = s_customizeChip.OutputPins[i].face;
+                s_customizeDescription.OutputPins[i].LocalOffset = s_CustomizeChip.OutputPins[i].LocalOffset;
+                s_customizeDescription.OutputPins[i].Face = s_CustomizeChip.OutputPins[i].face;
             }
         }
 
@@ -310,8 +316,17 @@ namespace DLS.Graphics
         {
             s_isCustomLayout = isCustom;
             UI.GetWheelSelectorState(ID_LayoutOptions).index = isCustom ? 1 : 0;
-            s_customizeChip.SetCustomLayout(isCustom);
+            s_CustomizeChip.SetCustomLayout(isCustom);
             s_customizeDescription.HasCustomLayout = isCustom;
+        }
+
+        static void CloseMenu()
+        {
+	        s_CustomizeChip = null;
+	        subChipsWithDisplays = null;
+	        displayLabelString = null;
+	        colHexCodeString = null;
+	        UIDrawer.SetActiveMenu(UIDrawer.MenuType.ChipSave);
         }
 	}
 }

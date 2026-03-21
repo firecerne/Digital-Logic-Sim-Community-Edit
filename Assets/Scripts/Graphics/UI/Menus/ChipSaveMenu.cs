@@ -20,8 +20,7 @@ namespace DLS.Graphics
 		static readonly UIHandle ID_ChipNameField = new("SaveMenu_ChipNameField");
 		static readonly Func<string, bool> chipNameValidator = ValidateChipNameInput;
 
-		public static SubChipInstance ActiveCustomizeChip;
-		static SubChipInstance CustomizeStateBeforeEnteringCustomizeMenu;
+		static ChipDescription CustomizeStateBeforeEnteringCustomizeMenu;
 
 		static readonly string[] CancelSaveButtonNames =
 		{
@@ -34,11 +33,11 @@ namespace DLS.Graphics
 		};
 
 		static readonly bool[] ButtonGroupInteractStates = { true, true, true, true };
-		public static ChipDescription ActiveCustomizeDescription => ActiveCustomizeChip.Description;
+		public static ChipDescription ActiveCustomizeDescription;
 
 		public static void OnMenuOpened()
 		{
-			ActiveCustomizeChip ??= CreateCustomizationState();
+			ActiveCustomizeDescription ??= CreateCustomizationState();
 			InitUIFromDescription(ActiveCustomizeDescription);
 		}
 
@@ -78,64 +77,55 @@ namespace DLS.Graphics
 				if (buttonIndex == CancelButtonIndex || KeyboardShortcuts.CancelShortcutTriggered())
 				{
 					Cancel();
+					return;
 				}
-				else if (buttonIndex == CustomizeButtonIndex)
+				if (buttonIndex == CustomizeButtonIndex)
 				{
 					OpenCustomizationMenu();
+					return;
 				}
-				else if (buttonIndex == SaveButtonIndex || confirmShortcut)
+				if (buttonIndex == SaveButtonIndex || confirmShortcut)
 				{
 					Save(renaming ? Project.SaveMode.Rename : Project.SaveMode.Normal);
+					return;
 				}
-				else if (buttonIndex == SaveAsButtonIndex)
+				if (buttonIndex == SaveAsButtonIndex)
 				{
 					Save(Project.SaveMode.SaveAs);
+					return;
 				}
 
 				Bounds2D uiBounds = UI.GetCurrentBoundsScope();
 				MenuHelper.DrawReservedMenuPanel(panelID, uiBounds);
 
 				// Update customization state
-				if (ActiveCustomizeChip != null)
+				string newName = inputFieldState.text;
+				if (ActiveCustomizeDescription.Name != newName)
 				{
-					string newName = inputFieldState.text;
-					if (ActiveCustomizeDescription.Name != newName)
-					{
-						ActiveCustomizeDescription.Name = newName;
-						Vector2 minChipSize = SubChipInstance.CalculateMinChipSize(ActiveCustomizeDescription.InputPins, ActiveCustomizeDescription.OutputPins, newName);
-						Vector2 chipSizeNew = Vector2.Max(minChipSize, ActiveCustomizeDescription.Size);
-						ActiveCustomizeDescription.Size = chipSizeNew;
-					}
+					ActiveCustomizeDescription.Name = newName;
+					Vector2 minChipSize = SubChipInstance.CalculateMinChipSize(ActiveCustomizeDescription.InputPins, ActiveCustomizeDescription.OutputPins, newName);
+					Vector2 chipSizeNew = Vector2.Max(minChipSize, ActiveCustomizeDescription.Size);
+					ActiveCustomizeDescription.Size = chipSizeNew;
 				}
 			}
 		}
 
         // Create a subChip instance based on the current dev chip (we need a subChip instance to be able to draw a preview of the chip in the customization menu)
         // The description on this subChip holds potential customizations, such as name changes, resizing, colour etc.
-        static SubChipInstance CreateCustomizationState()
+        static ChipDescription CreateCustomizationState()
         {
-            DevChipInstance viewedChip = Project.ActiveProject.ViewedChip;
-            ChipDescription desc = DescriptionCreator.CreateChipDescription(viewedChip);
-            return CreatePreviewSubChipInstance(desc);
+	        return DescriptionCreator.CreateChipDescription(Project.ActiveProject.ViewedChip);
         }
 
         static void OpenCustomizationMenu()
 		{
-			ActiveCustomizeChip = CreatePreviewSubChipInstance(ActiveCustomizeDescription);
-			CustomizeStateBeforeEnteringCustomizeMenu = CreatePreviewSubChipInstance(Saver.CloneChipDescription(ActiveCustomizeDescription));
+			CustomizeStateBeforeEnteringCustomizeMenu = Saver.CloneChipDescription(ActiveCustomizeDescription);
 			UIDrawer.SetActiveMenu(UIDrawer.MenuType.ChipCustomization);
 		}
 
 		public static void RevertCustomizationStateToBeforeEnteringCustomizeMenu()
 		{
-			ActiveCustomizeChip = CustomizeStateBeforeEnteringCustomizeMenu;
-			CustomizeStateBeforeEnteringCustomizeMenu = CreatePreviewSubChipInstance(Saver.CloneChipDescription(ActiveCustomizeDescription));
-		}
-
-		static SubChipInstance CreatePreviewSubChipInstance(ChipDescription desc)
-		{
-			SubChipDescription subChipDesc = new(desc.Name, 0, string.Empty, Vector2.zero, Array.Empty<OutputPinColourInfo>());
-			return new SubChipInstance(desc, subChipDesc);
+			ActiveCustomizeDescription = CustomizeStateBeforeEnteringCustomizeMenu;
 		}
 
 		public static bool ValidateChipNameInput(string nameInput) => nameInput.Length <= MaxLengthChipName.Length && !SaveUtils.NameContainsForbiddenChar(nameInput);
@@ -179,7 +169,7 @@ namespace DLS.Graphics
 
 		public static void Reset()
 		{
-			ActiveCustomizeChip = null;
+			ActiveCustomizeDescription = null;
 			CustomizeStateBeforeEnteringCustomizeMenu = null;
 		}
 	}
