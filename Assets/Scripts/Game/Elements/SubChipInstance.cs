@@ -260,16 +260,17 @@ namespace DLS.Game
 		/// Updates chip size while respecting pins on custom faces
 		public void UpdateSize()
 		{
-            PinInstance[] pins = InputPins.Concat(OutputPins).ToArray();
+            PinInstance[] pins = AllPins;
             if (pins == null || pins.Length == 0) return;
-            float Min0 = 0f;
-            float Min1 = 0f;
-			float Min2 = 0f;
-			float Min3 = 0f;
+            
+            float min0 = 0f;
+            float min1 = 0f;
+			float min2 = 0f;
+			float min3 = 0f;
+			
             foreach (PinInstance pin in pins)
             {
-				
-                int pinGridHeight = pin.bitCount.BitCount switch
+	            int pinGridHeight = pin.bitCount.BitCount switch
                 {
                     PinBitCount.Bit1 => 2,
                     PinBitCount.Bit4 => 3,
@@ -277,67 +278,59 @@ namespace DLS.Game
 					_ => Mathf.RoundToInt(PinHeightFromBitCount(pin.bitCount) /DrawSettings.GridSize)
                 };
 
-                if (pin.face == 0)
-                {
-                    Min0 += pinGridHeight;
-                }
-                else if (pin.face == 1)
-                {
-                    Min1 += pinGridHeight;
-                }
-                else if (pin.face == 2)
-                {
-                    Min2 += pinGridHeight;
-                }
-				else
-				{
-                    Min3 += pinGridHeight;
-                }
+	            switch (pin.face)
+	            {
+		            case 0:
+			            min0 += pinGridHeight;
+			            break;
+		            case 1:
+			            min1 += pinGridHeight;
+			            break;
+		            case 2:
+			            min2 += pinGridHeight;
+			            break;
+		            default:
+			            min3 += pinGridHeight;
+			            break;
+	            }
             }
 			
-            float MinY = Mathf.Max(Min1, Min3);
-            float MinX = Mathf.Max(Min0, Min2);
+            float minY = Mathf.Max(min1, min3);
+            float minX = Mathf.Max(min0, min2);
 			
-			MinX = Mathf.Abs(MinX) * DrawSettings.GridSize;
-            MinY = Mathf.Abs(MinY) * DrawSettings.GridSize;
+			minX *= DrawSettings.GridSize;
+            minY *= DrawSettings.GridSize;
             
             string multiLineName = CreateMultiLineName(Description.Name);
             bool hasMultiLineName = multiLineName != Description.Name;
             float minNameHeight = DrawSettings.GridSize * (hasMultiLineName ? 4 : 3);
 
 			float sizeX, sizeY;
-			Vector2 nameDrawBoundsSize;
 
-			string activationKeyString = ChipType == ChipType.Key ? InputHelper.UintToKeyName(InternalData[0]) : "";
-
-			// For the 1 char key chip name (Base/was before) use base size
-			if (ChipType == ChipType.Key && !string.IsNullOrEmpty(activationKeyString) && activationKeyString.Length == 1)
+			if (ChipType == ChipType.Key)
 			{
-				nameDrawBoundsSize = DevSceneDrawer.CalculateChipNameBounds(multiLineName);
-				sizeX = Mathf.Max(DrawSettings.GridSize * 3, MinX); // Size of normal key chip
-				sizeY = Mathf.Max(minNameHeight, MinY);
-			}
-			else
-			{
-				
-				// For key chips with more than 1 character, calculate size based on activation key string
-				if (ChipType == ChipType.Key && !string.IsNullOrEmpty(activationKeyString) && activationKeyString.Length > 1)
-				{
-					nameDrawBoundsSize = DevSceneDrawer.CalculateChipNameBounds(activationKeyString);
-				}
-				else
-				{
-					// Normal case (what was here before)
-					nameDrawBoundsSize = DevSceneDrawer.CalculateChipNameBounds(multiLineName);
-				}
+				string activationKeyString = InputHelper.UintToKeyName(InternalData[0]);
+				sizeX = activationKeyString.Length == 1 ?
+					// For the 1 char key chip name use base size
+					Mathf.Max(DrawSettings.GridSize * 3, minX) :
+					// For key chips with more than 1 character, calculate size based on activation key string
+					Mathf.Max(DevSceneDrawer.CalculateChipNameBounds(activationKeyString).x + DrawSettings.GridSize, minX);
 
-				sizeX = Mathf.Max(nameDrawBoundsSize.x + DrawSettings.GridSize, MinX);
-				sizeY = Mathf.Max(minNameHeight, MinY);
+				sizeY = Mathf.Max(minNameHeight, minY);
+				InstanceSize = new Vector2(sizeX, sizeY);
+				return;
 			}
 
-            MinSize = new Vector2(sizeX, sizeY);
-			InstanceSize = MinSize;
-        }
+			// Custom chips
+			sizeX = Description.NameLocation != NameDisplayLocation.Hidden ?
+				Mathf.Max(DevSceneDrawer.CalculateChipNameBounds(multiLineName).x + DrawSettings.GridSize, minX) :
+				Mathf.Max(DrawSettings.GridSize * 3, minX);
+
+			sizeY = Mathf.Max(minNameHeight, minY);
+
+			InstanceSize = new Vector2(sizeX, sizeY);
+			Description.Size = InstanceSize;
+		}
 
         // Calculate minimal height of chip to fit the given pins, and calculate their y positions (in grid space)
         public static (float chipHeight, float[] pinGridY) CalculateDefaultPinLayout(PinBitCount[] pins)
