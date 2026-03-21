@@ -98,22 +98,30 @@ namespace DLS.Game
 
 		Bounds2D CreateBoundingBox(float pad)
 		{
-			float handlePosition = IsHorizontal ? HandlePosition.x : HandlePosition.y;
-			float pinPosition = IsHorizontal ? PinPosition.x : PinPosition.y;
-			float dir = IsHorizontal ? FaceDir.x : FaceDir.y;
-			float x1 = handlePosition - dir * DevPinHandleWidth / 2;
-			float x2 = pinPosition + dir * PinRadius;
-			float minX = Mathf.Min(x1, x2);
-			float maxX = Mathf.Max(x1, x2);
-
-			Vector2 centre = new((minX + maxX) / 2, !IsHorizontal ? HandlePosition.x : HandlePosition.y);
-			Vector2 size = new Vector2(maxX - minX, BoundsHeight()) + Vector2.one * pad;
-			if (!IsHorizontal)
+			if (IsHorizontal)
 			{
-				(size.x, size.y) = (size.y, size.x);
-				(centre.x, centre.y) = (centre.y, centre.x);
+				float dir = FaceDir.x;
+				float x1 = HandlePosition.x - dir * DevPinHandleWidth / 2;
+				float x2 = PinPosition.x + dir * PinRadius;
+				float minX = Mathf.Min(x1, x2);
+				float maxX = Mathf.Max(x1, x2);
+
+				Vector2 centre = new((minX + maxX) / 2, HandlePosition.y);
+				Vector2 size = new Vector2(maxX - minX, BoundsHeight()) + Vector2.one * pad;
+				return Bounds2D.CreateFromCentreAndSize(centre, size);
 			}
-			return Bounds2D.CreateFromCentreAndSize(centre, size);
+			else
+			{
+				float dir = FaceDir.y;
+				float x1 = HandlePosition.y - dir * DevPinHandleWidth / 2;
+				float x2 = PinPosition.y + dir * PinRadius;
+				float minX = Mathf.Min(x1, x2);
+				float maxX = Mathf.Max(x1, x2);
+
+				Vector2 centre = new(HandlePosition.x, (minX + maxX) / 2);
+				Vector2 size = new Vector2(BoundsHeight(), maxX - minX ) + Vector2.one * pad;
+				return Bounds2D.CreateFromCentreAndSize(centre, size);
+			}
 		}
 
 		public Bounds2D HandleBounds() => Bounds2D.CreateFromCentreAndSize(HandlePosition, GetHandleSize());
