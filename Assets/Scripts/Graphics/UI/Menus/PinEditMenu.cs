@@ -35,7 +35,7 @@ namespace DLS.Graphics
 			inputFieldState.SetText(devPin.Pin.Name);
 			inputFieldState.SelectAll();
 
-			UI.GetWheelSelectorState(ID_ValueDisplayMode).index = (int)devPin.pinValueDisplayMode;
+			UI.GetWheelSelectorState(ID_ValueDisplayMode).index = (int)devPin.PinValueDisplayMode;
 		}
 
 		public static void DrawMenu()
@@ -86,7 +86,7 @@ namespace DLS.Graphics
 
 			if (devPin.BitCount != PinBitCount.Bit1)
 			{
-				devPin.pinValueDisplayMode = (PinValueDisplayMode)UI.GetWheelSelectorState(ID_ValueDisplayMode).index;
+				devPin.PinValueDisplayMode = (PinValueDisplayMode)UI.GetWheelSelectorState(ID_ValueDisplayMode).index;
 			}
 
 			UIDrawer.SetActiveMenu(UIDrawer.MenuType.None);

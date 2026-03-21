@@ -9,36 +9,36 @@ namespace DLS.Game
 {
 	public class DevPinInstance : IMoveable
 	{
-		public PinBitCount BitCount;
-		public readonly char[] decimalDisplayCharBuffer = new char[16];
+		public PinBitCount BitCount => Pin.bitCount;
+		public readonly char[] DecimalDisplayCharBuffer = new char[16];
 
-		public Vector2 faceDir;
+		public Vector2 FaceDir;
 
 		public readonly bool IsInputPin;
-		public readonly string Name;
+		public string Name => Pin.Name;
 		public readonly PinInstance Pin;
 		public Vector2Int StateGridDimensions;
 		public Vector2 StateGridSize;
 
-		public PinValueDisplayMode pinValueDisplayMode;
-		public bool IsHorizontal => faceDir == Vector2.right || faceDir == Vector2.left;
+		public PinValueDisplayMode PinValueDisplayMode;
+		public bool IsHorizontal => FaceDir == Vector2.right || FaceDir == Vector2.left;
 
 
 		public DevPinInstance(PinDescription pinDescription, bool isInput)
 		{
-			Name = pinDescription.Name;
 			ID = pinDescription.ID;
 			IsInputPin = isInput;
 			Position = pinDescription.Position;
-			BitCount = pinDescription.BitCount;
 
 			Pin = new PinInstance(pinDescription, new PinAddress(ID, 0), this, isInput);
-			pinValueDisplayMode = pinDescription.ValueDisplayMode;
+			PinValueDisplayMode = pinDescription.ValueDisplayMode;
 
 			// Calculate layout info
-			faceDir = pinDescription.DevPinFacingDirection;
-			StateGridDimensions = GridHelper.GetStateGridDimension(BitCount.BitCount);
-			StateGridSize = BitCount.BitCount == 1 ? Vector2.one * (DevPinStateDisplayRadius * 2 + DevPinStateDisplayOutline * 2) : (Vector2)StateGridDimensions * MultiBitPinStateDisplaySquareSize + Vector2.one * DevPinStateDisplayOutline;
+			FaceDir = pinDescription.DevPinFacingDirection;
+			StateGridDimensions = GridHelper.GetStateGridDimension(BitCount);
+			StateGridSize = BitCount == 1 ? 
+				Vector2.one * (DevPinStateDisplayRadius * 2 + DevPinStateDisplayOutline * 2) :
+				(Vector2)StateGridDimensions * MultiBitPinStateDisplaySquareSize + Vector2.one * DevPinStateDisplayOutline;
 		}
 
 		public Vector2 HandlePosition => Position;
@@ -50,10 +50,10 @@ namespace DLS.Game
 			{
 				if(BitCount.BitCount is 1 or 4 or 8)
 				{
-                    return Position + faceDir * (GridSize * (BitCount.BitCount is 1 or 4 ? 6 : 9));
+                    return Position + FaceDir * (GridSize * (BitCount.BitCount is 1 or 4 ? 6 : 9));
                 }
 
-				return Position + faceDir * (StateGridSize.x + 2 * GridSize);
+				return Position + FaceDir * (StateGridSize.x + 2 * GridSize);
 			}
 		}
 
@@ -67,11 +67,8 @@ namespace DLS.Game
 		public bool IsValidMovePos { get; set; }
 
 		public Bounds2D SelectionBoundingBox => CreateBoundingBox(SelectionBoundsPadding);
-
 		public Bounds2D BoundingBox => CreateBoundingBox(0);
-
-
-		public Vector2 SnapPoint => Pin.GetWorldPos();
+		public Vector2 SnapPoint => PinPosition;
 
 		public bool ShouldBeIncludedInSelectionBox(Vector2 selectionCentre, Vector2 selectionSize)
 		{
@@ -84,7 +81,7 @@ namespace DLS.Game
 			uint rawValue = Pin.State.GetValue();
 			int displayValue = (int)rawValue;
 
-			if (pinValueDisplayMode == PinValueDisplayMode.SignedDecimal)
+			if (PinValueDisplayMode == PinValueDisplayMode.SignedDecimal)
 			{
 				displayValue = Maths.TwosComplement(rawValue, Math.Min((int)BitCount,32));
 			}
@@ -94,18 +91,17 @@ namespace DLS.Game
 
 		Bounds2D CreateBoundingBox(float pad)
 		{
-			var isHorizontal = IsHorizontal;
-			var handlePosition = isHorizontal ? HandlePosition.x : HandlePosition.y;
-			var pinPosition = isHorizontal ? PinPosition.x : PinPosition.y;
-			var dir = isHorizontal ? faceDir.x : faceDir.y;
+			float handlePosition = IsHorizontal ? HandlePosition.x : HandlePosition.y;
+			float pinPosition = IsHorizontal ? PinPosition.x : PinPosition.y;
+			float dir = IsHorizontal ? FaceDir.x : FaceDir.y;
 			float x1 = handlePosition - dir * DevPinHandleWidth / 2;
 			float x2 = pinPosition + dir * PinRadius;
 			float minX = Mathf.Min(x1, x2);
 			float maxX = Mathf.Max(x1, x2);
 
-			Vector2 centre = new((minX + maxX) / 2, !isHorizontal ? HandlePosition.x : HandlePosition.y);
+			Vector2 centre = new((minX + maxX) / 2, !IsHorizontal ? HandlePosition.x : HandlePosition.y);
 			Vector2 size = new Vector2(maxX - minX, BoundsHeight()) + Vector2.one * pad;
-			if (!isHorizontal)
+			if (!IsHorizontal)
 			{
 				(size.x, size.y) = (size.y, size.x);
 				(centre.x, centre.y) = (centre.y, centre.x);
@@ -130,10 +126,9 @@ namespace DLS.Game
 
 		public bool PointIsInHandleBounds(Vector2 point) => HandleBounds().PointInBounds(point);
 
-
 		public void SetOrientation(Orientation orientation)
 		{
-			faceDir = GetFacingDirection(orientation);
+			FaceDir = GetFacingDirection(orientation);
 		}
 
 		public Vector2 GetFacingDirection(Orientation orientation) => orientation switch
@@ -147,25 +142,25 @@ namespace DLS.Game
 
 		public void Rotate(bool clockwise = true)
 		{
-			if (faceDir == Vector2.up)
+			if (FaceDir == Vector2.up)
 			{
-				faceDir = clockwise ? Vector2.right : Vector2.left;
+				FaceDir = clockwise ? Vector2.right : Vector2.left;
 				return;
 			}
 
-			if (faceDir == Vector2.right)
+			if (FaceDir == Vector2.right)
 			{
-				faceDir = clockwise ? Vector2.down : Vector2.up;
+				FaceDir = clockwise ? Vector2.down : Vector2.up;
 				return;
 			}
 
-			if (faceDir == Vector2.down)
+			if (FaceDir == Vector2.down)
 			{
-				faceDir = clockwise ? Vector2.left : Vector2.right;
+				FaceDir = clockwise ? Vector2.left : Vector2.right;
 			}
 			else
 			{
-				faceDir = clockwise ? Vector2.up : Vector2.down;
+				FaceDir = clockwise ? Vector2.up : Vector2.down;
 			}
 		}
 	}
