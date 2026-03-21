@@ -414,24 +414,39 @@ namespace DLS.Game
 		Bounds2D CreateBoundingBox(float pad)
 		{
 			float pinWidthPad = 0;
+			float pinHeightPad = 0;
 			float offsetX = 0;
+			float offsetY = 0;
 			bool inputsHidden = ChipTypeHelper.IsBusOriginType(ChipType);
 			float flipX = BusIsFlipped ? -1 : 1;
 
-			if (InputPins.Length > 0 && !inputsHidden)
+			var halfPinRadius = DrawSettings.PinRadius / 2;
+			if (AllPins.Any(p => p.face == 0))
 			{
-				pinWidthPad += DrawSettings.PinRadius;
-				offsetX -= DrawSettings.PinRadius / 2 * flipX;
+				pinHeightPad += halfPinRadius;
+				offsetY += halfPinRadius;
 			}
 
-			if (OutputPins.Length > 0)
+			if (AllPins.Any(p => p.face == 1))
 			{
-				pinWidthPad += DrawSettings.PinRadius;
-				offsetX += DrawSettings.PinRadius / 2 * flipX;
+				pinWidthPad += halfPinRadius;
+				offsetX += halfPinRadius * flipX;
+			}
+			
+			if (AllPins.Any(p => p.face == 2))
+			{
+				pinHeightPad += halfPinRadius;
+				offsetY -= halfPinRadius;
+			}
+			
+			if (AllPins.Any(p => p.face == 3) && !inputsHidden)
+			{
+				pinWidthPad += halfPinRadius;
+				offsetX -= halfPinRadius * flipX;
 			}
 
-			Vector2 padFinal = new(pinWidthPad + DrawSettings.ChipOutlineWidth + pad, DrawSettings.ChipOutlineWidth + pad);
-			return Bounds2D.CreateFromCentreAndSize(Position + Vector2.right * offsetX, Size + padFinal);
+			Vector2 padFinal = new(pinWidthPad + DrawSettings.ChipOutlineWidth + pad, pinHeightPad + DrawSettings.ChipOutlineWidth + pad);
+			return Bounds2D.CreateFromCentreAndSize(Position + new Vector2(offsetX, offsetY), Size + padFinal);
 		}
 
 		public static Vector2 CalculateMinChipSize(PinDescription[] inputPins, PinDescription[] outputPins, string unformattedName)
