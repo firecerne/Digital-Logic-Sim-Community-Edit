@@ -18,12 +18,10 @@ namespace DLS.Game
 		public readonly ChipDescription Description;
 
 		public readonly List<DisplayInstance> Displays;
-		public readonly SubChipDescription InitialSubChipDesc;
 		public readonly PinInstance[] InputPins;
 
 		public readonly uint[] InternalData;
 		public readonly bool IsBus;
-		public Vector2 MinSize;
 		public Vector2 InstanceSize;
 
 		public string MultiLineName;
@@ -33,7 +31,6 @@ namespace DLS.Game
 
 		public SubChipInstance(ChipDescription description, SubChipDescription subChipDesc)
 		{
-			InitialSubChipDesc = subChipDesc;
 			ChipType = description.ChipType;
 			Description = description;
 			Position = subChipDesc.Position;
@@ -41,8 +38,7 @@ namespace DLS.Game
 			Label = subChipDesc.Label;
 			IsBus = ChipTypeHelper.IsBusType(ChipType);
 			MultiLineName = CreateMultiLineName(description.Name);
-			MinSize = CalculateMinChipSize(description.InputPins, description.OutputPins, description.Name);
-			InstanceSize = MinSize;
+			InstanceSize = CalculateMinChipSize(description.InputPins, description.OutputPins, description.Name);
 
 			HasCustomLayout = description.HasCustomLayout;
 
@@ -138,8 +134,7 @@ namespace DLS.Game
 			
 			InternalData[0] = key; // KeyCode -> Number 
 
-			// Update size so it changes
-			updateMinSize();
+			UpdateSize();
 		}
 
 		public void UpdatePinLayout()
@@ -251,7 +246,7 @@ namespace DLS.Game
             }
         }
 
-        public void SetCustomLayout(bool SetCustom) => HasCustomLayout = SetCustom;
+        public void SetCustomLayout(bool setCustom) => HasCustomLayout = setCustom;
 
 		// Min chip height based on input and output pins
 		public static float MinChipHeightForPins(PinDescription[] inputs, PinDescription[] outputs) => Mathf.Max(MinChipHeightForPins(inputs), MinChipHeightForPins(outputs));
@@ -262,9 +257,8 @@ namespace DLS.Game
 			return CalculateDefaultPinLayout(pins.Select(p => p.BitCount).ToArray()).chipHeight;
 		}
 
-
-		//updates min size of chip based on which pins are on which faces, needed for custom layouts
-		public void updateMinSize()
+		/// Updates chip size while respecting pins on custom faces
+		public void UpdateSize()
 		{
             PinInstance[] pins = InputPins.Concat(OutputPins).ToArray();
             if (pins == null || pins.Length == 0) return;
@@ -462,7 +456,6 @@ namespace DLS.Game
 			return new Vector2(sizeX, sizeY);
 		}
 
-
 		public static float PinHeightFromBitCount(PinBitCount bitCount)
 		{
 			return bitCount.BitCount switch
@@ -503,7 +496,6 @@ namespace DLS.Game
 					}
 				}
 			}
-
 
 			// Pad lines with spaces to centre justify
 			string formatted = "";

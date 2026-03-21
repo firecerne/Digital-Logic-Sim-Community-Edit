@@ -88,14 +88,14 @@ namespace DLS.Graphics
                     pin.face = 1;
                     pin.LocalOffset = 0;
                 }
-                s_customizeChip.updateMinSize();
-                if (s_customizeChip.MinSize.x > s_customizeDescription.Size.x)
+                s_customizeChip.UpdateSize();
+                if (s_customizeChip.InstanceSize.x > s_customizeDescription.Size.x)
                 {
-                    s_customizeDescription.Size.x = s_customizeChip.MinSize.x;
+                    s_customizeDescription.Size.x = s_customizeChip.InstanceSize.x;
                 }
-                if (s_customizeChip.MinSize.y > s_customizeDescription.Size.y)
+                if (s_customizeChip.InstanceSize.y > s_customizeDescription.Size.y)
                 {
-                    s_customizeDescription.Size.y = s_customizeChip.MinSize.y;
+                    s_customizeDescription.Size.y = s_customizeChip.InstanceSize.y;
                 }
                 s_customizeChip.UpdatePinLayout();
             }

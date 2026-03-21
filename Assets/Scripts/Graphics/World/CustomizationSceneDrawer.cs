@@ -307,13 +307,13 @@ namespace DLS.Graphics
 			const float h = 1.1f;
 			const float size = 0.12f;
 			bool canInteract = displayInteractState == DisplayInteractState.None;
-			bool hascontrol = false;
+			bool hasControl = false;
 			// Draw resize arrow handles on all sides of chip
-			hascontrol |= DrawScaleHandle(chip.SelectionBoundingBox.CentreRight, Vector2Int.right);
-			hascontrol |= DrawScaleHandle(chip.SelectionBoundingBox.CentreLeft, Vector2Int.left);
-			hascontrol |= DrawScaleHandle(chip.SelectionBoundingBox.CentreTop, Vector2Int.up);
-			hascontrol |= DrawScaleHandle(chip.SelectionBoundingBox.CentreBottom, Vector2Int.down);
-			return hascontrol;
+			hasControl |= DrawScaleHandle(chip.SelectionBoundingBox.CentreRight, Vector2Int.right);
+			hasControl |= DrawScaleHandle(chip.SelectionBoundingBox.CentreLeft, Vector2Int.left);
+			hasControl |= DrawScaleHandle(chip.SelectionBoundingBox.CentreTop, Vector2Int.up);
+			hasControl |= DrawScaleHandle(chip.SelectionBoundingBox.CentreBottom, Vector2Int.down);
+			return hasControl;
 
 			bool DrawScaleHandle(Vector2 edge, Vector2Int dir)
 			{
@@ -360,8 +360,8 @@ namespace DLS.Graphics
 
                     if (snapY && dir.y != 0)
                     {
-                        float deltaY = GridHelper.SnapToGrid(desiredSize.y - chip.MinSize.y);
-                        desiredSize.y = chip.MinSize.y + deltaY;
+                        float deltaY = GridHelper.SnapToGrid(desiredSize.y - chip.InstanceSize.y);
+                        desiredSize.y = chip.InstanceSize.y + deltaY;
                     }
 
                     if (snapX && dir.x != 0)
@@ -369,12 +369,12 @@ namespace DLS.Graphics
                         desiredSize.x = GridHelper.SnapToGridForceEven(desiredSize.x) - ChipOutlineWidth;
                     }
 
-                    chip.updateMinSize();
-					Vector2 sizeNew = Vector2.Max(desiredSize, chip.MinSize);
+                    chip.UpdateSize();
+					Vector2 sizeNew = Vector2.Max(desiredSize, chip.InstanceSize);
 
 					if (sizeNew != chip.Size)
 					{
-                        chip.Description.Size = Vector2.Max(desiredSize, chip.MinSize);
+                        chip.Description.Size = Vector2.Max(desiredSize, chip.InstanceSize);
 						ChipSaveMenu.ActiveCustomizeChip.UpdatePinLayout();
 					}
 				}

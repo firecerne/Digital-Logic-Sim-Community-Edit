@@ -15,15 +15,12 @@ namespace DLS.SaveSystem
 			// Get previously saved customizations such as name and colour (if exist)
 			ChipDescription descOld = chip.LastSavedDescription;
 			bool hasSavedDesc = descOld != null;
-			Vector2 size = hasSavedDesc ? descOld.Size : Vector2.zero;
 			string name = hasSavedDesc ? descOld.Name : string.Empty;
 
             PinDescription[] inputPins = OrderPins(chip.GetInputPins()).Select(CreatePinDescription).ToArray();
             PinDescription[] outputPins = OrderPins(chip.GetOutputPins()).Select(CreatePinDescription).ToArray();
 
 			SubChipDescription[] subChips = chip.GetSubchips().Select(CreateSubChipDescription).ToArray();
-			Vector2 minChipsSize = SubChipInstance.CalculateMinChipSize(inputPins, outputPins, name);
-			size = Vector2.Max(minChipsSize, size);
 
 			UpdateWireIndicesForDescriptionCreation(chip);
 
@@ -34,7 +31,7 @@ namespace DLS.SaveSystem
 				LastSavedModdedVersion = Main.DLSVersion_ModdedID.ToString(),
 				Name = name,
 				NameLocation = hasSavedDesc ? descOld.NameLocation : NameDisplayLocation.Centre,
-				Size = size,
+				Size =  hasSavedDesc ? descOld.Size : SubChipInstance.CalculateMinChipSize(inputPins, outputPins, name),
 				Colour = hasSavedDesc ? descOld.Colour : RandomInitialChipColour(),
 				ShouldBeCached = hasSavedDesc ? descOld.ShouldBeCached : false,
 
