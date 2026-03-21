@@ -42,7 +42,7 @@ namespace DLS.Game
 		}
 
 		public Vector2 HandlePosition => Position;
-		public Vector2 StateDisplayPosition => HandlePosition + faceDir * (DevPinHandleWidth / 2 + StateGridSize.x / 2 + 0.065f);
+		public Vector2 StateDisplayPosition => (Position + PinPosition) / 2;
 
 		public Vector2 PinPosition
 		{
@@ -50,10 +50,10 @@ namespace DLS.Game
 			{
 				if(BitCount.BitCount is 1 or 4 or 8)
 				{
-                    return HandlePosition + faceDir * (GridSize * (BitCount.BitCount is 1 or 4 ? 6 : 9));
+                    return Position + faceDir * (GridSize * (BitCount.BitCount is 1 or 4 ? 6 : 9));
                 }
 
-				return StateDisplayPosition + faceDir * (StateGridSize.x / 2 + 2 * GridSize);
+				return Position + faceDir * (StateGridSize.x + 2 * GridSize);
 			}
 		}
 
