@@ -195,7 +195,7 @@ namespace DLS.Graphics
 			string text = pin.Name;
 			if (string.IsNullOrWhiteSpace(text) || text.Contains("Hidden")) return;
 
-			var facingDir = pin.parent is DevPinInstance devPin ? devPin.faceDir : pin.FacingDir;
+			var facingDir = pin.parent is DevPinInstance devPin ? devPin.FaceDir : pin.FacingDir;
 			Vector2 offset = (PinRadius + 0.05f) * facingDir;
 			FontType font = FontBold;
 
@@ -225,16 +225,16 @@ namespace DLS.Graphics
 		{
 			char[] chars = text.ToCharArray();
 			for (int i = 0; i < chars.Length; i++) {
-				pin.decimalDisplayCharBuffer[i] = chars[i];
+				pin.DecimalDisplayCharBuffer[i] = chars[i];
 			}
 		}
 		public static void DrawPinDecValue(DevPinInstance pin)
 		{
-			if (pin.pinValueDisplayMode == PinValueDisplayMode.Off) return;
+			if (pin.PinValueDisplayMode == PinValueDisplayMode.Off) return;
 
 			int charCount;
 
-			if (pin.Pin.State.IsValueBiggerThanInt() || ((pin.GetStateDecimalDisplayValue()&(1<<31)) == 1<<31 && pin.pinValueDisplayMode!=PinValueDisplayMode.SignedDecimal) )
+			if (pin.Pin.State.IsValueBiggerThanInt() || ((pin.GetStateDecimalDisplayValue()&(1<<31)) == 1<<31 && pin.PinValueDisplayMode!=PinValueDisplayMode.SignedDecimal) )
 			{
 				charCount = 7;
 				CopyToCharBuffer(pin, "TOO BIG");
@@ -246,14 +246,14 @@ namespace DLS.Graphics
 				CopyToCharBuffer(pin, "-2147483648");
 			}
 
-			else if (pin.pinValueDisplayMode != PinValueDisplayMode.HEX)
+			else if (pin.PinValueDisplayMode != PinValueDisplayMode.HEX)
 			{
-				charCount = StringHelper.CreateIntegerStringNonAlloc(pin.decimalDisplayCharBuffer, pin.GetStateDecimalDisplayValue());
+				charCount = StringHelper.CreateIntegerStringNonAlloc(pin.DecimalDisplayCharBuffer, pin.GetStateDecimalDisplayValue());
 			}
 
 			else
 			{
-				charCount = StringHelper.CreateHexStringNonAlloc(pin.decimalDisplayCharBuffer, pin.GetStateDecimalDisplayValue());
+				charCount = StringHelper.CreateHexStringNonAlloc(pin.DecimalDisplayCharBuffer, pin.GetStateDecimalDisplayValue());
 			}
 
 			
@@ -267,7 +267,7 @@ namespace DLS.Graphics
 			Vector2 labelCentre = new(centreX, parentBounds.Bottom + labelSize.y / 2 - offsetY);
 
 			Draw.Quad(labelCentre, labelSize, new Color(0, 0, 0, 0.17f));
-			Draw.Text(font, pin.decimalDisplayCharBuffer, charCount, FontSizePinLabel, labelCentre, Anchor.TextFirstLineCentre, Color.white);
+			Draw.Text(font, pin.DecimalDisplayCharBuffer, charCount, FontSizePinLabel, labelCentre, Anchor.TextFirstLineCentre, Color.white);
 		}
 
 		static Color GetChipOutlineCol(Color chipCol) => ColHelper.GetValue_HSV(chipCol) < 0.075f ? ColHelper.Brighten(chipCol, 0.15f) : ColHelper.Darken(chipCol, 0.15f);
@@ -1099,7 +1099,7 @@ namespace DLS.Graphics
         static void DrawSingleBitPin(PinInstance pin)
 		{
 			Vector2 pinPos = pin.GetWorldPos();
-			Vector2 dir = pin.parent is DevPinInstance devPin ? devPin.faceDir : pin.FacingDir;
+			Vector2 dir = pin.parent is DevPinInstance devPin ? devPin.FaceDir : pin.FacingDir;
 			Vector2 pinSelectionBoundsPos = pinPos + dir * 0.02f;
 			float pinSelectionBoundsRadius = PinRadius + 0.015f;
 
@@ -1138,7 +1138,7 @@ namespace DLS.Graphics
         {
             Vector2 pinPos = pin.GetWorldPos();
 
-            Vector2 dir = pin.parent is DevPinInstance devPin ? devPin.faceDir : pin.FacingDir;
+            Vector2 dir = pin.parent is DevPinInstance devPin ? devPin.FaceDir : pin.FacingDir;
             bool isHorizontal = dir == Vector2.up || dir == Vector2.down;
             float pinWidth = PinRadius * 2 * 0.95f;
             float pinHeight = SubChipInstance.PinHeightFromBitCount(pin.bitCount);
