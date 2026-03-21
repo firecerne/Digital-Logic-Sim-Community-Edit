@@ -31,13 +31,14 @@ namespace DLS.Graphics
         public static bool isPinPositionValid;
         static readonly float minPinSpacing = 0.025f;
 
-        static SubChipInstance CustomizeChip => ChipSaveMenu.ActiveCustomizeChip;
+        static SubChipInstance CustomizeChip => ChipCustomizationMenu.s_CustomizeChip;
 
 		public static bool IsPlacingDisplay => displayInteractState == DisplayInteractState.Placing;
 
 		public static void DrawCustomizationScene()
 		{
-			SubChipInstance chip = ChipSaveMenu.ActiveCustomizeChip;
+			SubChipInstance chip = CustomizeChip;
+			if (chip == null) return;
 
 			HandleKeyboardShortcuts();
 
@@ -94,10 +95,9 @@ namespace DLS.Graphics
 		public static void OnCustomizationMenuClosed()
 		{
 			selectedChipResizeDir = Vector2Int.zero;
-		}
-
-		public static void OnCustomizationMenuOpened()
-		{
+			SelectedDisplay = null;
+			DisplayUnderMouse = null;
+			selectedPin = null;
 		}
 
 		static void HandleDisplayScaling()
@@ -115,7 +115,7 @@ namespace DLS.Graphics
 			}
 
 
-			Bounds2D bounds = DevSceneDrawer.DrawDisplayWithBackground(SelectedDisplay, Vector2.zero, ChipSaveMenu.ActiveCustomizeChip);
+			Bounds2D bounds = DevSceneDrawer.DrawDisplayWithBackground(SelectedDisplay, Vector2.zero, CustomizeChip);
 			DrawDisplayBoundsIndicators(bounds, scaleCol);
 
 			if (Project.ActiveProject.ShouldSnapToGrid)
@@ -146,7 +146,7 @@ namespace DLS.Graphics
 
 				if (confirm)
 				{
-					ChipSaveMenu.ActiveCustomizeChip.Displays.Add(SelectedDisplay);
+					CustomizeChip.Displays.Add(SelectedDisplay);
 					SelectedDisplay = null;
 					displayInteractState = DisplayInteractState.None;
 				}
@@ -163,7 +163,7 @@ namespace DLS.Graphics
 				SelectedDisplay.Desc.Position = targetPos;
 			}
 
-			Bounds2D bounds = DevSceneDrawer.DrawDisplayWithBackground(SelectedDisplay, Vector2.zero, ChipSaveMenu.ActiveCustomizeChip);
+			Bounds2D bounds = DevSceneDrawer.DrawDisplayWithBackground(SelectedDisplay, Vector2.zero, CustomizeChip);
 			DrawDisplayBoundsIndicators(bounds, Color.white);
 
 			if (Project.ActiveProject.ShouldSnapToGrid)
@@ -191,7 +191,7 @@ namespace DLS.Graphics
 
 				if (confirmPlacement)
 				{
-					ChipSaveMenu.ActiveCustomizeChip.Displays.Add(SelectedDisplay);
+					CustomizeChip.Displays.Add(SelectedDisplay);
 					SelectedDisplay = null;
 					displayInteractState = DisplayInteractState.None;
 				}
@@ -375,7 +375,7 @@ namespace DLS.Graphics
 					if (sizeNew != chip.Size)
 					{
                         chip.Description.Size = Vector2.Max(desiredSize, chip.InstanceSize);
-						ChipSaveMenu.ActiveCustomizeChip.UpdatePinLayout();
+						CustomizeChip.UpdatePinLayout();
 					}
 				}
 				// Highlight opposite handle to selected handle
