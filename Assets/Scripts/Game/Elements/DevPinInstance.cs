@@ -23,17 +23,18 @@ namespace DLS.Game
 		public PinValueDisplayMode PinValueDisplayMode;
 		public bool IsHorizontal => FaceDir == Vector2.right || FaceDir == Vector2.left;
 
+		private Vector2 _position;
 
 		public DevPinInstance(PinDescription pinDescription, bool isInput)
 		{
 			ID = pinDescription.ID;
 			IsInputPin = isInput;
-			Position = pinDescription.Position;
 
 			Pin = new PinInstance(pinDescription, new PinAddress(ID, 0), this, isInput);
 			PinValueDisplayMode = pinDescription.ValueDisplayMode;
 
 			// Calculate layout info
+			Position = pinDescription.Position;
 			FaceDir = pinDescription.DevPinFacingDirection;
 			StateGridDimensions = GridHelper.GetStateGridDimension(BitCount);
 			StateGridSize = BitCount == 1 ? 
@@ -41,23 +42,19 @@ namespace DLS.Game
 				(Vector2)StateGridDimensions * MultiBitPinStateDisplaySquareSize + Vector2.one * DevPinStateDisplayOutline;
 		}
 
-		public Vector2 HandlePosition => Position;
-		public Vector2 StateDisplayPosition => (Position + PinPosition) / 2;
-
-		public Vector2 PinPosition
+		public Vector2 Position
 		{
-			get	
+			get => _position;
+			set
 			{
-				if(BitCount.BitCount is 1 or 4 or 8)
-				{
-                    return Position + FaceDir * (GridSize * (BitCount.BitCount is 1 or 4 ? 6 : 9));
-                }
-
-				return Position + FaceDir * (StateGridSize.x + 2 * GridSize);
+				_position = value;
+				UpdatePinPosition();
 			}
 		}
+		public Vector2 HandlePosition => Position;
+		public Vector2 StateDisplayPosition => (Position + PinPosition) / 2;
+		public Vector2 PinPosition;
 
-		public Vector2 Position { get; set; }
 		public Vector2 MoveStartPosition { get; set; }
 		public Vector2 StraightLineReferencePoint { get; set; }
 		public int ID { get; }
@@ -69,6 +66,16 @@ namespace DLS.Game
 		public Bounds2D SelectionBoundingBox => CreateBoundingBox(SelectionBoundsPadding);
 		public Bounds2D BoundingBox => CreateBoundingBox(0);
 		public Vector2 SnapPoint => PinPosition;
+
+		private void UpdatePinPosition()
+		{
+			PinPosition = BitCount.BitCount switch
+			{
+				1 or 4 => Position + FaceDir * (GridSize * 6),
+				8 => Position + FaceDir * (GridSize * 9),
+				_ => Position + FaceDir * (GridSize * 2 + StateGridSize.x)
+			};
+		}
 
 		public bool ShouldBeIncludedInSelectionBox(Vector2 selectionCentre, Vector2 selectionSize)
 		{
@@ -143,25 +150,18 @@ namespace DLS.Game
 		public void Rotate(bool clockwise = true)
 		{
 			if (FaceDir == Vector2.up)
-			{
 				FaceDir = clockwise ? Vector2.right : Vector2.left;
-				return;
-			}
-
-			if (FaceDir == Vector2.right)
-			{
+			
+			else if (FaceDir == Vector2.right)
 				FaceDir = clockwise ? Vector2.down : Vector2.up;
-				return;
-			}
 
-			if (FaceDir == Vector2.down)
-			{
+			else if (FaceDir == Vector2.down)
 				FaceDir = clockwise ? Vector2.left : Vector2.right;
-			}
-			else
-			{
+			
+			else if  (FaceDir == Vector2.left) 
 				FaceDir = clockwise ? Vector2.up : Vector2.down;
-			}
+			
+			UpdatePinPosition();
 		}
 	}
 }
