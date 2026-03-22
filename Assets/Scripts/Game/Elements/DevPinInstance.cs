@@ -144,6 +144,7 @@ namespace DLS.Game
 		public void SetOrientation(Orientation orientation)
 		{
 			FaceDir = GetFacingDirection(orientation);
+			UpdatePinPosition();
 		}
 
 		public Vector2 GetFacingDirection(Orientation orientation) => orientation switch
