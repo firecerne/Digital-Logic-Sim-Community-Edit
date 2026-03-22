@@ -464,6 +464,8 @@ namespace Seb.Vis.UI
 					bool showDefaultText = string.IsNullOrEmpty(state.text)
 #if UNITY_EDITOR
 					                       || !Application.isPlaying;
+#else
+					;
 #endif
 					string displayString = showDefaultText ? defaultText : state.text;
 

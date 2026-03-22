@@ -20,9 +20,7 @@ namespace DLS.Game
 
 		void Awake()
 		{
-#if DEBUG
 			ResetStatics();
-#endif
 
 			AudioState audioState = new();
 			FindFirstObjectByType<AudioUnity>().audioState = audioState;
@@ -91,6 +89,7 @@ namespace DLS.Game
 				Main.OpenSaveDataFolderInFileBrowser();
 			}
 		}
+#endif
 
 		// Ensure static stuff gets properly reset (on account of domain-reloading being disabled in editor)
 		static void ResetStatics()
@@ -101,6 +100,5 @@ namespace DLS.Game
 			CameraController.Reset();
 			WorldDrawer.Reset();
 		}
-#endif
 	}
 }

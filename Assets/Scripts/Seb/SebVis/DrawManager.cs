@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using Seb.Types;
 using Seb.Vis.Internal;
 using Seb.Vis.Text.FontLoading;
+#if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.Callbacks;
+#endif
 using UnityEngine;
 using UnityEngine.Rendering;
 
