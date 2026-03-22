@@ -90,7 +90,8 @@ namespace DLS.Game
 			}
 		}
 #endif
-		// Ensure static stuff gets properly reset (on account of domain-reloading being disabled in editor)
+
+		/// Ensure static stuff gets properly reset (on account of domain-reloading being disabled in editor)
 		static void ResetStatics()
 		{
 			Simulator.Reset();
