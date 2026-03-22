@@ -99,6 +99,7 @@ namespace DLS.Game
 				TimeSpentSinceCreated = new(),
 				Prefs_ChipPinNamesDisplayMode = PreferencesMenu.DisplayMode_OnHover,
 				Prefs_MainPinNamesDisplayMode = PreferencesMenu.DisplayMode_OnHover,
+				Prefs_AddNewChipToStarredItems = true,
 				Prefs_SimTargetStepsPerSecond = 1000,
 				Prefs_SimStepsPerClockTick = 250,
 				Prefs_SimPaused = false,
