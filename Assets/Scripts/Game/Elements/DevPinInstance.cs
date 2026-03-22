@@ -34,8 +34,8 @@ namespace DLS.Game
 			PinValueDisplayMode = pinDescription.ValueDisplayMode;
 
 			// Calculate layout info
-			Position = pinDescription.Position;
 			FaceDir = pinDescription.DevPinFacingDirection;
+			Position = pinDescription.Position;
 			StateGridDimensions = GridHelper.GetStateGridDimension(BitCount);
 			StateGridSize = BitCount == 1 ? 
 				Vector2.one * (DevPinStateDisplayRadius * 2 + DevPinStateDisplayOutline * 2) :
