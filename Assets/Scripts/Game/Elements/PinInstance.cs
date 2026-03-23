@@ -20,7 +20,7 @@ namespace DLS.Game
 		public PinStateValue PlayerInputState;
 		public PinColour Colour;
 		bool faceRight;
-		public float LocalPosY;
+		public float LocalOffset;
 		public string Name;
 		public int face;
         public readonly int ID;
@@ -37,11 +37,9 @@ namespace DLS.Game
 
             IsBusPin = parent is SubChipInstance { IsBus: true };
 			faceRight = isSourcePin;
-			desc.face = faceRight ? 1 : 3; // 1 for right, 3 for left
-			face = faceRight ? 1 : 3;
-            State.SetAllDisconnected();
+			face = desc.Face;
             ID = desc.ID;
-            LocalPosY = desc.LocalOffset;
+            LocalOffset = desc.LocalOffset;
 			State.MakeFromPinBitCount(bitCount);
 			PlayerInputState.MakeFromPinBitCount(bitCount);
 		}
@@ -60,7 +58,7 @@ namespace DLS.Game
                         Vector2 chipSize = subChip.Size;
                         Vector2 chipPos = subChip.Position;
 
-                        float halfWidth = chipSize.x / 2f * (faceRight ? 1 : -1);
+                        float halfWidth = chipSize.x / 2f;
                         float halfHeight = chipSize.y / 2f;
                         float inset = DrawSettings.SubChipPinInset;
                         float outlineOffset = DrawSettings.ChipOutlineWidth / 2f;
@@ -72,23 +70,23 @@ namespace DLS.Game
                         switch (face)
                         {
                             case 0: // Top edge (Y fixed)
-                                x = LocalPosY;
+                                x = LocalOffset;
                                 y = halfHeight + outlineOffset - inset;
                                 break;
 
                             case 1: // Right edge (X fixed)
                                 x = halfWidth + outlineOffset - inset;
-                                y = LocalPosY;
+                                y = LocalOffset;
                                 break;
 
                             case 2: // Bottom edge (Y fixed)
-                                x = LocalPosY;
+                                x = LocalOffset;
                                 y = -halfHeight - outlineOffset + inset;
                                 break;
 
                             case 3: // Left edge (X fixed)
-                                x = halfWidth - outlineOffset + inset;
-                                y = LocalPosY;
+                                x = -halfWidth - outlineOffset + inset;
+                                y = LocalOffset;
                                 break;
 
                             default:

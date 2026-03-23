@@ -82,7 +82,7 @@ namespace DLS.Game
 
 		public static ChipDescription CreateOutPin(PinBitCount pinBitCount)
 		{
-            PinDescription[] inPin = { CreatePinDescription("OUT", 0, pinBitCount) };
+            PinDescription[] inPin = { CreatePinDescription("OUT", 0, pinBitCount, 1) };
 
             ChipDescription OutChip = CreateBuiltinChipDescription(ChipType.Out_Pin, Vector2.zero, Color.clear, inPin, null, null,
                 NameDisplayLocation.Hidden, name: ChipTypeHelper.GetDevPinName(false, pinBitCount));
@@ -114,7 +114,7 @@ namespace DLS.Game
             for (int j = 0; j < smallInBig; j++)
             {
                 string letter = " " + (char)('A' + smallInBig -1 - j);
-                splitOUT[j] = CreatePinDescription("OUT" + letter, j + 1, counts.b);
+                splitOUT[j] = CreatePinDescription("OUT" + letter, j + 1, counts.b, 1);
             }
             string splitName = counts.a + "-" + counts.b + "BIT";
 
@@ -131,7 +131,7 @@ namespace DLS.Game
             int smallInBig = counts.a / counts.b;
 
             PinDescription[] mergeIN = new PinDescription[smallInBig];
-            PinDescription[] mergeOUT = { CreatePinDescription("OUT", smallInBig, counts.a) };
+            PinDescription[] mergeOUT = { CreatePinDescription("OUT", smallInBig, counts.a, 1) };
 
             for (int j = 0; j < smallInBig; j++)
             {
@@ -172,7 +172,7 @@ namespace DLS.Game
 			Vector2 size = new(CalculateGridSnappedWidth(GridSize * 8), GridSize * 4);
 
 			PinDescription[] inputPins = { CreatePinDescription("IN B", 0), CreatePinDescription("IN A", 1) };
-			PinDescription[] outputPins = { CreatePinDescription("OUT", 2) };
+			PinDescription[] outputPins = { CreatePinDescription("OUT", 2, face: 1) };
 
 			return CreateBuiltinChipDescription(ChipType.Nand, size, col, inputPins, outputPins);
 		}
@@ -198,10 +198,10 @@ namespace DLS.Game
 
 			PinDescription[] outputPins =
 			{
-				CreatePinDescription("SPCT", 3, PinBitCount.Bit16),
-				CreatePinDescription("SPS", 2, PinBitCount.Bit16),
-				CreatePinDescription("SPCT_OVERFLOW", 1, PinBitCount.Bit1),
-				CreatePinDescription("SPS_OVERFLOW", 0, PinBitCount.Bit1),
+				CreatePinDescription("SPCT", 3, PinBitCount.Bit16, 1),
+				CreatePinDescription("SPS", 2, PinBitCount.Bit16, 1),
+				CreatePinDescription("SPCT_OVERFLOW", 1, PinBitCount.Bit1, 1),
+				CreatePinDescription("SPS_OVERFLOW", 0, PinBitCount.Bit1, 1),
 			};
 			
 			float height = SubChipInstance.MinChipHeightForPins(outputPins, null);
@@ -216,7 +216,7 @@ namespace DLS.Game
 
 			PinDescription[] outputPins =
 			{
-				CreatePinDescription("TIME", 0, PinBitCount.Bit32),
+				CreatePinDescription("TIME", 0, PinBitCount.Bit32, 1),
 			};
 
 			float height = SubChipInstance.MinChipHeightForPins(outputPins, null);
@@ -237,7 +237,7 @@ namespace DLS.Game
 				CreatePinDescription("RESET", 3),
 				CreatePinDescription("CLOCK", 4)
 			};
-			PinDescription[] outputPins = { CreatePinDescription("OUT", 5, PinBitCount.Bit8) };
+			PinDescription[] outputPins = { CreatePinDescription("OUT", 5, PinBitCount.Bit8, 1) };
 			Vector2 size = new(GridSize * 10, SubChipInstance.MinChipHeightForPins(inputPins, outputPins));
 
 			return CreateBuiltinChipDescription(ChipType.dev_Ram_8Bit, size, col, inputPins, outputPins, canBeCached: false);
@@ -251,8 +251,8 @@ namespace DLS.Game
 			};
 			PinDescription[] outputPins =
 			{
-                CreatePinDescription("OUT B", 1, PinBitCount.Bit8),
-                CreatePinDescription("OUT A", 2, PinBitCount.Bit8)
+                CreatePinDescription("OUT B", 1, PinBitCount.Bit8, 1),
+                CreatePinDescription("OUT A", 2, PinBitCount.Bit8, 1)
             };
 
 			Color col = GetColor(new(0.25f, 0.35f, 0.5f));
@@ -273,8 +273,8 @@ namespace DLS.Game
             };
             PinDescription[] outputPins =
             {
-                CreatePinDescription("OUT B", 5, PinBitCount.Bit8),
-				CreatePinDescription("OUT A", 6, PinBitCount.Bit8)
+                CreatePinDescription("OUT B", 5, PinBitCount.Bit8, 1),
+				CreatePinDescription("OUT A", 6, PinBitCount.Bit8, 1)
 
             };
 
@@ -288,11 +288,11 @@ namespace DLS.Game
 		{
 			PinDescription[] outputPins =
 			{
-				CreatePinDescription("VALUE OUT", 0, PinBitCount.Bit8),
+				CreatePinDescription("VALUE OUT", 0, PinBitCount.Bit8, 1),
 			};
 
 			Color col = new(0.1f, 0.1f, 0.1f);
-			Vector2 size = Vector2.one * GridSize * 6;
+			Vector2 size = GridSize * 6 * Vector2.one;
 
 			return CreateBuiltinChipDescription(ChipType.Constant_8Bit, size, col, null, outputPins);
         }
@@ -306,9 +306,9 @@ namespace DLS.Game
 
             PinDescription[] outputPins =
             {
-                CreatePinDescription("0", 1, PinBitCount.Bit1),
-                CreatePinDescription("1", 2, PinBitCount.Bit1),
-                CreatePinDescription("Z", 3, PinBitCount.Bit1),
+                CreatePinDescription("0", 1, PinBitCount.Bit1, 1),
+                CreatePinDescription("1", 2, PinBitCount.Bit1, 1),
+                CreatePinDescription("Z", 3, PinBitCount.Bit1, 1),
             };
 
             Color col = new(0.1f, 0.1f, 0.3f);
@@ -323,7 +323,7 @@ namespace DLS.Game
 			Color col = GetColor(new(0.1f, 0.1f, 0.1f));
 			Vector2 size = new Vector2(GridSize, GridSize) * 3;
 
-			PinDescription[] outputPins = { CreatePinDescription("OUT", 0) };
+			PinDescription[] outputPins = { CreatePinDescription("OUT", 0, face: 1) };
 
 			return CreateBuiltinChipDescription(ChipType.Key, size, col, null, outputPins, null, NameDisplayLocation.Hidden, canBeCached: false);
 		}
@@ -334,7 +334,7 @@ namespace DLS.Game
             Vector2 size = new Vector2(GridSize, GridSize) * 3;
 			float displayWidth = size.x - GridSize *0.5f;
 
-            PinDescription[] outputPins = { CreatePinDescription("OUT", 0) };
+            PinDescription[] outputPins = { CreatePinDescription("OUT", 0, face: 1) };
 			DisplayDescription[] displays =
 			{
 				new()
@@ -354,7 +354,7 @@ namespace DLS.Game
             Vector2 size = new Vector2(1f, 2f) * GridSize;
             float displayWidth = size.x;
 
-            PinDescription[] outputPins = { CreatePinDescription("OUT", 0) };
+            PinDescription[] outputPins = { CreatePinDescription("OUT", 0, face: 1) };
             DisplayDescription[] displays =
             {
                 new()
@@ -375,7 +375,7 @@ namespace DLS.Game
 			Vector2 size = new(CalculateGridSnappedWidth(1.5f), GridSize * 5);
 
 			PinDescription[] inputPins = { CreatePinDescription("IN", 0), CreatePinDescription("ENABLE", 1) };
-			PinDescription[] outputPins = { CreatePinDescription("OUT", 2) };
+			PinDescription[] outputPins = { CreatePinDescription("OUT", 2, face: 1) };
 
 			return CreateBuiltinChipDescription(ChipType.TriStateBuffer, size, col, inputPins, outputPins);
 		}
@@ -384,7 +384,7 @@ namespace DLS.Game
 		{
 			Vector2 size = new(GridHelper.SnapToGrid(1), GridSize * 3);
 			Color col = GetColor(new(0.1f, 0.1f, 0.1f));
-			PinDescription[] outputPins = { CreatePinDescription("CLK", 0) };
+			PinDescription[] outputPins = { CreatePinDescription("CLK", 0, face: 1) };
 
 			return CreateBuiltinChipDescription(ChipType.Clock, size, col, null, outputPins, canBeCached: false);
 		}
@@ -394,7 +394,7 @@ namespace DLS.Game
 			Vector2 size = new(GridHelper.SnapToGrid(1), GridSize * 3);
 			Color col = GetColor(new(0.1f, 0.1f, 0.1f));
 			PinDescription[] inputPins = { CreatePinDescription("IN", 0) };
-			PinDescription[] outputPins = { CreatePinDescription("PULSE", 1) };
+			PinDescription[] outputPins = { CreatePinDescription("PULSE", 1, face: 1) };
 
 			return CreateBuiltinChipDescription(ChipType.Pulse, size, col, inputPins, outputPins, canBeCached: false);
 		}
@@ -453,9 +453,9 @@ namespace DLS.Game
 
 			PinDescription[] outputPins =
 			{
-				CreatePinDescription("R OUT", 8, PinBitCount.Bit4),
-				CreatePinDescription("G OUT", 9, PinBitCount.Bit4),
-				CreatePinDescription("B OUT", 10, PinBitCount.Bit4)
+				CreatePinDescription("R OUT", 8, PinBitCount.Bit4, face: 1),
+				CreatePinDescription("G OUT", 9, PinBitCount.Bit4, face: 1),
+				CreatePinDescription("B OUT", 10, PinBitCount.Bit4, face: 1)
 			};
 
 			DisplayDescription[] displays =
@@ -494,11 +494,11 @@ namespace DLS.Game
 
 			PinDescription[] outputPins =
 			{
-				CreatePinDescription("R OUT", 8, PinBitCount.Bit4),
-				CreatePinDescription("G OUT", 9, PinBitCount.Bit4),
-				CreatePinDescription("B OUT", 10, PinBitCount.Bit4),
-				CreatePinDescription("TOUCH POS", 11, PinBitCount.Bit8),
-				CreatePinDescription("TOUCHED", 12),
+				CreatePinDescription("R OUT", 8, PinBitCount.Bit4, face: 1),
+				CreatePinDescription("G OUT", 9, PinBitCount.Bit4, face: 1),
+				CreatePinDescription("B OUT", 10, PinBitCount.Bit4, face: 1),
+				CreatePinDescription("TOUCH POS", 11, PinBitCount.Bit8, face: 1),
+				CreatePinDescription("TOUCHED", 12, face: 1),
 			};
 
 			DisplayDescription[] displays =
@@ -528,7 +528,7 @@ namespace DLS.Game
 
 			PinDescription[] outputPins =
 			{
-				CreatePinDescription("PIXEL OUT", 6)
+				CreatePinDescription("PIXEL OUT", 6, face: 1)
 			};
 
 			float height = SubChipInstance.MinChipHeightForPins(inputPins, null);
@@ -569,7 +569,7 @@ namespace DLS.Game
 			string name = ChipTypeHelper.GetBusName(bitCount);
 
 			PinDescription[] inputs = { CreatePinDescription(name + " (Hidden)", 0, bitCount) };
-			PinDescription[] outputs = { CreatePinDescription(name, 1, bitCount) };
+			PinDescription[] outputs = { CreatePinDescription(name, 1, bitCount, 1) };
 
 			Color col = GetColor(new(0.1f, 0.1f, 0.1f));
 
@@ -604,7 +604,6 @@ namespace DLS.Game
 			return CreateBuiltinChipDescription(ChipType.DisplayLED, size, col, inputPins, null, displays, NameDisplayLocation.Hidden, canBeCached: false);
 		}
 
-
 		public static ChipDescription CreateBusTerminus(PinBitCount bitCount)
 		{
 			string name = ChipTypeHelper.GetBusTerminusName(bitCount);
@@ -637,14 +636,15 @@ namespace DLS.Game
 			};
 		}
 
-		static PinDescription CreatePinDescription(string name, int id, ushort bitcount = 1) =>
+		static PinDescription CreatePinDescription(string name, int id, ushort bitCount = 1, int face = 3) =>
 			new(
 				name,
 				id,
 				Vector2.zero,
-				new(bitcount),
+				new(bitCount),
 				PinColour.Red,
-				PinValueDisplayMode.Off
+				PinValueDisplayMode.Off,
+				face: face
 			);
 
 		static float CalculateGridSnappedWidth(float desiredWidth) =>

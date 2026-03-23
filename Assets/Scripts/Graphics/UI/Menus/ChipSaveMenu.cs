@@ -6,13 +6,12 @@ using Seb.Types;
 using Seb.Vis;
 using Seb.Vis.UI;
 using UnityEngine;
-using Random = System.Random;
 
 namespace DLS.Graphics
 {
 	public static class ChipSaveMenu
 	{
-		public const string MaxLengthChipName = "MY VERY LONG CHIP NAME";
+		const string MaxLengthChipName = "MY VERY LONG CHIP NAME";
 
 		const int CancelButtonIndex = 0;
 		const int CustomizeButtonIndex = 1;
@@ -20,7 +19,6 @@ namespace DLS.Graphics
 		const int SaveAsButtonIndex = 3;
 		static readonly UIHandle ID_ChipNameField = new("SaveMenu_ChipNameField");
 		static readonly Func<string, bool> chipNameValidator = ValidateChipNameInput;
-		static readonly Random rng = new();
 
 		public static SubChipInstance ActiveCustomizeChip;
 		static SubChipInstance CustomizeStateBeforeEnteringCustomizeMenu;
@@ -41,7 +39,7 @@ namespace DLS.Graphics
 		public static void OnMenuOpened()
 		{
 			ActiveCustomizeChip ??= CreateCustomizationState();
-			InitUIFromDescription(ActiveCustomizeChip.Description);
+			InitUIFromDescription(ActiveCustomizeDescription);
 		}
 
 		public static (Vector2 size, float pad) GetTextInputSize()
@@ -58,7 +56,6 @@ namespace DLS.Graphics
 
 			DrawSettings.UIThemeDLS theme = DrawSettings.ActiveUITheme;
 			InputFieldTheme inputTheme = DrawSettings.ActiveUITheme.ChipNameInputField;
-			InputFieldState inputFieldState;
 
 			using (UI.BeginBoundsScope(true))
 			{
@@ -66,7 +63,7 @@ namespace DLS.Graphics
 
 				// -- Chip name input field --
 				(Vector2 inputFieldSize, float inputFieldTextPad) = GetTextInputSize();
-				inputFieldState = UI.InputField(ID_ChipNameField, inputTheme, new Vector2(50, 33), inputFieldSize, "Name", Anchor.Centre, inputFieldTextPad, chipNameValidator, true);
+				var inputFieldState = UI.InputField(ID_ChipNameField, inputTheme, new Vector2(50, 33), inputFieldSize, "Name", Anchor.Centre, inputFieldTextPad, chipNameValidator, true);
 
 				Vector2 buttonTopLeft = UI.PrevBounds.BottomLeft + Vector2.down * (DrawSettings.DefaultButtonSpacing * 2);
 				bool renaming = Project.ActiveProject.ChipHasBeenSavedBefore && !ChipDescription.NameMatch(inputFieldState.text, Project.ActiveProject.ViewedChip.LastSavedDescription.Name);
@@ -113,34 +110,12 @@ namespace DLS.Graphics
 			}
 		}
 
-        // Create a subchip instance based on the current dev chip (we need a subchip instance to be able to draw a preview of the chip in the customization menu)
-        // The description on this subchip holds potential customizations, such as name changes, resizing, colour etc.
-		// This will load custom pin layouts if available to support editting existing chips. if no custom layout will use default behaviours.
+        // Create a subChip instance based on the current dev chip (we need a subChip instance to be able to draw a preview of the chip in the customization menu)
+        // The description on this subChip holds potential customizations, such as name changes, resizing, colour etc.
         static SubChipInstance CreateCustomizationState()
         {
             DevChipInstance viewedChip = Project.ActiveProject.ViewedChip;
             ChipDescription desc = DescriptionCreator.CreateChipDescription(viewedChip);
-
-            desc.HasCustomLayout = viewedChip.HasCustomLayout;
-
-            // Copy layout if it exists
-            if (desc.HasCustomLayout && viewedChip.LastSavedDescription != null)
-            {
-                var savedDesc = viewedChip.LastSavedDescription;
-
-                for (int i = 0; i < desc.InputPins.Length && i < savedDesc.InputPins.Length; i++)
-                {
-                    desc.InputPins[i].face = savedDesc.InputPins[i].face;
-                    desc.InputPins[i].LocalOffset = savedDesc.InputPins[i].LocalOffset;
-                }
-
-                for (int i = 0; i < desc.OutputPins.Length && i < savedDesc.OutputPins.Length; i++)
-                {
-                    desc.OutputPins[i].face = savedDesc.OutputPins[i].face;
-                    desc.OutputPins[i].LocalOffset = savedDesc.OutputPins[i].LocalOffset;
-                }
-            }
-
             return CreatePreviewSubChipInstance(desc);
         }
 
@@ -185,7 +160,6 @@ namespace DLS.Graphics
 			inputFieldState.SetText(chipDesc.Name);
 		}
 
-
 		static void Save(Project.SaveMode mode)
 		{
 			Project.ActiveProject.SaveFromDescription(ActiveCustomizeDescription, mode);
@@ -199,7 +173,7 @@ namespace DLS.Graphics
 
 		static void CloseMenu()
 		{
-			ActiveCustomizeChip = null;
+			Reset();
 			UIDrawer.SetActiveMenu(UIDrawer.MenuType.None);
 		}
 
@@ -207,14 +181,6 @@ namespace DLS.Graphics
 		{
 			ActiveCustomizeChip = null;
 			CustomizeStateBeforeEnteringCustomizeMenu = null;
-		}
-
-		static Color RandomInitialColour()
-		{
-			float h = (float)rng.NextDouble();
-			float s = Mathf.Lerp(0.2f, 1, (float)rng.NextDouble());
-			float v = Mathf.Lerp(0.2f, 1, (float)rng.NextDouble());
-			return Color.HSVToRGB(h, s, v);
 		}
 	}
 }

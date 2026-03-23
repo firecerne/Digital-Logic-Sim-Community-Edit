@@ -31,6 +31,9 @@ namespace DLS.Graphics
         static SubChipInstance[] subChipsWithDisplays;
 		static string displayLabelString;
 		static string colHexCodeString;
+		static bool s_isCustomLayout;
+		static SubChipInstance s_customizeChip => ChipSaveMenu.ActiveCustomizeChip;
+		static ChipDescription s_customizeDescription => ChipSaveMenu.ActiveCustomizeDescription;
 
 		static readonly UIHandle ID_DisplaysScrollView = new("CustomizeMenu_DisplaysScroll");
 		static readonly UIHandle ID_ColourPicker = new("CustomizeMenu_ChipCol");
@@ -38,16 +41,15 @@ namespace DLS.Graphics
 		static readonly UIHandle ID_NameDisplayOptions = new("CustomizeMenu_NameDisplayOptions");
 		static readonly UIHandle ID_CachingOptions = new("CustomizeMenu_CachingOptions");
 		static readonly UI.ScrollViewDrawElementFunc drawDisplayScrollEntry = DrawDisplayScroll;
-        public static readonly UIHandle ID_LayoutOptions = new("CustomizeMenu_LayoutOptions");
+		static readonly UIHandle ID_LayoutOptions = new("CustomizeMenu_LayoutOptions");
 		static readonly Func<string, bool> hexStringInputValidator = ValidateHexStringInput;
-		public static bool isCustomLayout;
-        public static void OnMenuOpened()
+		
+		public static void OnMenuOpened()
 		{
 			DevChipInstance chip = Project.ActiveProject.ViewedChip;
 			subChipsWithDisplays = chip.GetSubchips().Where(c => c.Description.HasDisplay()).OrderBy(c => c.Position.x).ThenBy(c => c.Position.y).ToArray();
 			CustomizationSceneDrawer.OnCustomizationMenuOpened();
 			displayLabelString = $"DISPLAYS ({subChipsWithDisplays.Length}):";
-            isCustomLayout = false;
 
             InitUIFromChipDescription();
 		}
@@ -68,55 +70,50 @@ namespace DLS.Graphics
 
 			// ---- Chip name UI ----
 			int nameDisplayMode = UI.WheelSelector(ID_NameDisplayOptions, nameDisplayOptions, NextPos(), new Vector2(pw, DrawSettings.ButtonHeight), theme.OptionsWheel, Anchor.TopLeft);
-			ChipSaveMenu.ActiveCustomizeDescription.NameLocation = (NameDisplayLocation)nameDisplayMode;
+			s_customizeDescription.NameLocation = (NameDisplayLocation)nameDisplayMode;
             // ---- Chip layout UI ----
             int layoutMode = UI.WheelSelector(ID_LayoutOptions, layoutOptions, NextPos(), new Vector2(pw, DrawSettings.ButtonHeight), theme.OptionsWheel, Anchor.TopLeft);
-            if (layoutMode == 0 && isCustomLayout)
+            if (layoutMode == 0 && s_isCustomLayout)
             {
                 // Switch to default layout
-                isCustomLayout = false;
-                ChipSaveMenu.ActiveCustomizeChip.SetCustomLayout(false);
+                SetCustomLayout(false);
                 // Reset pins on the preview instance
-                foreach (PinInstance pin in ChipSaveMenu.ActiveCustomizeChip.InputPins)
+                foreach (PinInstance pin in s_customizeChip.InputPins)
                 {
                     pin.face = 3;
-                    pin.LocalPosY = 0;
+                    pin.LocalOffset = 0;
                 }
-                foreach (PinInstance pin in ChipSaveMenu.ActiveCustomizeChip.OutputPins)
+                foreach (PinInstance pin in s_customizeChip.OutputPins)
                 {
                     pin.face = 1;
-                    pin.LocalPosY = 0;
-                    //Reset layout
-                    
+                    pin.LocalOffset = 0;
                 }
-                ChipSaveMenu.ActiveCustomizeChip.updateMinSize();
-                if (ChipSaveMenu.ActiveCustomizeChip.MinSize.x > ChipSaveMenu.ActiveCustomizeChip.Description.Size.x)
+                s_customizeChip.updateMinSize();
+                if (s_customizeChip.MinSize.x > s_customizeDescription.Size.x)
                 {
-                    ChipSaveMenu.ActiveCustomizeChip.Description.Size.x = ChipSaveMenu.ActiveCustomizeChip.MinSize.x;
+                    s_customizeDescription.Size.x = s_customizeChip.MinSize.x;
                 }
-                if (ChipSaveMenu.ActiveCustomizeChip.MinSize.y > ChipSaveMenu.ActiveCustomizeChip.Description.Size.y)
+                if (s_customizeChip.MinSize.y > s_customizeDescription.Size.y)
                 {
-                    ChipSaveMenu.ActiveCustomizeChip.Description.Size.y = ChipSaveMenu.ActiveCustomizeChip.MinSize.y;
+                    s_customizeDescription.Size.y = s_customizeChip.MinSize.y;
                 }
-                ChipSaveMenu.ActiveCustomizeChip.UpdatePinLayout();
+                s_customizeChip.UpdatePinLayout();
             }
-            else if (layoutMode == 1 && !isCustomLayout)
+            else if (layoutMode == 1 && !s_isCustomLayout)
             {
-                // Switch to custom layout
-                isCustomLayout = true;
-                ChipSaveMenu.ActiveCustomizeChip.SetCustomLayout(true);
+                SetCustomLayout();
             }
 
-				// ---- Chip colour UI ----
-				Color newCol = UI.DrawColourPicker(ID_ColourPicker, NextPos(), pw, Anchor.TopLeft);
+			// ---- Chip colour UI ----
+			Color newCol = UI.DrawColourPicker(ID_ColourPicker, NextPos(), pw, Anchor.TopLeft);
 			InputFieldTheme inputTheme = MenuHelper.Theme.ChipNameInputField;
 			inputTheme.fontSize = MenuHelper.Theme.FontSizeRegular;
 
 			InputFieldState hexColInput = UI.InputField(ID_ColourHexInput, inputTheme, NextPos(), new Vector2(pw, DrawSettings.ButtonHeight), "#", Anchor.TopLeft, 1, hexStringInputValidator);
 
-			if (newCol != ChipSaveMenu.ActiveCustomizeDescription.Colour)
+			if (newCol != s_customizeDescription.Colour)
 			{
-				ChipSaveMenu.ActiveCustomizeDescription.Colour = newCol;
+				s_customizeDescription.Colour = newCol;
 				UpdateChipColHexStringFromColour(newCol);
 			}
 			else if (colHexCodeString != hexColInput.text)
@@ -141,7 +138,7 @@ namespace DLS.Graphics
 						new Vector2(pw, DrawSettings.ButtonHeight), theme.OptionsWheel, Anchor.TopLeft);
 					bool shouldBeCached = false;
 					if (shouldBeCachedNum == 1) shouldBeCached = true;
-					ChipSaveMenu.ActiveCustomizeDescription.ShouldBeCached = shouldBeCached;
+					s_customizeDescription.ShouldBeCached = shouldBeCached;
 					UI.DrawText("WARNING: Caching chips with many", UIThemeLibrary.DefaultFont,
 						UIThemeLibrary.FontSizeSmall, NextPos(), Anchor.TopLeft, Color.white);
 					UI.DrawText("input bits significantly", UIThemeLibrary.DefaultFont,
@@ -206,7 +203,7 @@ namespace DLS.Graphics
 
 			// Don't allow adding same display multiple times
 			bool enabled = CustomizationSceneDrawer.SelectedDisplay == null || subChip.ID != CustomizationSceneDrawer.SelectedDisplay.Desc.SubChipID; // display is removed from list when selected, so check manually here
-			foreach (DisplayInstance d in ChipSaveMenu.ActiveCustomizeChip.Displays)
+			foreach (DisplayInstance d in s_customizeChip.Displays)
 			{
 				if (d.Desc.SubChipID == subChip.ID)
 				{
@@ -234,50 +231,38 @@ namespace DLS.Graphics
 		{
 			// Init col picker to chip colour
 			ColourPickerState chipColourPickerState = UI.GetColourPickerState(ID_ColourPicker);
-			Color.RGBToHSV(ChipSaveMenu.ActiveCustomizeDescription.Colour, out chipColourPickerState.hue, out chipColourPickerState.sat, out chipColourPickerState.val);
+			Color.RGBToHSV(s_customizeDescription.Colour, out chipColourPickerState.hue, out chipColourPickerState.sat, out chipColourPickerState.val);
 			UpdateChipColHexStringFromColour(chipColourPickerState.GetRGB());
 
 			// Init name display mode
 			WheelSelectorState nameDisplayWheelState = UI.GetWheelSelectorState(ID_NameDisplayOptions);
-			nameDisplayWheelState.index = (int)ChipSaveMenu.ActiveCustomizeDescription.NameLocation;
+			nameDisplayWheelState.index = (int)s_customizeDescription.NameLocation;
 
 			// Init cache setting
 			WheelSelectorState cacheSettingWheelState = UI.GetWheelSelectorState(ID_CachingOptions);
-			bool cacheBool = ChipSaveMenu.ActiveCustomizeDescription.ShouldBeCached;
-			int cacheInt = 0;
-			if (cacheBool) cacheInt = 1;
-			cacheSettingWheelState.index = cacheInt;
+			cacheSettingWheelState.index = s_customizeDescription.ShouldBeCached ? 1: 0;
       
             // Init layout mode by checking if any pins have custom positions
-            isCustomLayout = Project.ActiveProject.ViewedChip.HasCustomLayout;
-
             WheelSelectorState layoutWheelState = UI.GetWheelSelectorState(ID_LayoutOptions);
-            layoutWheelState.index = isCustomLayout ? 1 : 0;
-    }
+            s_isCustomLayout = s_customizeDescription.HasCustomLayout;
+            layoutWheelState.index = s_isCustomLayout ? 1 : 0;
+		}
 
 		static void UpdateCustomizeDescription()
 		{
-			List<DisplayInstance> displays = ChipSaveMenu.ActiveCustomizeChip.Displays;
-			ChipSaveMenu.ActiveCustomizeDescription.Displays = displays.Select(s => s.Desc).ToArray();
-			ChipSaveMenu.ActiveCustomizeDescription.HasCustomLayout = isCustomLayout;
+			List<DisplayInstance> displays = s_customizeChip.Displays;
+			s_customizeDescription.Displays = displays.Select(s => s.Desc).ToArray();
 
             //Saves pin offset and faces
-            for (int i = 0; i < ChipSaveMenu.ActiveCustomizeChip.Description.InputPins.Length; i++)
-				{
-                ChipSaveMenu.ActiveCustomizeDescription.InputPins[i].LocalOffset = ChipSaveMenu.ActiveCustomizeChip.InputPins[i].LocalPosY;
-                ChipSaveMenu.ActiveCustomizeDescription.InputPins[i].face = ChipSaveMenu.ActiveCustomizeChip.InputPins[i].face;
-
-                ChipSaveMenu.ActiveCustomizeChip.Description.InputPins[i].LocalOffset = ChipSaveMenu.ActiveCustomizeChip.InputPins[i].LocalPosY;
-                ChipSaveMenu.ActiveCustomizeChip.Description.InputPins[i].face = ChipSaveMenu.ActiveCustomizeChip.InputPins[i].face;
-
-            }
-            for (int i = 0; i < ChipSaveMenu.ActiveCustomizeChip.Description.OutputPins.Length; i++)
+            for (int i = 0; i < s_customizeDescription.InputPins.Length; i++)
             {
-                ChipSaveMenu.ActiveCustomizeDescription.OutputPins[i].LocalOffset = ChipSaveMenu.ActiveCustomizeChip.OutputPins[i].LocalPosY;
-                ChipSaveMenu.ActiveCustomizeDescription.OutputPins[i].face = ChipSaveMenu.ActiveCustomizeChip.OutputPins[i].face;
-
-                ChipSaveMenu.ActiveCustomizeChip.Description.OutputPins[i].LocalOffset = ChipSaveMenu.ActiveCustomizeChip.OutputPins[i].LocalPosY;
-                ChipSaveMenu.ActiveCustomizeChip.Description.OutputPins[i].face = ChipSaveMenu.ActiveCustomizeChip.OutputPins[i].face;
+                s_customizeDescription.InputPins[i].LocalOffset = s_customizeChip.InputPins[i].LocalOffset;
+                s_customizeDescription.InputPins[i].Face = s_customizeChip.InputPins[i].face;
+            }
+            for (int i = 0; i < s_customizeDescription.OutputPins.Length; i++)
+            {
+                s_customizeDescription.OutputPins[i].LocalOffset = s_customizeChip.OutputPins[i].LocalOffset;
+                s_customizeDescription.OutputPins[i].Face = s_customizeChip.OutputPins[i].face;
             }
         }
 
@@ -297,7 +282,7 @@ namespace DLS.Graphics
 			if (ColHelper.TryParseHexCode(hexString, out Color col))
 			{
 				UI.GetColourPickerState(ID_ColourPicker).SetRGB(col);
-				ChipSaveMenu.ActiveCustomizeDescription.Colour = col;
+				s_customizeDescription.Colour = col;
 			}
 		}
 
@@ -321,40 +306,12 @@ namespace DLS.Graphics
 			return numHexDigits <= 6;
 		}
 
-        static void FaceSnapping(PinInstance pin, float mouseY)
-            {
-                if (pin.parent is SubChipInstance chip)
-                {
-                    Vector2 chipSize = chip.Size;
-                    Vector2 chipPos = chip.Position;
-
-                    //Calculate distances to top and bottom edges
-                    float distanceToTop = Mathf.Abs(mouseY - (chipPos.y + chipSize.y / 2));
-                    float distanceToBottom = Mathf.Abs(mouseY - (chipPos.y - chipSize.y / 2));
-
-                    //Calculate distances to left and right edges
-                    float distanceToLeft = Mathf.Abs(chipPos.x - chipSize.x / 2);
-                    float distanceToRight = Mathf.Abs(chipPos.x + chipSize.x / 2);
-
-                    //Determine the closest vertical edge (top or bottom)
-                    float closestVerticalDistance = Mathf.Min(distanceToTop, distanceToBottom);
-                    bool isTopCloser = closestVerticalDistance == distanceToTop;
-
-                    //Determine the closest horizontal edge (left or right)
-                    float closestHorizontalDistance = Mathf.Min(distanceToLeft, distanceToRight);
-                    bool isLeftCloser = closestHorizontalDistance == distanceToLeft;
-                    //Compare the closest of the 2 previously closests
-                    if (closestVerticalDistance < closestHorizontalDistance)
-                    {
-                        if (isTopCloser) {pin.face = 0;}
-                        else {pin.face = 2;}
-                    }
-                    else
-                    {
-                        if (isLeftCloser) {pin.face = 3;}
-                        else{ pin.face = 1; }
-                    }
-                }
-            }
-    }
+        public static void SetCustomLayout(bool isCustom = true)
+        {
+            s_isCustomLayout = isCustom;
+            UI.GetWheelSelectorState(ID_LayoutOptions).index = isCustom ? 1 : 0;
+            s_customizeChip.SetCustomLayout(isCustom);
+            s_customizeDescription.HasCustomLayout = isCustom;
+        }
+	}
 }
