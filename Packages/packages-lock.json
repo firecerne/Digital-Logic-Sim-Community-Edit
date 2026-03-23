@@ -50,7 +50,7 @@
         "com.unity.modules.jsonserialize": "1.0.0"
       }
     },
-    "com.unity.toolchain.win-x86_64-linux": {
+    "com.unity.toolchain.linux-x86_64-linux": {
       "version": "1.0.2",
       "depth": 0,
       "source": "registry",
