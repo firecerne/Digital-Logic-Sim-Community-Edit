@@ -1,13 +1,13 @@
 using System;
+using System.Linq;
 using DLS.Description;
 using DLS.Game;
 using Seb.Helpers;
 using Seb.Types;
 using Seb.Vis;
-using UnityEngine;
-using System.Linq;
 using Seb.Vis.UI;
-using System.Collections.Generic;
+using UnityEngine;
+using static DLS.Graphics.DrawSettings;
 
 namespace DLS.Graphics
 {
@@ -24,6 +24,7 @@ namespace DLS.Graphics
 		static Vector2 mouseDownPos;
 		static Vector2 displayPosInitial;
 		static float displayScaleInitial;
+		
         public static PinInstance selectedPin;
         public static bool isDraggingPin;
         private static float lastValidOffset;
@@ -107,7 +108,7 @@ namespace DLS.Graphics
 			Color scaleCol = new(0.4f, 1, 0.2f);
 			float deltaScale = (mouseDownPos - InputHelper.MousePosWorld).magnitude;
 			deltaScale *= Vector2.Dot((InputHelper.MousePosWorld - mouseDownPos).normalized, (displayPosInitial - mouseDownPos).normalized);
-			float targetScale = Mathf.Max(DrawSettings.GridSize, displayScaleInitial - deltaScale);
+			float targetScale = Mathf.Max(GridSize, displayScaleInitial - deltaScale);
 
 			if (!Project.ActiveProject.ShouldSnapToGrid)
 			{
@@ -229,7 +230,7 @@ namespace DLS.Graphics
 						DisplayUnderMouse = display;
 
 						float cornerDst = bounds.DstToCorner(InputHelper.MousePosWorld);
-						float cornerDstThresholdForScaleMode = Mathf.Min(displayMinAxisSize * 0.2f, DrawSettings.GridSize * 1.5f);
+						float cornerDstThresholdForScaleMode = Mathf.Min(displayMinAxisSize * 0.2f, GridSize * 1.5f);
 						bool enterScaleMode = cornerDst < cornerDstThresholdForScaleMode;
 
 						if (enterScaleMode)
@@ -293,7 +294,7 @@ namespace DLS.Graphics
 		static void DrawPlacementCornerIndicator(Vector2 corner, Vector2 dirA, Vector2 dirB, Color col)
 		{
 			const float pad = 0.0f;
-			const float len = DrawSettings.GridSize;
+			const float len = GridSize;
 			const float thick = 0.01f;
 
 			Vector2 origin = corner - (dirA + dirB) * pad;
@@ -366,7 +367,7 @@ namespace DLS.Graphics
 
                     if (snapX && dir.x != 0)
                     {
-                        desiredSize.x = GridHelper.SnapToGridForceEven(desiredSize.x) - DrawSettings.ChipOutlineWidth;
+                        desiredSize.x = GridHelper.SnapToGridForceEven(desiredSize.x) - ChipOutlineWidth;
                     }
 
                     chip.updateMinSize();
@@ -391,96 +392,112 @@ namespace DLS.Graphics
 
         static void HandlePinDragging()
         {
-            if (!InteractionState.MouseIsOverUI)
-            {
-                // Start dragging a pin
-                if (InputHelper.IsMouseDownThisFrame(MouseButton.Left))
-                {
-                    if (InteractionState.ElementUnderMouse is PinInstance pin)
-                    {
-                        selectedPin = pin;
-                        isDraggingPin = true;
-                        lastValidOffset = pin.LocalPosY;
-                        lastValidFace = pin.face;
-                    }
-                }
+	        if (InteractionState.MouseIsOverUI) return;
+	        // Start dragging a pin
+	        if (InputHelper.IsMouseDownThisFrame(MouseButton.Left))
+	        {
+		        if (InteractionState.ElementUnderMouse is PinInstance pin)
+		        {
+			        selectedPin = pin;
+			        isDraggingPin = true;
+			        lastValidOffset = pin.LocalPosY;
+			        lastValidFace = pin.face;
+		        }
+	        }
 
-                if (isDraggingPin && selectedPin?.parent is SubChipInstance chip)
-                {
-                    Vector2 mouseWorld = InputHelper.MousePosWorld;
-                    Vector2 chipCenter = chip.Position;
-                    Vector2 localMouse = mouseWorld - chipCenter;
-                    Vector2 chipHalfSize = chip.Size / 2f;
+	        if (!isDraggingPin || selectedPin.parent is not SubChipInstance chip) return;
+	        
+	        Vector2 mouseWorld = InputHelper.MousePosWorld;
+	        Vector2 chipCenter = chip.Position;
+	        Vector2 localMouse = mouseWorld - chipCenter;
+	        Vector2 chipHalfSize = chip.Size / 2f;
 
-                    // Determine closest edge
-                    float distTop = Mathf.Abs(localMouse.y - chipHalfSize.y);
-                    float distBottom = Mathf.Abs(localMouse.y + chipHalfSize.y);
-                    float distRight = Mathf.Abs(localMouse.x - chipHalfSize.x);
-                    float distLeft = Mathf.Abs(localMouse.x + chipHalfSize.x);
+	        // Determine closest edge
+	        float distTop = Mathf.Abs(localMouse.y - chipHalfSize.y);
+	        float distBottom = Mathf.Abs(localMouse.y + chipHalfSize.y);
+	        float distRight = Mathf.Abs(localMouse.x - chipHalfSize.x);
+	        float distLeft = Mathf.Abs(localMouse.x + chipHalfSize.x);
 
-                    int closestFace = 0;
-                    float minDist = distTop;
+			int closestFace = 0;
+			float minDist = distTop;
 
-                    if (distRight < minDist) { closestFace = 1; minDist = distRight; }
-                    if (distBottom < minDist) { closestFace = 2; minDist = distBottom; }
-                    if (distLeft < minDist) { closestFace = 3; }
+	        if (distRight < minDist) { closestFace = 1; minDist = distRight; }
+	        if (distBottom < minDist) { closestFace = 2; minDist = distBottom; }
+	        if (distLeft < minDist) { closestFace = 3; }
 
-                    selectedPin.face = closestFace;
+	        selectedPin.face = closestFace;
 
-                    float pinHeight = SubChipInstance.PinHeightFromBitCount(selectedPin.bitCount);
+	        float pinHeight = SubChipInstance.PinHeightFromBitCount(selectedPin.bitCount);
 
-                    float maxOffset;
-                    float offsetAlongFace;
+	        float maxOffset;
+	        float offsetAlongFace;
 
-                    bool shouldSnapToGrid = Project.ActiveProject.ShouldSnapToGrid;
+	        bool shouldSnapToGrid = Project.ActiveProject.ShouldSnapToGrid;
 
-                    if (closestFace == 0 || closestFace == 2)
-                    {
-                        // Horizontal face - move along X axis
-                        maxOffset = chipHalfSize.x - pinHeight / 2f;
-                        offsetAlongFace = shouldSnapToGrid ? GridHelper.ClampToGrid(localMouse.x, -maxOffset, maxOffset) :
-                            Mathf.Clamp(localMouse.x, -maxOffset, maxOffset);
-                    }
-                    else
-                    {
-                        // Vertical face - move along Y axis
-                        maxOffset = chipHalfSize.y - pinHeight / 2f;
-                        offsetAlongFace = shouldSnapToGrid ? GridHelper.ClampToGrid(localMouse.y, -maxOffset, maxOffset) :
-                            Mathf.Clamp(localMouse.y, -maxOffset, maxOffset);
-                    }
+	        if (closestFace == 0 || closestFace == 2)
+	        {
+		        // Horizontal face - move along X axis
+		        maxOffset = chipHalfSize.x - pinHeight / 2f;
+		        offsetAlongFace = shouldSnapToGrid ? GridHelper.ClampToGrid(localMouse.x, -maxOffset, maxOffset) :
+			        Mathf.Clamp(localMouse.x, -maxOffset, maxOffset);
+	        }
+	        else
+	        {
+		        // Vertical face - move along Y axis
+		        maxOffset = chipHalfSize.y - pinHeight / 2f;
+		        offsetAlongFace = shouldSnapToGrid ? GridHelper.ClampToGrid(localMouse.y, -maxOffset, maxOffset) :
+			        Mathf.Clamp(localMouse.y, -maxOffset, maxOffset);
+	        }
 
-                    selectedPin.LocalPosY = offsetAlongFace;
+	        selectedPin.LocalPosY = offsetAlongFace;
 
-                    PinInstance overlappedPin;
-                    isPinPositionValid = !DoesPinOverlap(selectedPin, out overlappedPin);
+	        isPinPositionValid = !DoesPinOverlap(selectedPin, out PinInstance overlappedPin);
 
-                    // End drag on mouse release
-                    if (InputHelper.IsMouseUpThisFrame(MouseButton.Left))
-                    {
-                        if (isPinPositionValid)
-                        {
-                            lastValidOffset = offsetAlongFace;
-                            lastValidFace = selectedPin.face;
+	        //makes pins red if too close
+	        if (!isPinPositionValid)
+	        {
+		        Vector2 pinPos = overlappedPin.GetWorldPos();
+		        if (overlappedPin.bitCount == PinBitCount.Bit1)
+		        {
+			        Draw.Quad(pinPos, PinRadius * 2.4f * Vector2.one, Color.red);
+		        }
+		        else
+		        {
+			        float pinWidth = PinRadius * 2 * 0.95f;
+			        float overlappedPinHeight = SubChipInstance.PinHeightFromBitCount(overlappedPin.bitCount);
 
-                            if (!ChipCustomizationMenu.isCustomLayout)
-                            {
-                                ChipCustomizationMenu.isCustomLayout = true;
-                                UI.GetWheelSelectorState(ChipCustomizationMenu.ID_LayoutOptions).index = 1;
-                                ChipSaveMenu.ActiveCustomizeChip.SetCustomLayout(true);
-                            }
-                        }
-                        else
-                        {
-                            selectedPin.LocalPosY = lastValidOffset;
-                            selectedPin.face = lastValidFace;
-                        }
+			        Vector2 pinSize = (overlappedPin.face == 0 || overlappedPin.face == 2)
+				        ? new Vector2(overlappedPinHeight, pinWidth)  // horizontal pin
+				        : new Vector2(pinWidth, overlappedPinHeight); // vertical pin
 
-                        isDraggingPin = false;
-                        selectedPin = null;
-                        isPinPositionValid = true;
-                    }
-                }
-            }
+			        Draw.Quad(pinPos, pinSize * 1.2f, Color.red);
+		        }
+	        }
+
+	        if (!InputHelper.IsMouseUpThisFrame(MouseButton.Left)) return;
+
+	        // End drag on mouse release
+	        if (isPinPositionValid)
+	        {
+		        lastValidOffset = offsetAlongFace;
+		        lastValidFace = selectedPin.face;
+
+		        if (!ChipCustomizationMenu.isCustomLayout)
+		        {
+			        ChipCustomizationMenu.isCustomLayout = true;
+			        UI.GetWheelSelectorState(ChipCustomizationMenu.ID_LayoutOptions).index = 1;
+			        ChipSaveMenu.ActiveCustomizeChip.SetCustomLayout(true);
+		        }
+	        }
+	        else
+	        {
+		        selectedPin.LocalPosY = lastValidOffset;
+		        selectedPin.face = lastValidFace;
+	        }
+
+	        isDraggingPin = false;
+	        selectedPin = null;
+	        isPinPositionValid = true;
         }
 
         public static void Reset()
@@ -489,17 +506,12 @@ namespace DLS.Graphics
 			displayInteractState = DisplayInteractState.None;
 		}
 
-        public static bool DoesPinOverlap(PinInstance pin, out PinInstance overlappedPin)
+		static bool DoesPinOverlap(PinInstance pin, out PinInstance overlappedPin)
         {
             overlappedPin = null;
-            if (!(pin.parent is SubChipInstance chip)) return false;
+            if (pin.parent is not SubChipInstance chip) return false;
 
-            // Get all pins on the same chip to check pins on the same face as selectedpin
-            List<PinInstance> pinsToCheck = new List<PinInstance>();
-            pinsToCheck.AddRange(chip.InputPins);
-            pinsToCheck.AddRange(chip.OutputPins);
-
-            foreach (PinInstance otherPin in pinsToCheck)
+            foreach (PinInstance otherPin in chip.AllPins)
             {
                 if (otherPin == pin) continue;
 

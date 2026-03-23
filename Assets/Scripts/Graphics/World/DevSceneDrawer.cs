@@ -590,7 +590,6 @@ namespace DLS.Graphics
 					{
 						int address = y * 16 + x;
 						uint pixelState = simSource.InternalState[address];
-						float v = pixelState;
 						col = new Color(pixelState, pixelState, pixelState);
 					}
 
@@ -950,7 +949,7 @@ namespace DLS.Graphics
 
 			Vector2 topLeft = new(centre.x - inputGridSizeWithoutOutline.x / 2, centre.y + inputGridSizeWithoutOutline.y / 2);
 			Draw.Quad(centre, inputGridSize, Color.black);
-			int currBitIndex = (int)devPin.BitCount - 1;
+			int currBitIndex = devPin.BitCount - 1;
 
 			bool mouseOverStateGrid = InputHelper.MouseInsideBounds_World(centre, inputGridSize);
 			bool isInteractable = controller.CanInteractWithPinStateDisplay && devPin.IsInputPin;
@@ -1159,27 +1158,6 @@ namespace DLS.Graphics
 			{
 				DrawMultiBitPin(pin);
 			}
-
-            //makes pins red if too close
-            if (CustomizationSceneDrawer.isDraggingPin && CustomizationSceneDrawer.selectedPin == pin && !CustomizationSceneDrawer.isPinPositionValid)
-            {
-                Vector2 pinPos = pin.GetWorldPos();
-                if (pin.bitCount == PinBitCount.Bit1)
-                {
-                    Draw.Quad(pinPos, Vector2.one * PinRadius * 2.4f, Color.red);
-                }
-                else
-                {
-                    float pinWidth = PinRadius * 2 * 0.95f;
-                    float pinHeight = SubChipInstance.PinHeightFromBitCount(pin.bitCount);
-
-                    Vector2 pinSize = (pin.face == 0 || pin.face == 2)
-                        ? new Vector2(pinHeight, pinWidth)  // horizontal pin
-                        : new Vector2(pinWidth, pinHeight); // vertical pin
-
-                    Draw.Quad(pinPos, pinSize * 1.2f, Color.red);
-                }
-            }
         }
 
         static void DrawSingleBitPin(PinInstance pin)
@@ -1243,7 +1221,7 @@ namespace DLS.Graphics
         {
             Vector2 pinPos = pin.GetWorldPos();
 
-            bool isHorizontal = pin.face == 0 || pin.face == 2;
+            bool isHorizontal = pin.FacingDir == Vector2.up || pin.FacingDir == Vector2.down;
             float pinWidth = PinRadius * 2 * 0.95f;
             float pinHeight = SubChipInstance.PinHeightFromBitCount(pin.bitCount);
             Vector2 pinSize = isHorizontal ? new Vector2(pinHeight, pinWidth) : new Vector2(pinWidth, pinHeight);
