@@ -33,6 +33,10 @@ namespace DLS.Description
         public Shortcut DeleteShortcutTriggered;
         public Shortcut SimNextStepShortcutTriggered;
         public Shortcut SimPauseToggleShortcutTriggered;
+        
+        // ---- Chip interaction shortcuts ----
+        public Shortcut RotateElementClockwiseShortcutTriggered;
+        public Shortcut RotateElementCounterClockwiseShortcutTriggered;
 
         // ---- Dev shortcuts ----
         public Shortcut OpenSaveDataFolderShortcutTriggered;
@@ -66,6 +70,9 @@ namespace DLS.Description
                 DeleteShortcutTriggered = new(ShortcutModifier.None, KeyCode.Backspace, alternativeKey: KeyCode.Delete),
                 SimNextStepShortcutTriggered = new(ShortcutModifier.None, KeyCode.Space, forbiddenMod: ShortcutModifier.Ctrl),
                 SimPauseToggleShortcutTriggered = new(ShortcutModifier.Ctrl, KeyCode.Space),
+                
+                RotateElementClockwiseShortcutTriggered = new(ShortcutModifier.None, KeyCode.R, forbiddenMod: ShortcutModifier.Ctrl),
+                RotateElementCounterClockwiseShortcutTriggered = new(ShortcutModifier.Shift, KeyCode.R, forbiddenMod: ShortcutModifier.Ctrl),
 
                 OpenSaveDataFolderShortcutTriggered = new(ShortcutModifier.CtrlShiftAlt, KeyCode.O),
             };

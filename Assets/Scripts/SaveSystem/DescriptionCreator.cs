@@ -162,6 +162,7 @@ namespace DLS.SaveSystem
 				// Don't save colour info for output pin since it changes based on received input, so would just trigger unnecessary 'unsaved changes' warnings
 				devPin.IsInputPin ? devPin.Pin.Colour : default,
 				devPin.pinValueDisplayMode,
+				devPin.faceDir,
 				devPin.Pin.LocalOffset,
 				devPin.Pin.face
 			);

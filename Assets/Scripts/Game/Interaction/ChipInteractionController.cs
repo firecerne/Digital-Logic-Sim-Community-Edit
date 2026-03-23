@@ -223,6 +223,16 @@ namespace DLS.Game
 				}
 			}
 
+			if (KeyboardShortcuts.RotateElementCounterClockwiseShortcutTriggered())
+			{
+				RotateElements(false);
+			}
+
+			else if (KeyboardShortcuts.RotateElementClockwiseShortcutTriggered())
+			{
+				RotateElements();
+			}
+
 			if (KeyboardShortcuts.ConfirmShortcutTriggered())
 			{
 				ExitWireEditMode();
@@ -232,7 +242,6 @@ namespace DLS.Game
 			{
 				CancelEverything();
 			}
-
         }
 
 		void HandleMouseInput()
@@ -253,6 +262,36 @@ namespace DLS.Game
 			{
 				itemPlacementCurrVerticalSpacing += InputHelper.MouseScrollDelta.y * DrawSettings.GridSize;
 				itemPlacementCurrVerticalSpacing = Mathf.Max(0, itemPlacementCurrVerticalSpacing);
+			}
+		}
+
+		private void RotateElements(bool clockwise = true)
+		{
+			if (SelectedElements.Count > 0 && !IsPlacingOrMovingElementOrCreatingWire)
+			{
+				RotateSelectedElements(clockwise);
+			}
+			else if (InteractionState.ElementUnderMouse is IMoveable moveable)
+			{
+				RotateElement(moveable, clockwise);
+			}
+		}
+
+		void RotateSelectedElements(bool clockwise = true)
+		{
+			foreach (var element in SelectedElements)
+			{
+				RotateElement(element, clockwise);
+			}
+		}
+
+		private static void RotateElement(IMoveable element, bool clockwise = true)
+		{
+			switch (element)
+			{
+				case DevPinInstance devPin:
+					devPin.Rotate(clockwise);
+					break;
 			}
 		}
 
