@@ -149,6 +149,11 @@ namespace DLS.Game
 				CalculatePinLayout(InputPins);
 				CalculatePinLayout(OutputPins);
 			}
+			else
+			{
+				PinInstance[] combinedPins = InputPins.Concat(OutputPins).ToArray();
+				CustomLayout(combinedPins);
+			}
         }
 
         void CalculatePinLayout(PinInstance[] pins)
@@ -186,6 +191,65 @@ namespace DLS.Game
 				}
 			}
 		}
+        
+        void CustomLayout(PinInstance[] pins)
+        {
+            if (pins == null || pins.Length == 0) return;
+
+            foreach (int face in new[] { 0, 1, 2, 3 })
+            {
+                var facePins = pins.Where(p => p.face == face).ToList();
+                if (facePins.Count == 0) continue;
+
+                bool isHorizontal = face == 0 || face == 2;
+                float chipSpan = isHorizontal ? Size.x : Size.y;
+
+                float GetHalfHeight(PinInstance pin) => PinHeightFromBitCount(pin.bitCount) / 2f;
+                float GetRequiredSpacing(PinInstance a, PinInstance b)
+                    => GetHalfHeight(a) + GetHalfHeight(b) + DrawSettings.GridSize;
+                float GetMinBound(PinInstance pin) => -chipSpan / 2f + GetHalfHeight(pin);
+                float GetMaxBound(PinInstance pin) => chipSpan / 2f - GetHalfHeight(pin);
+
+                void Clamp(PinInstance pin)
+                    => pin.LocalOffset = Mathf.Clamp(pin.LocalOffset, GetMinBound(pin), GetMaxBound(pin));
+
+                foreach (var pin in facePins)
+                    Clamp(pin);
+
+                // Sweeps negative to positive (left to right / bottom to top)
+                var sweepLowToHigh = facePins.OrderBy(p => p.LocalOffset).ToList();
+                for (int i = 1; i < sweepLowToHigh.Count; i++)
+                {
+                    var prev = sweepLowToHigh[i - 1];
+                    var curr = sweepLowToHigh[i];
+
+                    float spacing = GetRequiredSpacing(prev, curr);
+                    float delta = curr.LocalOffset - prev.LocalOffset;
+
+                    if (delta < spacing)
+                    {
+                        curr.LocalOffset = prev.LocalOffset + spacing;
+                        Clamp(curr);
+                    }
+                }
+                // now sweep positive to negative (right to left / top to bottom) to ensure both ends are within chip
+                var sweepHighToLow = facePins.OrderByDescending(p => p.LocalOffset).ToList();
+                for (int i = 1; i < sweepHighToLow.Count; i++)
+                {
+                    var prev = sweepHighToLow[i - 1];
+                    var curr = sweepHighToLow[i];
+
+                    float spacing = GetRequiredSpacing(prev, curr);
+                    float delta = prev.LocalOffset - curr.LocalOffset;
+
+                    if (delta < spacing)
+                    {
+                        curr.LocalOffset = prev.LocalOffset - spacing;
+                        Clamp(curr);
+                    }
+                }
+            }
+        }
 
         public void SetCustomLayout(bool SetCustom) => HasCustomLayout = SetCustom;
 
