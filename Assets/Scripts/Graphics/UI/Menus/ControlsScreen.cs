@@ -31,6 +31,8 @@ namespace DLS.Graphics
             { "Duplicate Selection", Main.ActiveShortcutSettings.DuplicateShortcutTriggered },
             { "Toggle Grid", Main.ActiveShortcutSettings.ToggleGridShortcutTriggered },
             { "Reset Camera", Main.ActiveShortcutSettings.ResetCameraShortcutTriggered },
+            { "Rotate Pin clockwise", Main.ActiveShortcutSettings.RotateElementClockwiseShortcutTriggered },
+            { "Rotate Pin counterclockwise", Main.ActiveShortcutSettings.RotateElementCounterClockwiseShortcutTriggered },
             { "Undo", Main.ActiveShortcutSettings.UndoShortcutTriggered },
             { "Redo", Main.ActiveShortcutSettings.RedoShortcutTriggered },
             { "Lock Mode", Main.ActiveShortcutSettings.LockModeShortcutTriggered },
