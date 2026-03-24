@@ -97,11 +97,14 @@ namespace DLS.Graphics
 				}
 			}
 		}
-		
+
+		public static void SetTargetChip(SubChipInstance chip)
+		{
+			keyChip = chip;
+		}
+
 		public static void OnMenuOpened()
 		{
-			keyChip = (SubChipInstance)ContextMenu.interactionContext;
-
 			chosenKey = (KeyCode)keyChip.InternalData[0];
 		}
 	}

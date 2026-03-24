@@ -8,7 +8,6 @@ namespace DLS.SaveSystem
 {
 	public static class UpgradeHelper
 	{
-
 		public static void ApplyVersionChanges(ChipDescription[] customChips, ChipDescription[] builtinChips)
 		{
 			Main.Version defaultVersion = new(2, 0, 0);
@@ -121,6 +120,29 @@ namespace DLS.SaveSystem
 		{
 			// ---- Fixed Caching ----
 			SavedDescriptionCachingCorrector.CorrectCachingAbility(chipDesc);
+		}
+
+		public static void ApplyVersionChangesToShortcuts(ref ShortcutSettings shortcutSettings)
+		{
+			Main.Version defaultModdedVersion = new(1, 2, 1);
+			Main.Version moddedVersion_1_3_0 = new(1, 3, 0); // Edit elements hotkey
+
+			if (!Main.Version.TryParse(shortcutSettings.LastSavedModdedVersion, out Main.Version moddedVersion))
+			{
+				moddedVersion = defaultModdedVersion;
+			}
+			
+			if (moddedVersion.ToInt() < moddedVersion_1_3_0.ToInt())
+			{
+				UpdateShortcutSettingsPreModded_1_3_0(ref shortcutSettings);
+				shortcutSettings.LastSavedModdedVersion = moddedVersion_1_3_0.ToString();
+			}
+		}
+
+		private static void UpdateShortcutSettingsPreModded_1_3_0(ref ShortcutSettings shortcutSettings)
+		{
+			var defaults = ShortcutSettings.Default();
+			shortcutSettings.EditElementShortcutTriggered = defaults.EditElementShortcutTriggered;
 		}
 	}
 }
