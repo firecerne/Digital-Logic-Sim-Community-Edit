@@ -336,10 +336,14 @@ namespace DLS.Graphics
 			// Set bounding box of scroll list element 
 			UI.OverridePreviousBounds(entryBounds);
 		}
+		
+		public static void SetTargetChip(SubChipInstance chip)
+		{
+			romChip = chip;
+		}
 
 		public static void OnMenuOpened()
 		{
-			romChip = (SubChipInstance)ContextMenu.interactionContext;
 			RowCount = romChip.InternalData.Length;
 			ActiveRomDataBitCount = 16; //
 

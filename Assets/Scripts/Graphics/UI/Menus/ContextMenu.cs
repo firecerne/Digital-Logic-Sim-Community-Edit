@@ -528,6 +528,7 @@ namespace DLS.Graphics
 
 		static void OpenChipLabelPopup()
 		{
+			ChipLabelMenu.SetTargetChip(interactionContext as SubChipInstance);
 			UIDrawer.SetActiveMenu(UIDrawer.MenuType.ChipLabelPopup);
 		}
 
@@ -554,14 +555,27 @@ namespace DLS.Graphics
 
 		static void OpenKeyBindMenu()
 		{
+			RebindKeyChipMenu.SetTargetChip((SubChipInstance)interactionContext);
 			UIDrawer.SetActiveMenu(UIDrawer.MenuType.RebindKeyChip);
 		}
 
-		static void OpenRomEditMenu() => UIDrawer.SetActiveMenu(UIDrawer.MenuType.RomEdit);
+		static void OpenRomEditMenu()
+		{
+			RomEditMenu.SetTargetChip((SubChipInstance)interactionContext);
+			UIDrawer.SetActiveMenu(UIDrawer.MenuType.RomEdit);
+		}
 
-		static void OpenPulseEditMenu() => UIDrawer.SetActiveMenu(UIDrawer.MenuType.PulseEdit);
+		static void OpenPulseEditMenu()
+		{
+			PulseEditMenu.SetTargetChip((SubChipInstance)interactionContext);
+			UIDrawer.SetActiveMenu(UIDrawer.MenuType.PulseEdit);
+		}
 
-		static void OpenConstantEditMenu() => UIDrawer.SetActiveMenu(UIDrawer.MenuType.ConstantEdit);
+		static void OpenConstantEditMenu()
+		{
+			ConstantEditMenu.SetTargetChip((SubChipInstance)interactionContext);
+			UIDrawer.SetActiveMenu(UIDrawer.MenuType.ConstantEdit);
+		}
 
 		static bool CanEditCurrentChip() => Project.ActiveProject.CanEditViewedChip;
 
@@ -605,6 +619,7 @@ namespace DLS.Graphics
 
 		public static void CloseContextMenu()
 		{
+			interactionContext = null;
 			IsOpen = false;
 			IsSubMenuOpen = false;
 		}

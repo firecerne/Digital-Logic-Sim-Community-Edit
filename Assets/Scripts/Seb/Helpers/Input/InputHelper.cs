@@ -13,6 +13,13 @@ namespace Seb.Helpers
 		Middle = 2
 	}
 
+	public enum InputState
+	{
+		Down,
+		Held,
+		Up
+	}
+
 	public static class InputHelper
 	{
 		public static IInputSource InputSource = new UnityInputSource();

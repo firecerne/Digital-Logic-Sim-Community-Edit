@@ -37,6 +37,7 @@ namespace DLS.Description
         public Shortcut SimPauseToggleShortcutTriggered;
         
         // ---- Chip interaction shortcuts ----
+        public Shortcut EditElementShortcutTriggered;
         public Shortcut RotateElementClockwiseShortcutTriggered;
         public Shortcut RotateElementCounterClockwiseShortcutTriggered;
 
@@ -73,6 +74,7 @@ namespace DLS.Description
                 SimNextStepShortcutTriggered = new(ShortcutModifier.None, KeyCode.Space, forbiddenMod: ShortcutModifier.Ctrl),
                 SimPauseToggleShortcutTriggered = new(ShortcutModifier.Ctrl, KeyCode.Space),
                 
+                EditElementShortcutTriggered = new(ShortcutModifier.None, KeyCode.E),
                 RotateElementClockwiseShortcutTriggered = new(ShortcutModifier.None, KeyCode.R, forbiddenMod: ShortcutModifier.Ctrl),
                 RotateElementCounterClockwiseShortcutTriggered = new(ShortcutModifier.Shift, KeyCode.R, forbiddenMod: ShortcutModifier.Ctrl),
 

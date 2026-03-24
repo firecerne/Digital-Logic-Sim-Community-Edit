@@ -49,9 +49,13 @@ namespace DLS.Graphics
 			}
 		}
 
+		public static void SetTargetChip(SubChipInstance chip)
+		{
+			pulseChip = chip;
+		}
+
 		public static void OnMenuOpened()
 		{
-			pulseChip = (SubChipInstance)ContextMenu.interactionContext;
 			pulseWidth = pulseChip.InternalData[0];
 			UI.GetInputFieldState(ID_PulseWidthInput).SetText(pulseWidth.ToString());
 		}

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using DLS.Description;
@@ -223,6 +224,11 @@ namespace DLS.Game
 				}
 			}
 
+			if (KeyboardShortcuts.EditElementShortcutTriggered())
+			{
+				EditElement();
+			}
+
 			if (KeyboardShortcuts.RotateElementCounterClockwiseShortcutTriggered())
 			{
 				RotateElements(false);
@@ -243,6 +249,59 @@ namespace DLS.Game
 				CancelEverything();
 			}
         }
+
+		private void EditElement()
+		{
+			if (!CanInteract) return;
+			var elementUnderMouse = InteractionState.ElementUnderMouse;
+			switch (elementUnderMouse)
+			{
+				case DevPinInstance devPinInstance:
+						PinEditMenu.SetTargetPin(devPinInstance);
+						UIDrawer.SetActiveMenu(UIDrawer.MenuType.PinRename);
+					break;
+				case SubChipInstance subChipInstance:
+					switch (subChipInstance.ChipType)
+					{
+						case ChipType.Key:
+							RebindKeyChipMenu.SetTargetChip(subChipInstance);
+							UIDrawer.SetActiveMenu(UIDrawer.MenuType.RebindKeyChip);
+							break;
+						case ChipType.Rom_256x16:
+							RomEditMenu.SetTargetChip(subChipInstance);
+							UIDrawer.SetActiveMenu(UIDrawer.MenuType.RomEdit);
+							break;
+						case ChipType.Pulse:
+							PulseEditMenu.SetTargetChip(subChipInstance);
+							UIDrawer.SetActiveMenu(UIDrawer.MenuType.PulseEdit);
+							break;
+						case ChipType.Constant_8Bit:
+							ConstantEditMenu.SetTargetChip(subChipInstance);
+							UIDrawer.SetActiveMenu(UIDrawer.MenuType.ConstantEdit);
+							break;
+						default:
+							ChipLabelMenu.SetTargetChip(subChipInstance);
+							UIDrawer.SetActiveMenu(UIDrawer.MenuType.ChipLabelPopup);
+							break;
+					}
+					break;
+				case WireInstance wireInstance:
+					Project.ActiveProject.controller.EnterWireEditMode(wireInstance);
+					break;
+				
+				// Simply ignore pressed hotkey in these cases.
+				case IMoveable:
+					break;
+				case PinInstance:
+					break;
+				case DisplayInstance:
+					break;
+				case IClickable:
+					break;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(elementUnderMouse), elementUnderMouse, "Edit hotkey for this type is not implemented!");
+			}
+		}
 
 		void HandleMouseInput()
 		{

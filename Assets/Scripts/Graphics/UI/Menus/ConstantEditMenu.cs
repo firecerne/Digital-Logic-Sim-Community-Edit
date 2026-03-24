@@ -52,9 +52,13 @@ namespace DLS.Graphics
 			}
 		}
 
+		public static void SetTargetChip(SubChipInstance chip)
+		{
+			constantChip = chip;
+		}
+
 		public static void OnMenuOpened()
 		{
-			constantChip = (SubChipInstance)ContextMenu.interactionContext;
 			value = (byte)constantChip.InternalData[0];
 			UI.GetInputFieldState(ID_ValueInput).SetText(value.ToString());
 		}

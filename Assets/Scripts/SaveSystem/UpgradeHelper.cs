@@ -188,6 +188,7 @@ namespace DLS.SaveSystem
 			var defaults = ShortcutSettings.Default();
 			shortcutSettings.RotateElementClockwiseShortcutTriggered = defaults.RotateElementClockwiseShortcutTriggered;
 			shortcutSettings.RotateElementCounterClockwiseShortcutTriggered = defaults.RotateElementCounterClockwiseShortcutTriggered;
+			shortcutSettings.EditElementShortcutTriggered = defaults.EditElementShortcutTriggered;
 		}
 	}
 }

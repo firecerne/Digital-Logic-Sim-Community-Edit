@@ -19,10 +19,13 @@ namespace DLS.Graphics
 
 		static readonly bool[] ButtonGroupInteractStates = { true, true };
 
+		public static void SetTargetChip(SubChipInstance chip)
+		{
+			subChip = chip;
+		}
+
 		public static void OnMenuOpened()
 		{
-			subChip = (SubChipInstance)ContextMenu.interactionContext;
-
 			InputFieldState inputFieldState = UI.GetInputFieldState(ID_NameField);
 			inputFieldState.SetText(subChip.Label);
 			inputFieldState.SelectAll();
