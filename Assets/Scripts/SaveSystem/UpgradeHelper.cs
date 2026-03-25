@@ -89,6 +89,9 @@ namespace DLS.SaveSystem
 				AddNewBuiltinChipToCollection(ref projectDescription, ChipType.DisplayLED_RGB_8Bit, "DISPLAY");
 				// ---- Added 15 segment displays ----
 				AddNewBuiltinChipToCollection(ref projectDescription, ChipType.FifteenSegmentDisplay, "DISPLAY");
+				// ---- Added 16 segment displays ----
+				AddNewBuiltinChipToCollection(ref projectDescription, ChipType.SixteenSegmentPlusDotDisplay, "DISPLAY");
+				AddNewBuiltinChipToCollection(ref projectDescription, ChipType.SixteenSegmentPlusDotDisplayRGB, "DISPLAY");
 			}
 			projectDescription.DLSVersion_LastSavedModdedVersion = Main.DLSVersion_ModdedID.ToString();
         }

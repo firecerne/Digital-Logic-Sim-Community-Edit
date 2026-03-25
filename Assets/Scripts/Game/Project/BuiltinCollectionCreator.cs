@@ -37,9 +37,7 @@ namespace DLS.Game
 					"OUT-1",
 					"OUT-4",
 					"OUT-8"
-				)
-				
-				,
+				),
 				CreateByNames("MERGE/SPLIT",
 					"1-4BIT",
 					"1-8BIT",
@@ -56,6 +54,8 @@ namespace DLS.Game
 				CreateChipCollection("DISPLAY",
 					ChipType.SevenSegmentDisplay,
 					ChipType.FifteenSegmentDisplay,
+					ChipType.SixteenSegmentPlusDotDisplay,
+					ChipType.SixteenSegmentPlusDotDisplayRGB,
 					ChipType.DisplayDot,
 					ChipType.DisplayRGB,
 					ChipType.DisplayRGBTouch,

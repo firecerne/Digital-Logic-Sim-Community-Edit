@@ -25,6 +25,8 @@ namespace DLS.Description
 		DisplayLED_RGB_8Bit,
 		DisplayRGBTouch,
 		FifteenSegmentDisplay,
+		SixteenSegmentPlusDotDisplay,
+		SixteenSegmentPlusDotDisplayRGB,
 
 		// ---- Merge / Split ----
 		Merge_Pin,
