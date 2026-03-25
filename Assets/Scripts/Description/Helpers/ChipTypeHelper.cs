@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using UnityEngine.TextCore.Text;
 
 namespace DLS.Description
 {
@@ -29,6 +27,8 @@ namespace DLS.Description
 			{ ChipType.DisplayRGBTouch8BitColor, "8BIT TOUCHSCREEN RGB DISPLAY" },
 			{ ChipType.DisplayDot, "DOT DISPLAY" },
 			{ ChipType.SevenSegmentDisplay, "7-SEGMENT" },
+			{ ChipType.SixteenSegmentPlusDotDisplay, "16-SEGMENT" },
+			{ ChipType.SixteenSegmentPlusDotDisplayRGB, "16-SEGMENT-RGB" },
 			{ ChipType.DisplayLED, "LED" },
 
 			{ ChipType.Buzzer, "BUZZER" },
@@ -42,9 +42,7 @@ namespace DLS.Description
 			{ ChipType.Key, "KEY" },
             { ChipType.Button, "BUTTON" },
 			{ ChipType.Toggle, "DIPSWITCH" },
-
 		};
-
 
 		public static string GetName(ChipType type) => Names[type];
 
@@ -68,24 +66,24 @@ namespace DLS.Description
 
 		public static string GetDevPinName(bool isInput, PinBitCount numBits)
 		{
-			return (isInput ? "IN-" : "OUT-") + numBits.BitCount.ToString();
+			return (isInput ? "IN-" : "OUT-") + numBits.BitCount;
 		}
 
 		public static string GetBusName(PinBitCount numBits)
 		{
-			return "BUS-" + numBits.ToString();
+			return "BUS-" + numBits;
 		}
 
         public static string GetBusTerminusName(PinBitCount numBits)
         {
-            return "BUS-TERMINUS-" + numBits.ToString();
+            return "BUS-TERMINUS-" + numBits;
         }
-
 
         public static bool IsDevPin(ChipType chipType)
 		{
 			return chipType == ChipType.In_Pin || chipType == ChipType.Out_Pin;
 		}
+        
 		public static bool IsClickableDisplayType(ChipType type) {
 			// Return true for any chiptype that is a clickable display 
 

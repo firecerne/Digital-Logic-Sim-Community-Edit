@@ -18,6 +18,8 @@ namespace DLS.Description
 
 		// ---- Displays ----
 		SevenSegmentDisplay,
+		SixteenSegmentPlusDotDisplay,
+		SixteenSegmentPlusDotDisplayRGB,
 		DisplayRGB,
 		DisplayDot,
 		DisplayLED,

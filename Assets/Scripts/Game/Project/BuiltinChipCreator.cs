@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using DLS.Description;
-using DLS.Simulation;
 using UnityEngine;
 using static DLS.Graphics.DrawSettings;
 
@@ -10,7 +9,7 @@ namespace DLS.Game
 {
 	public static class BuiltinChipCreator
 	{
-		static readonly Color ChipCol_SplitMerge = new(0.1f, 0.1f, 0.1f); //new(0.8f, 0.8f, 0.8f);
+		static readonly Color ChipCol_SplitMerge = new(0.1f, 0.1f, 0.1f);
 		static bool AllBlack;
 		static Color AllBlackColor = Color.black;
 
@@ -37,11 +36,11 @@ namespace DLS.Game
 				CreateROM_8(),
 				CreateEEPROM_8(),
 
-				// ---- Merge / Split ----
-
 				// ---- Displays ----
 				CreateDisplay7Seg(),
-				CreateDisplayRGB(),
+				CreateDisplay16SegWithDot(),
+				CreateDisplay16SegWithDotRGB(),
+                CreateDisplayRGB(),
 				CreateDisplayRGBTouch(),
 				CreateDisplayRGB8BitColor(),
 				CreateDisplayRGBTouch8BitColor(),
@@ -58,8 +57,6 @@ namespace DLS.Game
 			.Concat(CreateSplitMergePins(description.SplitMergePairs))
 			.Concat(CreateBusAndBusTerminus(description.pinBitCounts))
 			.ToArray();
-				
-			
 		}
 
 		static ChipDescription[] CreateInOutPins(List<PinBitCount> pinBitCountsToLoad)
@@ -169,6 +166,7 @@ namespace DLS.Game
             return descriptions;
 
 		}
+        
         static ChipDescription CreateNand()
 		{
 			Color col = GetColor(new(0.73f, 0.26f, 0.26f));
@@ -295,7 +293,7 @@ namespace DLS.Game
 			};
 
 			Color col = new(0.1f, 0.1f, 0.1f);
-			Vector2 size = Vector2.one * GridSize * 6;
+			Vector2 size = GridSize * 6 * Vector2.one;
 
 			return CreateBuiltinChipDescription(ChipType.Constant_8Bit, size, col, null, outputPins);
         }
@@ -432,8 +430,64 @@ namespace DLS.Game
 			};
 			return CreateBuiltinChipDescription(ChipType.SevenSegmentDisplay, size, col, inputPins, null, displays, NameDisplayLocation.Hidden, canBeCached: false);
 		}
+        
+		static ChipDescription CreateDisplay16SegWithDot()
+		{
+			PinDescription[] inputPins =
+			{
+				CreatePinDescription("A", 0, PinBitCount.Bit8),
+				CreatePinDescription("B", 1, PinBitCount.Bit8),
+				CreatePinDescription("DP", 2),
+				CreatePinDescription("COL", 3)
+			};
 
-		static ChipDescription CreateDisplayRGB()
+			Color col = GetColor(new(0.1f, 0.1f, 0.1f));
+			float height = 16 * GridSize;
+			Vector2 size = new(GridSize * 10, height);
+			float displayWidth = size.x - GridSize;
+
+			DisplayDescription[] displays =
+			{
+				new()
+				{
+					Position = Vector2.zero,
+					Scale = displayWidth,
+					SubChipID = -1
+				}
+			};
+			return CreateBuiltinChipDescription(ChipType.SixteenSegmentPlusDotDisplay, size, col, inputPins, null, displays, NameDisplayLocation.Hidden, canBeCached: false);
+		}
+        
+		static ChipDescription CreateDisplay16SegWithDotRGB()
+		{
+			PinDescription[] inputPins =
+			{
+				CreatePinDescription("A", 0, PinBitCount.Bit8),
+				CreatePinDescription("B", 1, PinBitCount.Bit8),
+				CreatePinDescription("DP", 2),
+				CreatePinDescription("R", 3, PinBitCount.Bit8),
+				CreatePinDescription("G", 4, PinBitCount.Bit8),
+				CreatePinDescription("B", 5, PinBitCount.Bit8),
+			};
+
+			Color col = GetColor(new(0.1f, 0.1f, 0.1f));
+			float height = 22 * GridSize;
+			Vector2 size = new(GridSize * 13, height);
+			float displayWidth = size.x - GridSize * 2;
+
+			DisplayDescription[] displays =
+			{
+				new()
+				{
+					Position = Vector2.zero,
+					Scale = displayWidth,
+					SubChipID = -1
+				}
+			};
+			return CreateBuiltinChipDescription(ChipType.SixteenSegmentPlusDotDisplayRGB, size, col, inputPins, null, displays, NameDisplayLocation.Hidden, canBeCached: false);
+		}
+
+        static ChipDescription CreateDisplayRGB()
 		{
 			float height = GridSize * 21;
 			float width = height;
