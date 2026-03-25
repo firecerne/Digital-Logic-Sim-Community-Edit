@@ -29,6 +29,8 @@ namespace DLS.Description
 			{ ChipType.DisplayLED_RGB, "RGB LED" },
 			{ ChipType.DisplayLED_RGB_8Bit, "RGB LED 8BIT" },
 			{ ChipType.FifteenSegmentDisplay, "15-SEGMENT" },
+			{ ChipType.SixteenSegmentPlusDotDisplay, "16-SEGMENT" },
+			{ ChipType.SixteenSegmentPlusDotDisplayRGB, "16-SEGMENT-RGB" },
 
             { ChipType.Buzzer, "BUZZER" },
 
