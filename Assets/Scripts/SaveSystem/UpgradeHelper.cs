@@ -33,7 +33,7 @@ namespace DLS.SaveSystem
 					chipDesc.DLSVersion = version_2_1_4.ToString();
 				}
 
-				if (moddedChipVersion.ToInt() <= moddedVersion_1_3_0.ToInt())
+				if (moddedChipVersion.ToInt() < moddedVersion_1_3_0.ToInt())
 				{
 					UpdateChipPreModded_1_3_0(chipDesc);
 					chipDesc.LastSavedModdedVersion = moddedVersion_1_3_0.ToString();
@@ -168,7 +168,7 @@ namespace DLS.SaveSystem
 				chipDesc.OutputPins[i].DevPinFacingDirection = Vector2.left;
 				if (!chipDesc.HasCustomLayout)
 				{
-					chipDesc.InputPins[i].Face = 1;
+					chipDesc.OutputPins[i].Face = 1;
 				}
 			}
 		}
