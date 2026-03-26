@@ -289,17 +289,7 @@ namespace DLS.Game
 					Project.ActiveProject.controller.EnterWireEditMode(wireInstance);
 					break;
 				
-				// Simply ignore pressed hotkey in these cases.
-				case IMoveable:
-					break;
-				case PinInstance:
-					break;
-				case DisplayInstance:
-					break;
-				case IClickable:
-					break;
-				default:
-					throw new ArgumentOutOfRangeException(nameof(elementUnderMouse), elementUnderMouse, "Edit hotkey for this type is not implemented!");
+				// Simply ignore pressed hotkey in other cases.
 			}
 		}
 
