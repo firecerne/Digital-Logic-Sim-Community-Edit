@@ -235,7 +235,7 @@ namespace DLS.Game
 				return ViewedChip.Elements.Count > 0;
 			}
 
-			return Saver.HasUnsavedChanges(ViewedChip.LastSavedDescription, DescriptionCreator.CreateChipDescription(ViewedChip));
+			return Saver.HasUnsavedChanges(ViewedChip.LastSavedDescription, DescriptionCreator.CreateChipDescription(ViewedChip, true));
 		}
 
 		public void CreateBlankDevChip()
@@ -551,7 +551,7 @@ namespace DLS.Game
 
 				if (anyChanges)
 				{
-					ChipDescription updatedDesc = DescriptionCreator.CreateChipDescription(devChip);
+					ChipDescription updatedDesc = DescriptionCreator.CreateChipDescription(devChip, true);
 
 					if (willRename)
 					{

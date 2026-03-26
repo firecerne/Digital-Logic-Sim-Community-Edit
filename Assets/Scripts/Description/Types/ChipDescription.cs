@@ -11,6 +11,7 @@ namespace DLS.Description
 
 		// ---- Data ----
 		public string DLSVersion;
+		public string LastSavedModdedVersion;
 		public string Name;
 		public NameDisplayLocation NameLocation;
 		public ChipType ChipType;

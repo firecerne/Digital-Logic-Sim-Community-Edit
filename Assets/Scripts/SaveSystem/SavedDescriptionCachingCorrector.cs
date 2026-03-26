@@ -3,17 +3,15 @@ using DLS.Simulation;
 
 namespace DLS.SaveSystem
 {
-    public static class SavedDescriptionCorrector
+    public static class SavedDescriptionCachingCorrector
     {
-
-        // Corrects issues with chip descriptions that arise with software or user error, not those that are created when updating versions.
-        // For that, see UpgradeHelper.
-        public static void CorrectChipDescription(ChipDescription description)
+	    /// If somehow the chip was saved as cacheable when it shouldn't be, correct that.
+        public static void CorrectCachingAbility(ChipDescription description)
         {
-            CorrectCachingAbility(description);
-        }
-        static void CorrectCachingAbility(ChipDescription description)
-        {
+	        if (!description.ShouldBeCached)
+	        {
+		        return;
+	        }
             int totalInputPinCount = ChipDescriptionHelper.CountTotalInputWidth(description);
             int biggestOutputPinCount = ChipDescriptionHelper.GetBiggestOutputPinWidth(description);
             int biggestInputPinCount = ChipDescriptionHelper.GetBiggestInputPinWidth(description);
@@ -29,8 +27,14 @@ namespace DLS.SaveSystem
             if (!appropriatelySizedIO)
             {
                 description.ShouldBeCached = false;
+                return;
             }
 
+            if (ChipDescriptionHelper.OutputPinHasMoreThanOneConnection(description))
+            {
+	            description.ShouldBeCached = false;
+	            return;
+            }
         }
     }
 }
