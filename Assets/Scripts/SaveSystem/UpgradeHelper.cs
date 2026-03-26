@@ -166,6 +166,10 @@ namespace DLS.SaveSystem
 			for (int i = 0; i < chipDesc.OutputPins.Length; i++)
 			{
 				chipDesc.OutputPins[i].DevPinFacingDirection = Vector2.left;
+				if (!chipDesc.HasCustomLayout)
+				{
+					chipDesc.InputPins[i].Face = 1;
+				}
 			}
 		}
 
