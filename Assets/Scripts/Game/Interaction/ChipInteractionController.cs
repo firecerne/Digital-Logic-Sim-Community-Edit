@@ -316,7 +316,11 @@ namespace DLS.Game
 
 		private void RotateElements(bool clockwise = true)
 		{
-			if (SelectedElements.Count > 0 && !IsPlacingOrMovingElementOrCreatingWire)
+			if (IsCreatingWire)
+			{
+				return;
+			}
+			if (SelectedElements.Count > 0)
 			{
 				RotateSelectedElements(clockwise);
 			}
