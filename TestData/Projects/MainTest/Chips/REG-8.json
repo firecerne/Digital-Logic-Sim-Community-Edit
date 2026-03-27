@@ -1,6 +1,10 @@
 {
+  "DLSVersion": "2.1.6",
   "Name": "REG-8",
   "NameLocation": 0,
+  "ChipType": 0,
+  "CanBeCached": false,
+  "ShouldBeCached": false,
   "Size": {
     "x": 1.14,
     "y": 1.25
@@ -19,9 +23,11 @@
         "x":-5.97355,
         "y":1.13757
       },
-      "BitCount":8,
+      "BitCount":"8",
       "Colour":0,
-      "ValueDisplayMode":0
+      "ValueDisplayMode":0,
+      "face":0,
+      "LocalOffset":0.0
     },
     {
       "Name":"STORE",
@@ -30,9 +36,11 @@
         "x":-6.0956,
         "y":-0.54702
       },
-      "BitCount":1,
+      "BitCount":"1",
       "Colour":0,
-      "ValueDisplayMode":0
+      "ValueDisplayMode":0,
+      "face":0,
+      "LocalOffset":0.0
     },
     {
       "Name":"OUT ENABLE",
@@ -41,9 +49,11 @@
         "x":-6.06339,
         "y":-1.4866
       },
-      "BitCount":1,
+      "BitCount":"1",
       "Colour":0,
-      "ValueDisplayMode":0
+      "ValueDisplayMode":0,
+      "face":0,
+      "LocalOffset":0.0
     },
     {
       "Name":"CLOCK",
@@ -52,9 +62,11 @@
         "x":-6.01727,
         "y":-2.51649
       },
-      "BitCount":1,
+      "BitCount":"1",
       "Colour":0,
-      "ValueDisplayMode":0
+      "ValueDisplayMode":0,
+      "face":0,
+      "LocalOffset":0.0
     }
   ],
   "OutputPins":[
@@ -65,9 +77,11 @@
         "x":10.38769,
         "y":-0.09384
       },
-      "BitCount":8,
+      "BitCount":"8",
       "Colour":0,
-      "ValueDisplayMode":0
+      "ValueDisplayMode":0,
+      "face":0,
+      "LocalOffset":0.0
     },
     {
       "Name":"OUT-BUS",
@@ -76,9 +90,11 @@
         "x":10.40129,
         "y":-0.79517
       },
-      "BitCount":8,
+      "BitCount":"8",
       "Colour":0,
-      "ValueDisplayMode":0
+      "ValueDisplayMode":0,
+      "face":0,
+      "LocalOffset":0.0
     }
   ],
   "SubChips":[
@@ -305,7 +321,7 @@
       "ConnectionType":1,
       "ConnectedWireIndex":9,
       "ConnectedWireSegmentIndex":0,
-      "Points":[{"x":5.53762,"y":-0.11911},{"x":5.53775,"y":-1.4866},{"x":0.0,"y":0.0}]
+      "Points":[{"x":5.53762,"y":-0.11837},{"x":5.53775,"y":-1.4866},{"x":0.0,"y":0.0}]
     },
     {
       "SourcePinAddress":{
@@ -323,5 +339,5 @@
     }
   ],
   "Displays":[],
-  "ChipType": 0
+  "HasCustomLayout": false
 }

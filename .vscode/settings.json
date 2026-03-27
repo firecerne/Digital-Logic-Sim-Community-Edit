@@ -66,5 +66,5 @@
     "explorer.fileNesting.patterns": {
         "*.sln": "*.csproj"
     },
-    "dotnet.defaultSolution": "Digital-Logic-Sim-Community-Edit.sln"
+    "dotnet.defaultSolution": "Digital-Logic-Sim-Community-Edit-Screen-Color-Width.slnx"
 }

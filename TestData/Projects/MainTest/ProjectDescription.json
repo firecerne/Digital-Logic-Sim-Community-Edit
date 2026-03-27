@@ -2,9 +2,9 @@
   "ProjectName": "MainTest",
   "DLSVersion_LastSaved": "2.1.6",
   "DLSVersion_EarliestCompatible": "2.0.0",
-  "DLSVersion_LastSavedModdedVersion": "1.1.2",
+  "DLSVersion_LastSavedModdedVersion": "1.2.1",
   "CreationTime": "2025-03-14T10:23:30.404-07:00",
-  "LastSaveTime": "2026-01-27T10:08:30.741-08:00",
+  "LastSaveTime": "2026-03-26T19:48:04.284-07:00",
   "Prefs_MainPinNamesDisplayMode": 2,
   "Prefs_ChipPinNamesDisplayMode": 1,
   "Prefs_GridDisplayMode": 1,
@@ -14,9 +14,9 @@
   "Prefs_SimTargetStepsPerSecond": 100,
   "Prefs_SimStepsPerClockTick": 1,
   "Perfs_PinIndicators": 4,
-  "StepsRanSinceCreated": 25181827100,
+  "StepsRanSinceCreated": 25182034368,
   "TimeSpentSinceCreated": {
-    "StartFrom": "05:53:40.2325945"
+    "StartFrom": "06:28:27.6520195"
   },
   "AllCustomChipNames":[
     "AND",
@@ -69,9 +69,7 @@
     "#",
     "BuzzTest",
     "#AA",
-    "scroll test",
-    "scroll test 2",
-    "testhalt"
+    "screen test"
   ],
   "StarredList":[
     {
@@ -111,15 +109,7 @@
       "IsCollection":false
     },
     {
-      "Name":"scroll test",
-      "IsCollection":false
-    },
-    {
-      "Name":"scroll test 2",
-      "IsCollection":false
-    },
-    {
-      "Name":"testhalt",
+      "Name":"screen test",
       "IsCollection":false
     }
   ],
@@ -141,7 +131,7 @@
     },
     {
       "Chips":["7-SEGMENT","DECIMAL-4","DECIMAL-8","DOT DISPLAY","RGB DISPLAY","LED","TOUCHSCREEN RGB DISPLAY"],
-      "IsToggledOpen":false,
+      "IsToggledOpen":true,
       "Name":"DISPLAY"
     },
     {
@@ -165,7 +155,7 @@
       "Name":"TEST"
     },
     {
-      "Chips":["PULSE","TEST MergeSplit","BUZZER","SPS","#","BuzzTest","SPSTest","#AA","StatsTest","StatsTest1","StatsTest2","EEPROM 256×16","EEPROM_test","BUTTON","BUTTON_test","BUTTON_test2","DIPSWITCH","4sw","RAM-8","DETECTOR","RTC","ConstTest","scroll test","scroll test 2","testhalt"],
+      "Chips":["PULSE","TEST MergeSplit","BUZZER","SPS","#","BuzzTest","SPSTest","#AA","StatsTest","StatsTest1","StatsTest2","EEPROM 256×16","EEPROM_test","BUTTON","BUTTON_test","BUTTON_test2","DIPSWITCH","4sw","RAM-8","DETECTOR","RTC","ConstTest","8BIT COLOR RGB DISPLAY"],
       "IsToggledOpen":false,
       "Name":"OTHER"
     }

@@ -1,6 +1,10 @@
 {
+  "DLSVersion": "2.1.6",
   "Name": "demo",
   "NameLocation": 0,
+  "ChipType": 0,
+  "CanBeCached": false,
+  "ShouldBeCached": false,
   "Size": {
     "x": 0.98875,
     "y": 2.375
@@ -19,9 +23,11 @@
         "x":-6.0,
         "y":2.8125
       },
-      "BitCount":4,
+      "BitCount":"4",
       "Colour":0,
-      "ValueDisplayMode":1
+      "ValueDisplayMode":1,
+      "face":0,
+      "LocalOffset":0.0
     },
     {
       "Name":"OUTPUT DATA",
@@ -30,9 +36,11 @@
         "x":-6.0,
         "y":1.9375
       },
-      "BitCount":1,
-      "Colour":3,
-      "ValueDisplayMode":0
+      "BitCount":"1",
+      "Colour":4,
+      "ValueDisplayMode":0,
+      "face":0,
+      "LocalOffset":0.0
     },
     {
       "Name":"OUTPUT REG A",
@@ -41,9 +49,11 @@
         "x":-6.0,
         "y":1.375
       },
-      "BitCount":1,
-      "Colour":3,
-      "ValueDisplayMode":0
+      "BitCount":"1",
+      "Colour":4,
+      "ValueDisplayMode":0,
+      "face":0,
+      "LocalOffset":0.0
     },
     {
       "Name":"OUTPUT ALU",
@@ -52,9 +62,11 @@
         "x":-6.0,
         "y":0.8125
       },
-      "BitCount":1,
-      "Colour":3,
-      "ValueDisplayMode":0
+      "BitCount":"1",
+      "Colour":4,
+      "ValueDisplayMode":0,
+      "face":0,
+      "LocalOffset":0.0
     },
     {
       "Name":"OUTPUT REG B",
@@ -63,9 +75,11 @@
         "x":-6.0,
         "y":0.25
       },
-      "BitCount":1,
-      "Colour":3,
-      "ValueDisplayMode":0
+      "BitCount":"1",
+      "Colour":4,
+      "ValueDisplayMode":0,
+      "face":0,
+      "LocalOffset":0.0
     },
     {
       "Name":"STORE REG A",
@@ -74,9 +88,11 @@
         "x":-6.0,
         "y":-0.4375
       },
-      "BitCount":1,
-      "Colour":4,
-      "ValueDisplayMode":0
+      "BitCount":"1",
+      "Colour":5,
+      "ValueDisplayMode":0,
+      "face":0,
+      "LocalOffset":0.0
     },
     {
       "Name":"SUBTRACT",
@@ -85,9 +101,11 @@
         "x":-6.0,
         "y":-1.0
       },
-      "BitCount":1,
-      "Colour":4,
-      "ValueDisplayMode":0
+      "BitCount":"1",
+      "Colour":5,
+      "ValueDisplayMode":0,
+      "face":0,
+      "LocalOffset":0.0
     },
     {
       "Name":"STORE REG B",
@@ -96,9 +114,11 @@
         "x":-6.0,
         "y":-1.5625
       },
-      "BitCount":1,
-      "Colour":4,
-      "ValueDisplayMode":0
+      "BitCount":"1",
+      "Colour":5,
+      "ValueDisplayMode":0,
+      "face":0,
+      "LocalOffset":0.0
     },
     {
       "Name":"CLOCK",
@@ -107,9 +127,11 @@
         "x":-6.0,
         "y":-2.125
       },
-      "BitCount":1,
-      "Colour":5,
-      "ValueDisplayMode":0
+      "BitCount":"1",
+      "Colour":6,
+      "ValueDisplayMode":0,
+      "face":0,
+      "LocalOffset":0.0
     }
   ],
   "OutputPins":[],
@@ -144,7 +166,7 @@
         "x":2.45438,
         "y":0.1875
       },
-      "OutputPinColourInfo":[{"PinColour":2,"PinID":683281904}],
+      "OutputPinColourInfo":[{"PinColour":3,"PinID":683281904}],
       "InternalData":null
     },
     {
@@ -155,7 +177,7 @@
         "x":-2.115,
         "y":2.8125
       },
-      "OutputPinColourInfo":[{"PinColour":0,"PinID":1}],
+      "OutputPinColourInfo":null,
       "InternalData":[126656166,0]
     },
     {
@@ -166,7 +188,7 @@
         "x":-2.135,
         "y":-2.4375
       },
-      "OutputPinColourInfo":[],
+      "OutputPinColourInfo":null,
       "InternalData":[91787565,1]
     },
     {
@@ -199,7 +221,7 @@
         "x":4.29375,
         "y":0.0625
       },
-      "OutputPinColourInfo":[{"PinColour":2,"PinID":813273076}],
+      "OutputPinColourInfo":[{"PinColour":3,"PinID":813273076}],
       "InternalData":null
     },
     {
@@ -525,5 +547,5 @@
     }
   ],
   "Displays": null,
-  "ChipType": 0
+  "HasCustomLayout": false
 }

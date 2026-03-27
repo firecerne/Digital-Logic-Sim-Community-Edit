@@ -57,6 +57,8 @@ namespace DLS.Game
 					ChipType.SevenSegmentDisplay,
 					ChipType.DisplayDot,
 					ChipType.DisplayRGB,
+					ChipType.DisplayRGB8BitColor,
+					ChipType.DisplayRGBTouch8BitColor,
 					ChipType.DisplayRGBTouch,
 					ChipType.DisplayLED
 				),
