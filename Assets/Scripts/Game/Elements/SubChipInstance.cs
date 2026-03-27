@@ -310,11 +310,12 @@ namespace DLS.Game
 			if (ChipType == ChipType.Key)
 			{
 				string activationKeyString = InputHelper.UintToKeyName(InternalData[0]);
-				sizeX = activationKeyString.Length == 1 ?
-					// For the 1 char key chip name use base size
-					Mathf.Max(DrawSettings.GridSize * 3, minX) :
+
+				sizeX = !String.IsNullOrEmpty(activationKeyString) && activationKeyString.Length != 1
 					// For key chips with more than 1 character, calculate size based on activation key string
-					Mathf.Max(DevSceneDrawer.CalculateChipNameBounds(activationKeyString).x + DrawSettings.GridSize, minX);
+					? Mathf.Max(DevSceneDrawer.CalculateChipNameBounds(activationKeyString).x + DrawSettings.GridSize, minX)
+					// For the 1 char key chip name use base size
+					: Mathf.Max(DrawSettings.GridSize * 3, minX);
 
 				sizeY = Mathf.Max(minNameHeight, minY);
 				InstanceSize = new Vector2(sizeX, sizeY);
