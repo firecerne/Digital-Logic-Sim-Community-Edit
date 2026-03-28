@@ -139,7 +139,14 @@ namespace DLS.Simulation
 			if(ChipType != ChipType.Custom)
 				return canBeCached;
 
-			// Chip isn't combinational, if any of the subChips inputPins has more than one connection
+			// If any of the output pins has more than one connection, the simulation handles the conflict and randomly decides
+			// which input to use. Therefor it doesn't depend solely on the input anymore and is not cominational.
+			foreach (SimPin outputPin in OutputPins)
+			{
+				if (outputPin.numInputConnections > 1) return false;
+			}
+
+			// Chip isn't combinational if any of the subChips inputPins has more than one connection
 			foreach (SimChip subChip in SubChips)
 			{
 				foreach (SimPin inputPin in subChip.InputPins)
