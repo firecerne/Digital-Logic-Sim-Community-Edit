@@ -151,6 +151,14 @@ namespace DLS.Game
 			}
 		}
 
+		void OnApplicationFocus(bool hasFocus)
+		{
+			if (hasFocus)
+			{
+				Graphics.ExternalRomFileMenu.ReloadAllExternalRoms();
+			}
+		}
+
 		void OnDestroy()
 		{
 			if (Project.ActiveProject != null) Project.ActiveProject.NotifyExit();

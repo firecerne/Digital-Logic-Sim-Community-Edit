@@ -510,6 +510,18 @@ namespace DLS.Simulation
                     break;
 				}
 
+				case ChipType.ExternalRom_256x16:
+				{
+					const uint mask = 0x00ff;
+					uint address = chip.InputPins[0].State.GetShortValues();
+					uint data = chip.InternalState[address];
+
+					chip.OutputPins[0].State.SetShort((data>>8) & mask);
+					chip.OutputPins[1].State.SetShort(data & mask);
+
+					break;
+				}
+
 				case ChipType.EEPROM_256x16:
 				{
                     const uint mask = 0x00ff;

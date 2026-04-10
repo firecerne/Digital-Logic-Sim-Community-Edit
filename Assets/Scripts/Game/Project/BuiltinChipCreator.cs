@@ -36,6 +36,7 @@ namespace DLS.Game
 				dev_CreateRAM_8(),
 				CreateROM_8(),
 				CreateEEPROM_8(),
+				CreateExternalROM(),
 
 				// ---- Merge / Split ----
 
@@ -284,6 +285,24 @@ namespace DLS.Game
 
             return CreateBuiltinChipDescription(ChipType.EEPROM_256x16, size, col, inputPins, outputPins, canBeCached: false);
         }
+
+		static ChipDescription CreateExternalROM()
+		{
+			PinDescription[] inputPins =
+			{
+				CreatePinDescription("ADDRESS", 0, PinBitCount.Bit8)
+			};
+			PinDescription[] outputPins =
+			{
+				CreatePinDescription("OUT B", 1, PinBitCount.Bit8),
+				CreatePinDescription("OUT A", 2, PinBitCount.Bit8)
+			};
+
+			Color col = GetColor(new(0.2f, 0.5f, 0.5f));
+			Vector2 size = new(GridSize * 12, SubChipInstance.MinChipHeightForPins(inputPins, outputPins));
+
+			return CreateBuiltinChipDescription(ChipType.ExternalRom_256x16, size, col, inputPins, outputPins);
+		}
 
 		static ChipDescription CreateConstant_8()
 		{
