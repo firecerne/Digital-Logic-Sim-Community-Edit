@@ -79,7 +79,7 @@ namespace DLS.Simulation
 			// ---- Initialize internal state ----
 			const int addressSize_8Bit = 256;
 
-			if (ChipType is ChipType.DisplayRGB  || ChipType is ChipType.DisplayRGBTouch)
+			if (ChipType is ChipType.DisplayRGB  || ChipType is ChipType.DisplayRGBTouch || ChipType is ChipType.DisplayRGB8BitColor || ChipType is ChipType.DisplayRGBTouch8BitColor)
 			{
 				// first 256 bits = display buffer, next 256 bits = back buffer, last bit = clock state (to allow edge-trigger behaviour)
 				InternalState = new uint[addressSize_8Bit * 2 + 1];
