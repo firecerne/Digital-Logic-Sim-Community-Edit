@@ -65,6 +65,7 @@ namespace DLS.Game
 				CreateChipCollection("MEMORY",
 					ChipType.Rom_256x16,
 					ChipType.EEPROM_256x16,
+					ChipType.ExternalRom_256x16,
 					ChipType.dev_Ram_8Bit
 				)
 			};

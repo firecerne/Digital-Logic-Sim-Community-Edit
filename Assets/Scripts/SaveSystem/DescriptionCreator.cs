@@ -157,6 +157,7 @@ namespace DLS.SaveSystem
 			return type switch
 			{
 				ChipType.Rom_256x16 => new uint[256], // ROM contents
+				ChipType.ExternalRom_256x16 => new uint[256], // External ROM contents
 				ChipType.EEPROM_256x16 => new uint[257], // EEPROM contents + Rising-Edge detection
 				ChipType.Key => new uint[] { (uint)KeyCode.K }, // Key binding
 				ChipType.Pulse => new uint[] { 50, 0, 0 }, // Pulse width, ticks remaining, input state old

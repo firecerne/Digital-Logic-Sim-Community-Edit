@@ -27,7 +27,8 @@ namespace DLS.Graphics
             UnsavedChanges,
 			Search,
 			ChipLabelPopup,
-			SpecialChipMaker
+			SpecialChipMaker,
+			ExternalRomFileSelect
 		}
 
 		static MenuType activeMenuOld;
@@ -81,6 +82,7 @@ namespace DLS.Graphics
 			else if (menuToDraw == MenuType.PulseEdit) PulseEditMenu.DrawMenu();
 			else if (menuToDraw == MenuType.ConstantEdit)  ConstantEditMenu.DrawMenu();
 			else if (menuToDraw == MenuType.SpecialChipMaker) SpecialChipMakerMenu.DrawMenu();
+			else if (menuToDraw == MenuType.ExternalRomFileSelect) ExternalRomFileMenu.DrawMenu();
 			else
 			{
 				bool showSimPausedBanner = project.simPaused;
@@ -119,6 +121,7 @@ namespace DLS.Graphics
 				else if (ActiveMenu == MenuType.ProjectStats) ProjectStatsMenu.OnMenuOpened();
                 else if (ActiveMenu == MenuType.ConstantEdit) ConstantEditMenu.OnMenuOpened();
 				else if (ActiveMenu == MenuType.SpecialChipMaker) SpecialChipMakerMenu.OnMenuOpened();
+				else if (ActiveMenu == MenuType.ExternalRomFileSelect) ExternalRomFileMenu.OnMenuOpened();
 
 
 				if (InInputBlockingMenu() && Project.ActiveProject != null && Project.ActiveProject.controller != null)

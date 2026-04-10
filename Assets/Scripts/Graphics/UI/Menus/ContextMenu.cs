@@ -88,6 +88,14 @@ namespace DLS.Graphics
 
 
 
+		static readonly MenuEntry[] entries_builtinExternalRomSubchip =
+		{
+			new(Format("LOAD FILE"), OpenExternalRomFileMenu, CanEditCurrentChip),
+			new(Format("OPEN ROM FOLDER"), OpenRomFolder, () => true),
+			labelChipEntry,
+			deleteEntry
+		};
+
         static readonly MenuEntry[] entries_subChipOutput = pinColEntries;
 
 		static readonly MenuEntry[] entries_inputDevPin = new[]
@@ -190,6 +198,7 @@ namespace DLS.Graphics
 						{
 							headerName = ChipTypeHelper.IsBusType(subChip.ChipType) ? "BUS" : subChip.Description.Name;
 							if (subChip.ChipType is ChipType.Key) activeContextMenuEntries = entries_builtinKeySubchip;
+							else if (subChip.ChipType is ChipType.ExternalRom_256x16) activeContextMenuEntries = entries_builtinExternalRomSubchip;
 							else if (ChipTypeHelper.IsRomType(subChip.ChipType)) activeContextMenuEntries = entries_builtinRomSubchip;
 							else if (subChip.ChipType is ChipType.Pulse) activeContextMenuEntries = entries_builtinPulseChip;
 							else if (ChipTypeHelper.IsBusType(subChip.ChipType)) activeContextMenuEntries = entries_builtinBus;
@@ -425,6 +434,17 @@ namespace DLS.Graphics
 		static void OpenPulseEditMenu() => UIDrawer.SetActiveMenu(UIDrawer.MenuType.PulseEdit);
 
 		static void OpenConstantEditMenu() => UIDrawer.SetActiveMenu(UIDrawer.MenuType.ConstantEdit);
+
+		static void OpenExternalRomFileMenu() => UIDrawer.SetActiveMenu(UIDrawer.MenuType.ExternalRomFileSelect);
+
+		static void OpenRomFolder()
+		{
+			string romFolderPath = System.IO.Path.Combine(DLS.SaveSystem.SavePaths.AllData, "ROM");
+			System.IO.Directory.CreateDirectory(romFolderPath);
+			string path = romFolderPath.Replace("\\", "/");
+			string url = "file://" + (path.StartsWith("/") ? path : "/" + path);
+			UnityEngine.Application.OpenURL(url);
+		}
 
 		static bool CanEditCurrentChip() => Project.ActiveProject.CanEditViewedChip;
 
