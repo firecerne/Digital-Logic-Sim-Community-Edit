@@ -2,13 +2,11 @@ using System.Collections.Generic;
 using System.Linq;
 using DLS.Description;
 using DLS.Game;
-using UnityEngine;
 
 namespace DLS.SaveSystem
 {
 	public static class UpgradeHelper
 	{
-
 		public static void ApplyVersionChanges(ChipDescription[] customChips, ChipDescription[] builtinChips)
 		{
 			Main.Version defaultVersion = new(2, 0, 0);
@@ -47,12 +45,14 @@ namespace DLS.SaveSystem
 			Main.Version defaultModdedVersion = new(1, 0, 0);
 			Main.Version moddedVersion_1_1_0 = new(1, 1, 0); // Custom IN and OUTS version
 			Main.Version moddedVersion_1_1_1 = new(1, 1, 1); // New 16 and 32 bit pins
+			Main.Version moddedVersion_1_3_0 = new(1, 3, 0); // RGB LED
 
 
 			bool canParseModdedVersion = Main.Version.TryParse(projectDescription.DLSVersion_LastSavedModdedVersion, out Main.Version projectVersion);
 
-			bool isVersionEarlierThan_1_1_0 = (!canParseModdedVersion) || projectVersion.ToInt() < moddedVersion_1_1_0.ToInt();
-			bool isVersionEarlierThan_1_1_1 = (!canParseModdedVersion) || projectVersion.ToInt() < moddedVersion_1_1_1.ToInt();
+			bool isVersionEarlierThan_1_1_0 = !canParseModdedVersion || projectVersion.ToInt() < moddedVersion_1_1_0.ToInt();
+			bool isVersionEarlierThan_1_1_1 = !canParseModdedVersion || projectVersion.ToInt() < moddedVersion_1_1_1.ToInt();
+			bool isVersionEarlierThan_1_3_0 = !canParseModdedVersion || projectVersion.ToInt() < moddedVersion_1_3_0.ToInt();
 
 			bool isSplitMergeInvalid = projectDescription.SplitMergePairs == null || projectDescription.SplitMergePairs.Count == 0;
 			bool isPinBitCountInvalid = projectDescription.pinBitCounts == null || projectDescription.pinBitCounts.Count == 0;
@@ -76,6 +76,24 @@ namespace DLS.SaveSystem
 				projectDescription.pinBitCounts.Union(Project.PinBitCounts);
 				projectDescription.SplitMergePairs.Union(Project.SplitMergePairs);
 			}
+
+			if (isVersionEarlierThan_1_3_0)
+			{
+				List<ChipCollection> chipCollections = projectDescription.ChipCollections;
+				var chipCollectionToAddTo = chipCollections.FirstOrDefault(collection => collection.Name == "DISPLAY") ??
+				                        chipCollections.FirstOrDefault(collection => collection.Name == "OTHER");
+				string name = ChipTypeHelper.GetName(ChipType.DisplayLED_RGB);
+				if (!chipCollections.Any(collection => collection.Chips.Contains(name)))
+				{
+					chipCollectionToAddTo?.Chips.Add(name);
+				}
+				name = ChipTypeHelper.GetName(ChipType.DisplayLED_RGB_8Bit);
+				if (!chipCollections.Any(collection => collection.Chips.Contains(name)))
+				{
+					chipCollectionToAddTo?.Chips.Add(name);
+				}
+			}
+			projectDescription.DLSVersion_LastSavedModdedVersion = Main.DLSVersion_ModdedID.ToString();
         }
 
         static void UpdateChipPre_2_1_5(ChipDescription chipDesc)
