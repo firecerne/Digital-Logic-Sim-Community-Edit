@@ -79,8 +79,15 @@ namespace Seb.Vis.Internal
 			while (materialPool.HasAvailable())
 			{
 				Material mat = materialPool.PurgeNextAvailable().material;
-				if (Application.isPlaying) Object.Destroy(mat);
-				else Object.DestroyImmediate(mat); //
+#if UNITY_EDITOR
+				if (Application.isPlaying)
+				{
+#endif
+					Object.Destroy(mat);
+#if UNITY_EDITOR
+				}
+				else Object.DestroyImmediate(mat);
+#endif
 			}
 		}
 

@@ -215,8 +215,15 @@ namespace Seb.Vis.Text.Rendering
 
 			if (fontMat != null)
 			{
-				if (Application.isPlaying) Object.Destroy(fontMat);
+#if UNITY_EDITOR
+				if (Application.isPlaying)
+				{
+#endif
+					Object.Destroy(fontMat);
+#if UNITY_EDITOR
+				}
 				else Object.DestroyImmediate(fontMat);
+#endif
 			}
 		}
 

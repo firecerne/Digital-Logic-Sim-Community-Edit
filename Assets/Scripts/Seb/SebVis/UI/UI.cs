@@ -460,14 +460,20 @@ namespace Seb.Vis.UI
 				using (CreateMaskScope(centre, size))
 				{
 					float fontSize_ss = theme.fontSize * scale;
-					bool showDefaultText = string.IsNullOrEmpty(state.text) || !Application.isPlaying;
+					bool showDefaultText = string.IsNullOrEmpty(state.text)
+#if UNITY_EDITOR
+					                       || !Application.isPlaying;
+#else
+					;
+#endif
 					string displayString = showDefaultText ? defaultText : state.text;
 
 					Color textCol = showDefaultText ? theme.defaultTextCol : theme.textCol;
 					Draw.Text(theme.font, displayString, fontSize_ss, textCentreLeft_ss, Anchor.TextCentreLeft, textCol);
-
+#if UNITY_EDITOR
 					if (Application.isPlaying)
 					{
+#endif
 						Vector2 boundsSizeUpToCaret = Draw.CalculateTextBoundsSize(displayString.AsSpan(0, state.cursorBeforeCharIndex), theme.fontSize, theme.font);
 
 						// Draw selection box
@@ -497,7 +503,9 @@ namespace Seb.Vis.UI
 							Vector2 caretSize = new(0.125f * theme.fontSize, caretTextBoundsTest.y * 1.2f);
 							Draw.Quad(caretPos_ss, caretSize * scale, theme.textCol);
 						}
+#if UNITY_EDITOR
 					}
+#endif
 				}
 			}
 
