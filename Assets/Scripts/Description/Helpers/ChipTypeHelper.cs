@@ -21,6 +21,7 @@ namespace DLS.Description
 			{ ChipType.dev_Ram_8Bit, "RAM-8" },
 			{ ChipType.Rom_256x16, $"ROM 256{mulSymbol}16" },
             { ChipType.EEPROM_256x16, $"EEPROM 256{mulSymbol}16" },
+			{ ChipType.ExternalRom_256x16, $"EXT-ROM 256{mulSymbol}16" },
 
 			// ---- Displays -----
 			{ ChipType.DisplayRGB, "RGB DISPLAY" },
