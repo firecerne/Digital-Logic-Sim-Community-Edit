@@ -33,10 +33,11 @@ namespace DLS.Description
 		public int Prefs_SimTargetStepsPerSecond;
 		public int Prefs_SimStepsPerClockTick;
 		public int Perfs_PinIndicators;
+		public bool Prefs_AddNewChipToStarredItems;
 
 		// Stats
 		public ulong StepsRanSinceCreated;
-		public CustomStopwatch /* We should ask Stack Overflow why we cannot access this class from outside its namespace */ TimeSpentSinceCreated;
+		public CustomStopwatch TimeSpentSinceCreated;
 
 		// List of all player-created chips (in order of creation -- oldest first)
 		public string[] AllCustomChipNames;
@@ -172,7 +173,6 @@ namespace DLS.Description
             result.Add(SplitMergeNames()[indexNext]);
             return result;
         }
-
     }
 
 

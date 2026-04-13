@@ -213,10 +213,13 @@ namespace DLS.Game
 				chipLibrary.NotifyChipSaved(saveChipDescription);
 				bool isNewChip = !ChipHasBeenSavedBefore || saveMode is SaveMode.SaveAs;
 
-				// New chips are automatically starred
 				if (isNewChip)
 				{
-					SetStarred(saveChipDescription.Name, true, false, false);
+					// Only add chip to starred items when user wants to.
+					if (description.Prefs_AddNewChipToStarredItems)
+					{
+						SetStarred(saveChipDescription.Name, true, false, false);
+					}
 					UpdateAndSaveProjectDescription();
 				}
 			}
