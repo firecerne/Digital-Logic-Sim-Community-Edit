@@ -37,6 +37,9 @@ namespace DLS.Game
 		public static Func<bool> DeleteShortcutTriggered;
 		public static Func<bool> SimNextStepShortcutTriggered;
 		public static Func<bool> SimPauseToggleShortcutTriggered;
+		
+		// ---- Chip interaction shortcuts ----
+		public static Func<bool> EditElementShortcutTriggered;
 
 		// ---- Dev shortcuts ----
 		public static Func<bool> OpenSaveDataFolderShortcutTriggered;
@@ -53,7 +56,7 @@ namespace DLS.Game
 
 		// ---- Helpers ----
 		public static bool CtrlShortcutTriggered(KeyCode key) => InputHelper.IsKeyDownThisFrame(key) && InputHelper.CtrlIsHeld && !(InputHelper.AltIsHeld || InputHelper.ShiftIsHeld);
-        public static bool CtrlShiftShortcutTriggered(KeyCode key) => InputHelper.IsKeyDownThisFrame(key) && InputHelper.CtrlIsHeld && InputHelper.ShiftIsHeld && !(InputHelper.AltIsHeld);
+        public static bool CtrlShiftShortcutTriggered(KeyCode key) => InputHelper.IsKeyDownThisFrame(key) && InputHelper.CtrlIsHeld && InputHelper.ShiftIsHeld && !InputHelper.AltIsHeld;
         public static bool ShiftShortcutTriggered(KeyCode key) => InputHelper.IsKeyDownThisFrame(key) && InputHelper.ShiftIsHeld && !(InputHelper.AltIsHeld || InputHelper.CtrlIsHeld);
 		public static bool AltShortcutTriggered(KeyCode key) => InputHelper.IsKeyDownThisFrame(key) && InputHelper.AltIsHeld && !(InputHelper.CtrlIsHeld || InputHelper.ShiftIsHeld);
 		public static bool CtrlShiftAltShortcutTriggered(KeyCode key) => InputHelper.IsKeyDownThisFrame(key) && InputHelper.CtrlIsHeld && InputHelper.AltIsHeld && InputHelper.ShiftIsHeld;
@@ -90,23 +93,35 @@ namespace DLS.Game
             LoadShortcut(out SimPauseToggleShortcutTriggered, shortcutSettings.SimPauseToggleShortcutTriggered);
 
             LoadShortcut(out OpenSaveDataFolderShortcutTriggered, shortcutSettings.OpenSaveDataFolderShortcutTriggered);
+            
+            LoadShortcut(out EditElementShortcutTriggered, shortcutSettings.EditElementShortcutTriggered, InputState.Up);
         }
 
-        public static void LoadShortcut(out Func<bool> shortcutFunction, Shortcut shortcut)
+        public static void LoadShortcut(out Func<bool> shortcutFunction, Shortcut shortcut, InputState inputState = InputState.Down)
 		{
 			shortcutFunction = () => false;
 			if (shortcut.ForbiddenModifier == ShortcutModifier.None && shortcut.AlternativeKeyCode == KeyCode.None && shortcut.AlternativeModifier == ShortcutModifier.None)
 			{
-				LoadSimpleShortcut(out shortcutFunction, shortcut);
+				LoadSimpleShortcut(out shortcutFunction, shortcut, inputState);
 				return;
 			}
 
 			LoadComplexShortcut(out shortcutFunction, shortcut);
 		}
 
-		static void LoadSimpleShortcut(out Func<bool> shortcutFunction, Shortcut shortcut)
+		static void LoadSimpleShortcut(out Func<bool> shortcutFunction, Shortcut shortcut, InputState inputState)
 		{
-			shortcutFunction = () => GetFuncFromShortcutModifier(shortcut.Modifier)() && InputHelper.IsKeyDownThisFrame(shortcut.KeyCode);
+			shortcutFunction = () =>
+			{
+				bool triggered = inputState switch
+				{
+					InputState.Down => InputHelper.IsKeyDownThisFrame(shortcut.KeyCode),
+					InputState.Held => InputHelper.IsKeyHeld(shortcut.KeyCode),
+					InputState.Up => InputHelper.IsKeyUpThisFrame(shortcut.KeyCode),
+					_ => throw new ArgumentOutOfRangeException(nameof(inputState), inputState, "Loading shortcut triggered in this state is not implemented.")
+				};
+				return GetFuncFromShortcutModifier(shortcut.Modifier)() && triggered;
+			};
 		}
 
 		static void LoadComplexShortcut(out Func<bool> shortcutFunction, Shortcut shortcut)

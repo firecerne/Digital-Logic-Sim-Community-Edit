@@ -4,6 +4,8 @@ namespace DLS.Description
 {
     public struct ShortcutSettings
     {
+	    public string LastSavedModdedVersion;
+	    
         public Shortcut MainMenu_NewProjectShortcutTriggered;
         public Shortcut MainMenu_OpenProjectShortcutTriggered;
         public Shortcut MainMenu_SettingsShortcutTriggered;
@@ -33,6 +35,9 @@ namespace DLS.Description
         public Shortcut DeleteShortcutTriggered;
         public Shortcut SimNextStepShortcutTriggered;
         public Shortcut SimPauseToggleShortcutTriggered;
+        
+        // ---- Chip interaction shortcuts ----
+        public Shortcut EditElementShortcutTriggered;
 
         // ---- Dev shortcuts ----
         public Shortcut OpenSaveDataFolderShortcutTriggered;
@@ -66,6 +71,8 @@ namespace DLS.Description
                 DeleteShortcutTriggered = new(ShortcutModifier.None, KeyCode.Backspace, alternativeKey: KeyCode.Delete),
                 SimNextStepShortcutTriggered = new(ShortcutModifier.None, KeyCode.Space, forbiddenMod: ShortcutModifier.Ctrl),
                 SimPauseToggleShortcutTriggered = new(ShortcutModifier.Ctrl, KeyCode.Space),
+                
+                EditElementShortcutTriggered = new(ShortcutModifier.None, KeyCode.E),
 
                 OpenSaveDataFolderShortcutTriggered = new(ShortcutModifier.CtrlShiftAlt, KeyCode.O),
             };
