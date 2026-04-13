@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using DLS.Description;
 using DLS.Game;
 using DLS.Simulation;
@@ -441,6 +442,71 @@ namespace DLS.Graphics
 				int G = (simActive && sim.InputPins[6].FirstBitHigh ? DisplayOnState : hoverActive && pin == rootChip.AllPins[6] ? DisplayHighlightState : DisplayOffState) + colOffset;
 				bounds = DrawDisplay_SevenSegment(posWorld, scaleWorld, A, B, C, D, E, F, G);
 			}
+			else if (display.DisplayType is ChipType.SixteenSegmentPlusDotDisplay)
+			{
+				const float targetHeightAspect = 1.65f;
+				const float segmentThicknessFac = 0.085f;
+				const float segmentVerticalSpacingFac = 0.02f;
+				const float displayInsetFac = 0.1f;
+            
+				bool simActive = sim != null;
+				bool hoverActive = rootChip.ChipType == ChipType.SixteenSegmentPlusDotDisplay;
+				int colOffset = simActive && sim.InputPins[3].FirstBitHigh ? 3 : 0;
+				Color[] cols = ActiveTheme.SevenSegCols;
+				Color a1 = cols[GetSegmentColorIndex(simActive, hoverActive, rootChip, sim, 0, 0, colOffset)];
+				Color a2 = cols[GetSegmentColorIndex(simActive, hoverActive, rootChip, sim, 0, 1, colOffset)];
+				Color b = cols[GetSegmentColorIndex(simActive, hoverActive, rootChip, sim, 0, 2, colOffset)];
+				Color c = cols[GetSegmentColorIndex(simActive, hoverActive, rootChip, sim, 0, 3, colOffset)];
+				Color d2 = cols[GetSegmentColorIndex(simActive, hoverActive, rootChip, sim, 0, 4, colOffset)];
+				Color d1 = cols[GetSegmentColorIndex(simActive, hoverActive, rootChip, sim, 0, 5, colOffset)];
+				Color e = cols[GetSegmentColorIndex(simActive, hoverActive, rootChip, sim, 0, 6, colOffset)];
+				Color f = cols[GetSegmentColorIndex(simActive, hoverActive, rootChip, sim, 0, 7, colOffset)];
+				Color h = cols[GetSegmentColorIndex(simActive, hoverActive, rootChip, sim, 1, 0, colOffset)];
+				Color i = cols[GetSegmentColorIndex(simActive, hoverActive, rootChip, sim, 1, 1, colOffset)];
+				Color j = cols[GetSegmentColorIndex(simActive, hoverActive, rootChip, sim, 1, 2, colOffset)];
+				Color g2 = cols[GetSegmentColorIndex(simActive, hoverActive, rootChip, sim, 1, 3, colOffset)];
+				Color m = cols[GetSegmentColorIndex(simActive, hoverActive, rootChip, sim, 1, 4, colOffset)];
+				Color l = cols[GetSegmentColorIndex(simActive, hoverActive, rootChip, sim, 1, 5, colOffset)];
+				Color k = cols[GetSegmentColorIndex(simActive, hoverActive, rootChip, sim, 1, 6, colOffset)];
+				Color g1 = cols[GetSegmentColorIndex(simActive, hoverActive, rootChip, sim, 1, 7, colOffset)];
+				Color dot = cols[GetSegmentColorIndex(simActive, hoverActive, rootChip, sim, 2, 0, colOffset)];
+				bounds =  DrawDisplay_SixteenSegmentPlusDot(posWorld, scaleWorld, targetHeightAspect, segmentThicknessFac, segmentVerticalSpacingFac, displayInsetFac,
+					a1, a2, b, c, d2, d1, e, f, h, i, j, g2, m, l, k, g1, dot);
+			}
+			else if (display.DisplayType is ChipType.SixteenSegmentPlusDotDisplayRGB)
+			{
+				const float targetHeightAspect = 1.8f;
+				const float segmentThicknessFac = 0.085f;
+				const float segmentVerticalSpacingFac = 0.02f;
+				const float displayInsetFac = 0.1f;
+				bool simActive = sim != null;
+				bool hoverActive = rootChip.ChipType == ChipType.SixteenSegmentPlusDotDisplayRGB;
+
+				Color col = Color.black;
+				if (simActive)
+				{
+					col = GetColorFrom8BitPins(sim, 3, 4, 5);
+				}
+				Color a1 = GetSegmentColor(simActive, hoverActive, rootChip, sim, 0, 0, col);
+				Color a2 = GetSegmentColor(simActive, hoverActive, rootChip, sim, 0, 1, col);
+				Color b = GetSegmentColor(simActive, hoverActive, rootChip, sim, 0, 2, col);
+				Color c = GetSegmentColor(simActive, hoverActive, rootChip, sim, 0, 3, col);
+				Color d2 = GetSegmentColor(simActive, hoverActive, rootChip, sim, 0, 4, col);
+				Color d1 = GetSegmentColor(simActive, hoverActive, rootChip, sim, 0, 5, col);
+				Color e = GetSegmentColor(simActive, hoverActive, rootChip, sim, 0, 6, col);
+				Color f = GetSegmentColor(simActive, hoverActive, rootChip, sim, 0, 7, col);
+				Color h = GetSegmentColor(simActive, hoverActive, rootChip, sim, 1, 0, col);
+				Color i = GetSegmentColor(simActive, hoverActive, rootChip, sim, 1, 1, col);
+				Color j = GetSegmentColor(simActive, hoverActive, rootChip, sim, 1, 2, col);
+				Color g2 = GetSegmentColor(simActive, hoverActive, rootChip, sim, 1, 3, col);
+				Color m = GetSegmentColor(simActive, hoverActive, rootChip, sim, 1, 4, col);
+				Color l = GetSegmentColor(simActive, hoverActive, rootChip, sim, 1, 5, col);
+				Color k = GetSegmentColor(simActive, hoverActive, rootChip, sim, 1, 6, col);
+				Color g1 = GetSegmentColor(simActive, hoverActive, rootChip, sim, 1, 7, col);
+				Color dot = GetSegmentColor(simActive, hoverActive, rootChip, sim, 2, 0, col);
+				bounds = DrawDisplay_SixteenSegmentPlusDot(posWorld, scaleWorld, targetHeightAspect, segmentThicknessFac, segmentVerticalSpacingFac, displayInsetFac,
+					a1, a2, b, c, d2, d1, e, f, h, i, j, g2, m, l, k, g1, dot);
+			}
 			else if (display.DisplayType == ChipType.DisplayRGB)
 			{
 				bounds = DrawDisplay_RGB(posWorld, scaleWorld, sim);
@@ -590,7 +656,6 @@ namespace DLS.Graphics
 					{
 						int address = y * 16 + x;
 						uint pixelState = simSource.InternalState[address];
-						float v = pixelState;
 						col = new Color(pixelState, pixelState, pixelState);
 					}
 
@@ -645,7 +710,68 @@ namespace DLS.Graphics
 			return Bounds2D.CreateFromCentreAndSize(centre, boundsSize);
 		}
 
-		public static Bounds2D DrawDisplay_LED(Vector2 centre, float scale, Color col)
+		public static Bounds2D DrawDisplay_SixteenSegmentPlusDot(Vector2 centre, float scale, float targetHeightAspect, float segmentThicknessFac, float segmentVerticalSpacingFac, float displayInsetFac,
+			Color a1, Color a2, Color b, Color c, Color d2, Color d1, Color e, Color f, Color h, Color i, Color j, Color g2, Color m, Color l, Color k, Color g1, Color dot)
+        {
+            float boundsWidth = scale;
+            float boundsHeight = boundsWidth * targetHeightAspect;
+            float segmentThickness = scale * segmentThicknessFac;
+            float lineThickness = segmentThickness / 2;
+            float segmentSpacing = scale * segmentVerticalSpacingFac;
+            float displayInset = scale * displayInsetFac;
+
+            // Width of horizontal segments
+            float segmentWidth = (boundsWidth - displayInset) / 2  - segmentThickness;
+            // Distance between the centers of the bottom-most and top-most segments
+            float segmentRegionHeight = (boundsHeight - displayInset) / 2  - segmentThickness;
+            // Height of the vertical segments
+            float segmentHeight = segmentRegionHeight;
+
+            Vector2 segmentSizeVertical = new(segmentThickness, segmentHeight);
+            Vector2 segmentSizeHorizontal = new(segmentWidth, segmentThickness);
+            Vector2 offsetX = Vector2.right * (segmentWidth + segmentSpacing);
+            Vector2 offsetY = Vector2.up * (segmentRegionHeight / 2 + segmentSpacing);
+            
+            Vector2 halfOffsetX = offsetX / 2;
+            Vector2 heightOffset = offsetY * 2;
+            float midOffset = segmentThickness + segmentSpacing;
+            float cornerOffsetX = offsetX.x - segmentThickness - segmentSpacing;
+            float cornerOffsetY = heightOffset.y - segmentThickness - segmentSpacing;
+            
+            // Draw background
+            Vector2 boundsSize = new(boundsWidth, boundsHeight);
+            Draw.Quad(centre, boundsSize, Color.black);
+            
+            // Draw horizontal segments
+            Draw.Diamond(centre - halfOffsetX, segmentSizeHorizontal, g1); // mid left
+            Draw.Diamond(centre + halfOffsetX, segmentSizeHorizontal, g2); // mid right
+
+            Draw.Diamond(centre - halfOffsetX + heightOffset, segmentSizeHorizontal, a1); // top left
+            Draw.Diamond(centre + halfOffsetX + heightOffset, segmentSizeHorizontal, a2); // top right
+            Draw.Diamond(centre - halfOffsetX - heightOffset, segmentSizeHorizontal, d1); // bottom left
+            Draw.Diamond(centre + halfOffsetX - heightOffset, segmentSizeHorizontal, d2); // bottom right
+
+            // Draw vertical segments
+            Draw.Diamond(centre - offsetX + offsetY, segmentSizeVertical, f); // left top
+            Draw.Diamond(centre - offsetX - offsetY, segmentSizeVertical, e); // left bottom
+            Draw.Diamond(centre + offsetX + offsetY, segmentSizeVertical, b); // right top
+            Draw.Diamond(centre + offsetX - offsetY, segmentSizeVertical, c); // right bottom
+
+            Draw.Diamond(centre + offsetY, segmentSizeVertical, i); // mid top
+            Draw.Diamond(centre - offsetY, segmentSizeVertical, l); // mid bottom
+
+            //Draw Diagonal Segments
+            Draw.Line(centre + new Vector2(-cornerOffsetX, cornerOffsetY), centre + new Vector2(-midOffset, midOffset), lineThickness, h); // NW
+            Draw.Line(centre + new Vector2(cornerOffsetX, cornerOffsetY), centre + new Vector2(midOffset, midOffset), lineThickness, j); // NE
+            Draw.Line(centre + new Vector2(cornerOffsetX, -cornerOffsetY), centre + new Vector2(midOffset, -midOffset), lineThickness, m); // SE
+            Draw.Line(centre + new Vector2(-cornerOffsetX, -cornerOffsetY), centre + new Vector2(-midOffset, -midOffset), lineThickness, k); // SW
+
+			Draw.Point(centre + new Vector2(offsetX.x + lineThickness + segmentSpacing, -heightOffset.y), lineThickness, dot);
+
+            return Bounds2D.CreateFromCentreAndSize(centre, boundsSize);
+        }
+		
+        public static Bounds2D DrawDisplay_LED(Vector2 centre, float scale, Color col)
 		{
 			const float pixelSizeT = 0.975f;
 			Vector2 pixelDrawSize = Vector2.one * (scale * pixelSizeT);
@@ -688,9 +814,9 @@ namespace DLS.Graphics
 			}
 
 			if (inBounds)
-				{
-					InteractionState.NotifyElementUnderMouse(display);
-				}
+			{
+				InteractionState.NotifyElementUnderMouse(display);
+			}
 
 			rootChip.IsSelected = clicked ? false : rootChip.IsSelected;
 
@@ -746,7 +872,7 @@ namespace DLS.Graphics
 				}
 			}
 
-			if (simSource != null) simSource.OutputPins[3].State.SmallSet(addr == null ? 0 : addr.Value);
+			simSource?.OutputPins[3].State.SmallSet(addr ?? 0);
 
 			return (bounds, inBounds, pressed);
 
@@ -850,7 +976,6 @@ namespace DLS.Graphics
             bool inBounds = false;
             bool gettingClicked = false;
 
-            int currentSwitchHeadPos = 1;
             int nextSwitchHeadPos = 1;
 
 
@@ -866,9 +991,9 @@ namespace DLS.Graphics
 
             if (chipSource != null)
             {
-				bool currentState = (chipSource.InternalState[0] & 1) == 1 ? true : false;
-				currentSwitchHeadPos = currentState ? -1 : 1;
-                Bounds2D bounds = Bounds2D.CreateFromCentreAndSize(centre + Vector2.up * verticalOffset * currentSwitchHeadPos, switchDrawSize);
+				bool currentState = (chipSource.InternalState[0] & 1) == 1;
+				int currentSwitchHeadPos = currentState ? -1 : 1;
+                Bounds2D bounds = Bounds2D.CreateFromCentreAndSize(centre + verticalOffset * currentSwitchHeadPos * Vector2.up, switchDrawSize);
                 inBounds = bounds.PointInBounds(InputHelper.MousePosWorld);
                 gettingClicked = inBounds && InputHelper.IsMouseDownThisFrame(MouseButton.Left) && controller.CanInteractWithButton;
 				bool nextState = gettingClicked ? !currentState : currentState;
@@ -895,7 +1020,7 @@ namespace DLS.Graphics
 
         public static void DrawDevPin(DevPinInstance devPin)
 		{
-			if (devPin.BitCount == (uint)1)
+			if (devPin.BitCount == 1)
 			{
 				Draw1BitDevPin(devPin);
 			}
@@ -930,7 +1055,7 @@ namespace DLS.Graphics
 			Draw.Point(devPin.StateDisplayPosition, DevPinStateDisplayRadius, stateCol);
 
 			// Draw pin and handle
-			DrawPin(devPin.Pin);
+			DrawSingleBitPin(devPin.Pin);
 			DrawPinHandle(devPin, devPin.HandlePosition, devPin.GetHandleSize());
 		}
 
@@ -986,7 +1111,7 @@ namespace DLS.Graphics
 			}
 
 			// Draw pin and handle
-			DrawPin(devPin.Pin);
+			DrawMultiBitPin(devPin.Pin);
 			DrawPinHandle(devPin, devPin.HandlePosition, devPin.GetHandleSize());
 		}
 
@@ -1461,13 +1586,55 @@ namespace DLS.Graphics
 			int drawPriority_signalHigh = wireIsHigh ? 1000 : 0;
 
 			// Draw multi-bit wires above single bit wires
-			int drawPriority_bitCount = (int)wire.bitCount * 1000;
+			int drawPriority_bitCount = wire.bitCount * 1000;
 
 			// If a wire is connected to another wire, it should be drawn beneath it
 			// (mainly important for multi-bit wires, since these look strange otherwise)
 			int drawPriority_childWire = -wire.ConnectedWireRecursionDepth;
 
 			return (drawPriority_childWire + drawPriority_signalHigh + drawPriority_bitCount) * 100 + wire.spawnOrder;
+		}
+
+		static int GetSegmentColorIndex(bool simActive, bool hoverActive, SubChipInstance rootChip, SimChip simChip, uint pinIndex, int bitIndex, int colOffset)
+		{
+			PinInstance pin = InteractionState.PinUnderMouse;
+			return (simActive && IsBitHigh(simChip.InputPins[pinIndex], bitIndex) ?
+				DisplayOnState :
+				hoverActive && pin == rootChip.AllPins[pinIndex] ? DisplayHighlightState : DisplayOffState)
+			       + colOffset;
+		}
+
+		static Color GetSegmentColor(bool simActive, bool hoverActive, SubChipInstance rootChip, SimChip simChip, uint pinIndex, int bitIndex, Color inputColor)
+		{
+			PinInstance pin = InteractionState.PinUnderMouse;
+			if (simActive && IsBitHigh(simChip.InputPins[pinIndex], bitIndex))
+				return inputColor;
+			return hoverActive && pin == rootChip.AllPins[pinIndex]
+				? ActiveTheme.SevenSegCols[DisplayHighlightState]
+				: ActiveTheme.SevenSegCols[DisplayOffState];
+		}
+		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		static bool IsBitHigh(SimPin pin, int bitIndex)
+		{
+			var state = pin.State;	
+			return state.GetTristatedValue(bitIndex) == PinStateValue.LOGIC_HIGH;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		static Color GetColorFrom8BitPins(SimChip sim, int rPinIndex, int gPinIndex, int bPinIndex)
+		{
+			Color col = Color.black;
+			col.r = Unpack8BitChannel(sim, rPinIndex);
+			col.g = Unpack8BitChannel(sim, gPinIndex);
+			col.b = Unpack8BitChannel(sim, bPinIndex);
+			return col;
+
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			static float Unpack8BitChannel(SimChip sim, int pinIndex)
+			{
+				return (sim.InputPins[pinIndex].State.GetShortValues() & 0b1111_1111) / 255f;
+			}
 		}
 	}
 }

@@ -55,6 +55,8 @@ namespace DLS.Game
 				),
 				CreateChipCollection("DISPLAY",
 					ChipType.SevenSegmentDisplay,
+					ChipType.SixteenSegmentPlusDotDisplay,
+					ChipType.SixteenSegmentPlusDotDisplayRGB,
 					ChipType.DisplayDot,
 					ChipType.DisplayRGB,
 					ChipType.DisplayRGB8BitColor,

@@ -2,13 +2,11 @@ using System.Collections.Generic;
 using System.Linq;
 using DLS.Description;
 using DLS.Game;
-using UnityEngine;
 
 namespace DLS.SaveSystem
 {
 	public static class UpgradeHelper
 	{
-
 		public static void ApplyVersionChanges(ChipDescription[] customChips, ChipDescription[] builtinChips)
 		{
 			Main.Version defaultVersion = new(2, 0, 0);
@@ -47,12 +45,14 @@ namespace DLS.SaveSystem
 			Main.Version defaultModdedVersion = new(1, 0, 0);
 			Main.Version moddedVersion_1_1_0 = new(1, 1, 0); // Custom IN and OUTS version
 			Main.Version moddedVersion_1_1_1 = new(1, 1, 1); // New 16 and 32 bit pins
+			Main.Version moddedVersion_1_3_0 = new(1, 3, 0); // 16 segment displays
 
 
 			bool canParseModdedVersion = Main.Version.TryParse(projectDescription.DLSVersion_LastSavedModdedVersion, out Main.Version projectVersion);
 
-			bool isVersionEarlierThan_1_1_0 = (!canParseModdedVersion) || projectVersion.ToInt() < moddedVersion_1_1_0.ToInt();
-			bool isVersionEarlierThan_1_1_1 = (!canParseModdedVersion) || projectVersion.ToInt() < moddedVersion_1_1_1.ToInt();
+			bool isVersionEarlierThan_1_1_0 = !canParseModdedVersion || projectVersion.ToInt() < moddedVersion_1_1_0.ToInt();
+			bool isVersionEarlierThan_1_1_1 = !canParseModdedVersion || projectVersion.ToInt() < moddedVersion_1_1_1.ToInt();
+			bool isVersionEarlierThan_1_3_0 = !canParseModdedVersion || projectVersion.ToInt() < moddedVersion_1_3_0.ToInt();
 
 			bool isSplitMergeInvalid = projectDescription.SplitMergePairs == null || projectDescription.SplitMergePairs.Count == 0;
 			bool isPinBitCountInvalid = projectDescription.pinBitCounts == null || projectDescription.pinBitCounts.Count == 0;
@@ -76,7 +76,32 @@ namespace DLS.SaveSystem
 				projectDescription.pinBitCounts.Union(Project.PinBitCounts);
 				projectDescription.SplitMergePairs.Union(Project.SplitMergePairs);
 			}
+
+			if (isVersionEarlierThan_1_3_0)
+			{
+				// ---- Added 16 segment displays ----
+				AddNewBuiltinChipToCollection(ref projectDescription, ChipType.SixteenSegmentPlusDotDisplay, "DISPLAY");
+				AddNewBuiltinChipToCollection(ref projectDescription, ChipType.SixteenSegmentPlusDotDisplayRGB, "DISPLAY");
+				projectDescription.DLSVersion_LastSavedModdedVersion = moddedVersion_1_3_0.ToString();
+			}
+			projectDescription.DLSVersion_LastSavedModdedVersion = Main.DLSVersion_ModdedID.ToString();
         }
+
+		/// If no player created chip with the same name already exists, add it to the given chip collection.
+		/// Fall back to "OTHER" if collection was not found.
+		static void AddNewBuiltinChipToCollection(ref ProjectDescription projectDescription, ChipType chipType, string chipCollectionName)
+		{
+			string name = ChipTypeHelper.GetName(chipType);
+			if (projectDescription.AllCustomChipNames.Contains(name))
+			{
+				return;
+			}
+			List<ChipCollection> chipCollections = projectDescription.ChipCollections;
+			var chipCollectionToAddTo = chipCollections.FirstOrDefault(collection => collection.Name == chipCollectionName) ??
+			                            chipCollections.FirstOrDefault(collection => collection.Name == "OTHER");
+
+			chipCollectionToAddTo?.Chips.Add(name);
+		}
 
         static void UpdateChipPre_2_1_5(ChipDescription chipDesc)
 		{
