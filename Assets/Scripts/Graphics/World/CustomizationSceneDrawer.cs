@@ -303,17 +303,21 @@ namespace DLS.Graphics
 
 		static bool HandleChipResizing(SubChipInstance chip)
 		{
+			if (displayInteractState != DisplayInteractState.None || isDraggingPin)
+			{
+				return false;
+			}
+			
 			const float pad = 0.25f;
 			const float h = 1.1f;
 			const float size = 0.12f;
-			bool canInteract = displayInteractState == DisplayInteractState.None;
-			bool hascontrol = false;
+			bool hasControl = false;
 			// Draw resize arrow handles on all sides of chip
-			hascontrol |= DrawScaleHandle(chip.SelectionBoundingBox.CentreRight, Vector2Int.right);
-			hascontrol |= DrawScaleHandle(chip.SelectionBoundingBox.CentreLeft, Vector2Int.left);
-			hascontrol |= DrawScaleHandle(chip.SelectionBoundingBox.CentreTop, Vector2Int.up);
-			hascontrol |= DrawScaleHandle(chip.SelectionBoundingBox.CentreBottom, Vector2Int.down);
-			return hascontrol;
+			hasControl |= DrawScaleHandle(chip.SelectionBoundingBox.CentreRight, Vector2Int.right);
+			hasControl |= DrawScaleHandle(chip.SelectionBoundingBox.CentreLeft, Vector2Int.left);
+			hasControl |= DrawScaleHandle(chip.SelectionBoundingBox.CentreTop, Vector2Int.up);
+			hasControl |= DrawScaleHandle(chip.SelectionBoundingBox.CentreBottom, Vector2Int.down);
+			return hasControl;
 
 			bool DrawScaleHandle(Vector2 edge, Vector2Int dir)
 			{
@@ -324,7 +328,7 @@ namespace DLS.Graphics
 				Vector2 b = edge - (dir + perp * h) * size;
 				Vector2 c = edge - (dir - perp * h) * size;
 
-				bool mouseOver = canInteract && Maths.TriangleContainsPoint(InputHelper.MousePosWorld, a, b, c);
+				bool mouseOver = Maths.TriangleContainsPoint(InputHelper.MousePosWorld, a, b, c);
 				if (mouseOver && InputHelper.IsMouseDownThisFrame(MouseButton.Left))
 				{
 					selectedChipResizeDir = dir;
@@ -334,7 +338,7 @@ namespace DLS.Graphics
 
 				if (InputHelper.IsMouseUpThisFrame(MouseButton.Left)) selectedChipResizeDir = Vector2Int.zero;
 
-				bool selected = canInteract && selectedChipResizeDir == dir;
+				bool selected = selectedChipResizeDir == dir;
 				Color col = mouseOver ? ColHelper.MakeCol(0.7f) : ColHelper.MakeCol(0.3f);
 				if (selected)
 				{
