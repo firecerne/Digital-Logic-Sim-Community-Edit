@@ -313,11 +313,12 @@ namespace DLS.Graphics
 
 
 			// Draw outline and body
-			Draw.Quad(pos, subchip.Size + Vector2.one * ChipOutlineWidth, outlineCol);
-			Draw.Quad(pos, subchip.Size, chipCol);
+			Vector2 size = subchip.Size;
+			Draw.Quad(pos, size + Vector2.one * ChipOutlineWidth, outlineCol);
+			Draw.Quad(pos, size, chipCol);
 
 			// Mouse over detection
-			if (InputHelper.MouseInsideBounds_World(pos, subchip.Size))
+			if (InputHelper.MouseInsideBounds_World(pos, size))
 			{
 				// If mouse is over one of this chip's pins, then prioritize keeping the pin highlighted (so interaction is not too fiddly)
 				if (InteractionState.PinUnderMouse == null || InteractionState.PinUnderMouse.parent != subchip)
@@ -333,12 +334,13 @@ namespace DLS.Graphics
 				if (desc.NameLocation == NameDisplayLocation.Top)
 				{
 					Color bgBandCol = GetChipDisplayBorderCol(chipCol);
-					Vector2 topLeft = pos + new Vector2(-desc.Size.x / 2, desc.Size.y / 2);
-					Vector2 textPos = pos + Vector2.up * (subchip.Size.y / 2 - GridSize / 2);
+					float halfHeight = size.y / 2;
+					Vector2 topLeft = pos + new Vector2(-size.x / 2, halfHeight);
+					Vector2 textPos = pos + Vector2.up * (halfHeight - GridSize / 2);
 					TextRenderer.BoundingBox textBounds = Draw.CalculateTextBounds(subchip.DisplayName, FontBold, FontSizeChipName, textPos, Anchor.CentreTop);
 					float h = (topLeft.y - textBounds.Centre.y) * 2;
 
-					Vector2 s = new(desc.Size.x, h);
+					Vector2 s = new(size.x, h);
 					Vector2 c = topLeft + new Vector2(s.x, -s.y) / 2;
 					Draw.Quad(c, s, bgBandCol);
 					Draw.Text(FontBold, subchip.DisplayName, FontSizeChipName, textPos, Anchor.CentreTop, nameTextCol, ChipNameLineSpacing);
