@@ -329,14 +329,7 @@ namespace DLS.Graphics
 			// Draw name
 			if (isKeyChip || desc.NameLocation != NameDisplayLocation.Hidden)
 			{
-				// Display on single line if name fits comfortably, otherwise use 'formatted' version (split across multiple lines)
-				string displayName = isKeyChip ? InputHelper.UintToKeyName(subchip.InternalData[0]) : subchip.MultiLineName;
-				string nameToCheckFit = isKeyChip ? InputHelper.UintToKeyName(subchip.InternalData[0]) : subchip.Description.Name;
-				if (Draw.CalculateTextBoundsSize(nameToCheckFit, FontSizeChipName, FontBold).x < subchip.Size.x - PinRadius * 2.5f)
-				{
-					displayName = nameToCheckFit;
-				}
-
+				string displayName = subchip.DisplayName;
 				bool nameCentre = desc.NameLocation == NameDisplayLocation.Centre || isKeyChip;
 				Anchor textAnchor = nameCentre ? Anchor.TextCentre : Anchor.CentreTop;
 				Vector2 textPos = nameCentre ? pos : pos + Vector2.up * (subchip.Size.y / 2 - GridSize / 2);

@@ -1,13 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
 using DLS.Description;
 using DLS.Graphics;
 using DLS.SaveSystem;
 using Seb.Helpers;
 using Seb.Types;
-using Seb.Vis;
 using UnityEngine;
 using Exception = System.Exception;
 
@@ -28,7 +26,12 @@ namespace DLS.Game
 		public Vector2 MinSize;
 		public Vector2 InstanceSize;
 
-		public string MultiLineName;
+		/// Name displayed on every SubChip, if not hidden.
+		/// <remarks>
+		/// <para> - Long names with spaces will be wrapped. </para>
+		/// <para> - KeyChips will show their ActivationChar instead. </para>
+		/// </remarks>
+		public string DisplayName;
 		public readonly PinInstance[] OutputPins;
 		public string Label;
 		public bool HasCustomLayout;
@@ -42,9 +45,9 @@ namespace DLS.Game
 			ID = subChipDesc.ID;
 			Label = subChipDesc.Label;
 			IsBus = ChipTypeHelper.IsBusType(ChipType);
-			MultiLineName = CreateMultiLineName(description.Name);
 			MinSize = CalculateMinChipSize(description.InputPins, description.OutputPins, description.Name);
 			InstanceSize = MinSize;
+			DisplayName = SubChipHelper.GetDisplayName(description.Name, InstanceSize);
 
 			HasCustomLayout = description.HasCustomLayout;
 
@@ -148,6 +151,8 @@ namespace DLS.Game
 
 			// Update size so it changes
 			updateMinSize();
+			
+			DisplayName = InputHelper.UintToKeyName(InternalData[0]);
 		}
 
 		public void UpdatePinLayout()
@@ -316,7 +321,7 @@ namespace DLS.Game
 			MinX = Mathf.Abs(MinX) * DrawSettings.GridSize;
             MinY = Mathf.Abs(MinY) * DrawSettings.GridSize;
             
-            string multiLineName = CreateMultiLineName(Description.Name);
+            string multiLineName = SubChipHelper.CreateMultiLineName(Description.Name);
             bool hasMultiLineName = multiLineName != Description.Name;
             float minNameHeight = DrawSettings.GridSize * (hasMultiLineName ? 4 : 3);
 
@@ -459,7 +464,7 @@ namespace DLS.Game
 		public static Vector2 CalculateMinChipSize(PinDescription[] inputPins, PinDescription[] outputPins, string unformattedName)
 		{
 			float minHeightForPins = MinChipHeightForPins(inputPins, outputPins);
-			string multiLineName = CreateMultiLineName(unformattedName);
+			string multiLineName = SubChipHelper.CreateMultiLineName(unformattedName);
 			bool hasMultiLineName = multiLineName != unformattedName;
 			float minNameHeight = DrawSettings.GridSize * (hasMultiLineName ? 4 : 3);
 
@@ -486,58 +491,6 @@ namespace DLS.Game
 		public static float GetPinDepthMultiplier(PinBitCount bitCount)
 		{
 			return (float)Math.Pow(8, -bitCount.GetTier());
-		}
-
-		// Split chip name into two lines (if contains a space character)
-		static string CreateMultiLineName(string name)
-		{
-			// If name is short, or contains no spaces, then just keep on single line
-			if (name.Length <= 6 || !name.Contains(' ')) return name;
-
-			string[] lines = { name };
-			float bestSplitPenalty = float.MaxValue;
-
-			for (int i = 0; i < name.Length; i++)
-			{
-				if (name[i] == ' ')
-				{
-					string lineA = name.Substring(0, i).Trim();
-					string lineB = name.Substring(i).Trim();
-					int lenDiff = lineA.Length - lineB.Length;
-					float splitPenalty = Mathf.Abs(lenDiff);
-					if (splitPenalty < bestSplitPenalty)
-					{
-						lines = new[] { lineA, lineB };
-						bestSplitPenalty = splitPenalty;
-					}
-				}
-			}
-
-
-			// Pad lines with spaces to centre justify
-			string formatted = "";
-			int longestLine = lines.Max(l => l.Length);
-
-			for (int i = 0; i < lines.Length; i++)
-			{
-				string line = lines[i];
-				int numPadChars = longestLine - line.Length;
-				int numPadLeft = numPadChars / 2;
-				int numPadRight = numPadChars - numPadLeft;
-				line = line.PadLeft(line.Length + numPadLeft, ' ');
-				line = line.PadRight(line.Length + numPadRight, ' ');
-
-				// Add half space tag to center if padding is uneven
-				if (numPadLeft < numPadRight)
-				{
-					line = "<halfSpace>" + line;
-				}
-
-				formatted += line;
-				if (i < lines.Length - 1) formatted += "\n";
-			}
-
-			return formatted;
 		}
 
 		public void FlipBus()
