@@ -313,11 +313,12 @@ namespace DLS.Graphics
 
 
 			// Draw outline and body
-			Draw.Quad(pos, subchip.Size + Vector2.one * ChipOutlineWidth, outlineCol);
-			Draw.Quad(pos, subchip.Size, chipCol);
+			Vector2 size = subchip.Size;
+			Draw.Quad(pos, size + Vector2.one * ChipOutlineWidth, outlineCol);
+			Draw.Quad(pos, size, chipCol);
 
 			// Mouse over detection
-			if (InputHelper.MouseInsideBounds_World(pos, subchip.Size))
+			if (InputHelper.MouseInsideBounds_World(pos, size))
 			{
 				// If mouse is over one of this chip's pins, then prioritize keeping the pin highlighted (so interaction is not too fiddly)
 				if (InteractionState.PinUnderMouse == null || InteractionState.PinUnderMouse.parent != subchip)
@@ -329,32 +330,24 @@ namespace DLS.Graphics
 			// Draw name
 			if (isKeyChip || desc.NameLocation != NameDisplayLocation.Hidden)
 			{
-				// Display on single line if name fits comfortably, otherwise use 'formatted' version (split across multiple lines)
-				string displayName = isKeyChip ? InputHelper.UintToKeyName(subchip.InternalData[0]) : subchip.MultiLineName;
-				string nameToCheckFit = isKeyChip ? InputHelper.UintToKeyName(subchip.InternalData[0]) : subchip.Description.Name;
-				if (Draw.CalculateTextBoundsSize(nameToCheckFit, FontSizeChipName, FontBold).x < subchip.Size.x - PinRadius * 2.5f)
-				{
-					displayName = nameToCheckFit;
-				}
-
-				bool nameCentre = desc.NameLocation == NameDisplayLocation.Centre || isKeyChip;
-				Anchor textAnchor = nameCentre ? Anchor.TextCentre : Anchor.CentreTop;
-				Vector2 textPos = nameCentre ? pos : pos + Vector2.up * (subchip.Size.y / 2 - GridSize / 2);
-
 				// Draw background band behind text if placed at top (so it doesn't look out of place..)
 				if (desc.NameLocation == NameDisplayLocation.Top)
 				{
 					Color bgBandCol = GetChipDisplayBorderCol(chipCol);
-					Vector2 topLeft = pos + new Vector2(-desc.Size.x / 2, desc.Size.y / 2);
-					TextRenderer.BoundingBox textBounds = Draw.CalculateTextBounds(displayName, FontBold, FontSizeChipName, textPos, textAnchor);
+					float halfHeight = size.y / 2;
+					Vector2 topLeft = pos + new Vector2(-size.x / 2, halfHeight);
+					Vector2 textPos = pos + Vector2.up * (halfHeight - GridSize / 2);
+					TextRenderer.BoundingBox textBounds = Draw.CalculateTextBounds(subchip.DisplayName, FontBold, FontSizeChipName, textPos, Anchor.CentreTop);
 					float h = (topLeft.y - textBounds.Centre.y) * 2;
 
-					Vector2 s = new(desc.Size.x, h);
+					Vector2 s = new(size.x, h);
 					Vector2 c = topLeft + new Vector2(s.x, -s.y) / 2;
 					Draw.Quad(c, s, bgBandCol);
+					Draw.Text(FontBold, subchip.DisplayName, FontSizeChipName, textPos, Anchor.CentreTop, nameTextCol, ChipNameLineSpacing);
+					return;
 				}
 
-				Draw.Text(FontBold, displayName, FontSizeChipName, textPos, textAnchor, nameTextCol, ChipNameLineSpacing);
+				Draw.Text(FontBold, subchip.DisplayName, FontSizeChipName, pos, Anchor.TextCentre, nameTextCol, ChipNameLineSpacing);
 			}
 		}
 
