@@ -1,8 +1,6 @@
-using System.Collections.Generic;
 using System.Linq;
 using DLS.Description;
 using DLS.Game;
-using UnityEngine;
 
 namespace DLS.SaveSystem
 {
@@ -34,7 +32,7 @@ namespace DLS.SaveSystem
 					chipDesc.DLSVersion = version_2_1_4.ToString();
 				}
 
-				if (moddedChipVersion.ToInt() <= moddedVersion_1_3_0.ToInt())
+				if (moddedChipVersion.ToInt() < moddedVersion_1_3_0.ToInt())
 				{
 					UpdateChipPreModded_1_3_0(chipDesc);
 					chipDesc.LastSavedModdedVersion = moddedVersion_1_3_0.ToString();
