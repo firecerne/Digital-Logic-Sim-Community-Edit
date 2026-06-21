@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using UnityEngine.TextCore.Text;
 
 namespace DLS.Description
 {
@@ -68,17 +66,17 @@ namespace DLS.Description
 
 		public static string GetDevPinName(bool isInput, PinBitCount numBits)
 		{
-			return (isInput ? "IN-" : "OUT-") + numBits.BitCount.ToString();
+			return (isInput ? "IN-" : "OUT-") + numBits.BitCount;
 		}
 
 		public static string GetBusName(PinBitCount numBits)
 		{
-			return "BUS-" + numBits.ToString();
+			return "BUS-" + numBits;
 		}
 
         public static string GetBusTerminusName(PinBitCount numBits)
         {
-            return "BUS-TERMINUS-" + numBits.ToString();
+            return "BUS-TERMINUS-" + numBits;
         }
 
 

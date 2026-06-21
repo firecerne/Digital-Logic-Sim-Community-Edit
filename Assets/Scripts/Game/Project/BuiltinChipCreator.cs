@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using DLS.Description;
-using DLS.Simulation;
 using UnityEngine;
 using static DLS.Graphics.DrawSettings;
 
@@ -77,7 +76,7 @@ namespace DLS.Game
 
 		public static ChipDescription CreateInPin(PinBitCount pinBitCount)
 		{
-            PinDescription[] outPin = new[] { CreatePinDescription("IN", 0, pinBitCount) };
+            PinDescription[] outPin = { CreatePinDescription("IN", 0, pinBitCount) };
             ChipDescription InChip = CreateBuiltinChipDescription(ChipType.In_Pin, Vector2.zero, Color.clear, null, outPin, null,
                 NameDisplayLocation.Hidden, name: ChipTypeHelper.GetDevPinName(true, pinBitCount));
 			return InChip;
@@ -85,7 +84,7 @@ namespace DLS.Game
 
 		public static ChipDescription CreateOutPin(PinBitCount pinBitCount)
 		{
-            PinDescription[] inPin = new[] { CreatePinDescription("OUT", 0, pinBitCount) };
+            PinDescription[] inPin = { CreatePinDescription("OUT", 0, pinBitCount) };
 
             ChipDescription OutChip = CreateBuiltinChipDescription(ChipType.Out_Pin, Vector2.zero, Color.clear, inPin, null, null,
                 NameDisplayLocation.Hidden, name: ChipTypeHelper.GetDevPinName(false, pinBitCount));
@@ -111,7 +110,7 @@ namespace DLS.Game
             (PinBitCount a, PinBitCount b) counts = (pair.Key, pair.Value);
             int smallInBig = counts.a / counts.b;
 
-            PinDescription[] splitIN = new[] { CreatePinDescription("IN", 0, counts.a) };
+            PinDescription[] splitIN = { CreatePinDescription("IN", 0, counts.a) };
             PinDescription[] splitOUT = new PinDescription[smallInBig];
 
             for (int j = 0; j < smallInBig; j++)
@@ -119,7 +118,7 @@ namespace DLS.Game
                 string letter = " " + (char)('A' + smallInBig -1 - j);
                 splitOUT[j] = CreatePinDescription("OUT" + letter, j + 1, counts.b);
             }
-            string splitName = counts.a.ToString() + "-" + counts.b.ToString() + "BIT";
+            string splitName = counts.a + "-" + counts.b + "BIT";
 
             Vector2 minChipSize = SubChipInstance.CalculateMinChipSize(splitIN, splitOUT, splitName);
             float width = Mathf.Max(GridSize * 9, minChipSize.x);
@@ -134,14 +133,14 @@ namespace DLS.Game
             int smallInBig = counts.a / counts.b;
 
             PinDescription[] mergeIN = new PinDescription[smallInBig];
-            PinDescription[] mergeOUT = new[] { CreatePinDescription("OUT", smallInBig, counts.a) };
+            PinDescription[] mergeOUT = { CreatePinDescription("OUT", smallInBig, counts.a) };
 
             for (int j = 0; j < smallInBig; j++)
             {
                 string letter = " " + (char)('A' + smallInBig -1 - j);
                 mergeIN[j] = CreatePinDescription("IN" + letter, j, counts.b);
             }
-            string mergeName = counts.b.ToString() + "-" + counts.a.ToString() + "BIT";
+            string mergeName = counts.b + "-" + counts.a + "BIT";
 
             Vector2 minChipSize = SubChipInstance.CalculateMinChipSize(mergeIN, mergeOUT, mergeName);
             float width = Mathf.Max(GridSize * 9, minChipSize.x);
@@ -193,7 +192,7 @@ namespace DLS.Game
 			float height = SubChipInstance.MinChipHeightForPins(inputPins, null);
 			Vector2 size = new(CalculateGridSnappedWidth(GridSize * 9), height);
 
-			return CreateBuiltinChipDescription(ChipType.Buzzer, size, col, inputPins, null, null, canBeCached: false);
+			return CreateBuiltinChipDescription(ChipType.Buzzer, size, col, inputPins, null, canBeCached: false);
 		}
 		static ChipDescription CreateSPSChip()
 		{

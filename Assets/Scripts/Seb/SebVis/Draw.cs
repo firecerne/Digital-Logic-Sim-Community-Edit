@@ -1,10 +1,9 @@
 using System;
+using System.Collections.Generic;
 using Seb.Vis.Internal;
 using Seb.Vis.Text.FontLoading;
 using Seb.Vis.Text.Rendering;
 using UnityEngine;
-using System.Collections.Generic;
-
 
 namespace Seb.Vis
 {

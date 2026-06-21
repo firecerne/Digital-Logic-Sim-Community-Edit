@@ -4,6 +4,7 @@ using DLS.Game;
 using Seb.Helpers;
 using Seb.Types;
 using Seb.Vis;
+using Seb.Vis.Text.Rendering;
 using Seb.Vis.UI;
 using UnityEngine;
 
@@ -43,7 +44,7 @@ namespace DLS.Graphics
             { "Open Save Data Folder", Main.ActiveShortcutSettings.OpenSaveDataFolderShortcutTriggered },
         };
 
-        static string[] modifierNames = new[] {"None","Control","Shift","Alt","Ctrl+Shift","Ctrl+Shift+Alt","Right Alt" };
+        static string[] modifierNames = {"None","Control","Shift","Alt","Ctrl+Shift","Ctrl+Shift+Alt","Right Alt" };
 
         static List<ShortcutEditingCollapsable> collapsables = new List<ShortcutEditingCollapsable>();
         static List<ShortcutEditingCollapsable> startingCollapsable;
@@ -53,7 +54,7 @@ namespace DLS.Graphics
 
         static DrawSettings.UIThemeDLS theme = DrawSettings.ActiveUITheme;
 
-        static string[] cancelSave = new[] { "Cancel", "Save" };
+        static string[] cancelSave = { "Cancel", "Save" };
 
         class ShortcutEditingCollapsable
         {
@@ -72,7 +73,7 @@ namespace DLS.Graphics
             {
                 this.relatedShortcut = relatedShortcut.Copy();
                 this.name = name;
-                this.shortcutDesc = MenuHelper.GetComplexStringRepresentationOfShortcut(this.relatedShortcut);
+                shortcutDesc = MenuHelper.GetComplexStringRepresentationOfShortcut(this.relatedShortcut);
             }
 
             public void RegenerateShortcutDesc()
@@ -88,7 +89,7 @@ namespace DLS.Graphics
                 const float panelSpacing = 1f;
 
                 string rolldown = isOpen ? "v" : ">";
-                Seb.Vis.Text.Rendering.TextRenderer.BoundingBox bounds = Seb.Vis.Draw.CalculateTextBounds(shortcutDesc, theme.FontRegular, theme.FontSizeRegular, topLeft + (width - spacing / 2f) * Vector2.right, Anchor.TopRight);
+                TextRenderer.BoundingBox bounds = Seb.Vis.Draw.CalculateTextBounds(shortcutDesc, theme.FontRegular, theme.FontSizeRegular, topLeft + (width - spacing / 2f) * Vector2.right, Anchor.TopRight);
                 float height = bounds.BoundsMax.y - bounds.BoundsMin.y;
                 Bounds2D correctedBounds = new(new Vector2(bounds.BoundsMin.x - panelSpacing, topLeft.y - height/2f - panelSpacing),
                     new Vector2(bounds.BoundsMax.x + panelSpacing, topLeft.y - height / 2f + panelSpacing)
@@ -124,7 +125,7 @@ namespace DLS.Graphics
                     Vector2 modWheelSize = new Vector2(17f, 2.5f);
 
                     // center the selection wheels to the middle of their "title".
-                    Vector2 ModWheelPosition = originalTextPos + (modifierTextXSize / 2f) * Vector2.right + 2 * spacing * Vector2.down;
+                    Vector2 ModWheelPosition = originalTextPos + modifierTextXSize / 2f * Vector2.right + 2 * spacing * Vector2.down;
                     
                     int firstModWheelSelected = DrawModWheel((int)relatedShortcut.Modifier, ModWheelPosition);
                     int altModWheelSelected = (int)relatedShortcut.AlternativeModifier;
@@ -133,13 +134,13 @@ namespace DLS.Graphics
                     if (firstModWheelSelected != 0) { // Draw only either Alt or Forbidden because Forbidden only makes sense for None Mod and Alt only for NonNone Mod
                         DrawText("Alt Modifier", secondModifierPosition);
                         secondModifierTextSize = CalculateBounds("Alt Modifier", secondModifierPosition).Size.x;
-                        Vector2 secondModWheelPosition = secondModifierPosition + (secondModifierTextSize / 2f) * Vector2.right + 2 * spacing * Vector2.down;
+                        Vector2 secondModWheelPosition = secondModifierPosition + secondModifierTextSize / 2f * Vector2.right + 2 * spacing * Vector2.down;
                         altModWheelSelected = DrawModWheel(altModWheelSelected, secondModWheelPosition);
                     }
                     else {
                         DrawText("NOT Modifier", secondModifierPosition);
                         secondModifierTextSize = CalculateBounds("NOT Modifier", secondModifierPosition).Size.x;
-                        Vector2 secondModWheelPosition = secondModifierPosition + (secondModifierTextSize / 2f) * Vector2.right + 2 * spacing * Vector2.down;
+                        Vector2 secondModWheelPosition = secondModifierPosition + secondModifierTextSize / 2f * Vector2.right + 2 * spacing * Vector2.down;
                         forbiddenModWheelSelected = DrawModWheel(forbiddenModWheelSelected, secondModWheelPosition);
                     }
 
@@ -207,7 +208,7 @@ namespace DLS.Graphics
                         UI.DrawText(text, theme.FontRegular, theme.FontSizeRegular, position, Anchor.TopLeft, Color.white);
                     }
 
-                    Seb.Vis.Text.Rendering.TextRenderer.BoundingBox CalculateBounds(string text, Vector2 pos)
+                    TextRenderer.BoundingBox CalculateBounds(string text, Vector2 pos)
                     {
                         return Seb.Vis.Draw.CalculateTextBounds(text, theme.FontRegular, theme.FontSizeRegular, pos, Anchor.TopLeft);
                     }

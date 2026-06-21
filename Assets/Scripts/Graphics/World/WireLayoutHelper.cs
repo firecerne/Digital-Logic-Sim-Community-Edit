@@ -22,7 +22,7 @@ namespace DLS.Graphics
 
 			Vector2 dirPrev = Vector2.zero;
 			int numBits = bitWires.Length;
-			int wiresToDraw = (int)(numBits * (SubChipInstance.GetPinDepthMultiplier(wire.bitCount)));
+			int wiresToDraw = (int)(numBits * SubChipInstance.GetPinDepthMultiplier(wire.bitCount));
 			float offsetSign = 1;
 
 			// Create layout

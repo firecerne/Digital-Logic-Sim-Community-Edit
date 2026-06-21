@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Threading;
 using DLS.Description;
 using DLS.Graphics;
@@ -10,8 +9,8 @@ using DLS.SaveSystem;
 using DLS.Simulation;
 using Seb.Helpers;
 using UnityEngine;
-using UnityEngine.Windows;
 using Debug = UnityEngine.Debug;
+using ThreadPriority = System.Threading.ThreadPriority;
 
 namespace DLS.Game
 {
@@ -118,7 +117,7 @@ namespace DLS.Game
 			simThreadActive = true;
 			Thread simThread = new(SimThread)
 			{
-				Priority = System.Threading.ThreadPriority.Highest,
+				Priority = ThreadPriority.Highest,
 				Name = "DLS_SimThread",
 				IsBackground = true
 			};
@@ -564,7 +563,7 @@ namespace DLS.Game
 						}
 					}
 
-					Saver.SaveChip(updatedDesc, this.description.ProjectName);
+					Saver.SaveChip(updatedDesc, description.ProjectName);
 					chipLibrary.NotifyChipSaved(updatedDesc);
 				}
 			}
@@ -610,7 +609,7 @@ namespace DLS.Game
 					{
 						double elapsedMs = stopwatchTotal.ElapsedTicks * (1000.0 / Stopwatch.Frequency);
 						int frame = Simulator.simulationFrame;
-						if (frame > 0) UnityEngine.Debug.Log($"Avg sim step time: {elapsedMs / frame} ms NumSteps: {frame} secs: {elapsedMs / 1000.0:0.00}");
+						if (frame > 0) Debug.Log($"Avg sim step time: {elapsedMs / frame} ms NumSteps: {frame} secs: {elapsedMs / 1000.0:0.00}");
 					}
 				}
 

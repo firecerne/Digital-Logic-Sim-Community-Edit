@@ -1,11 +1,9 @@
+using System.Linq;
 using DLS.Game;
-using DLS.Simulation;
 using Seb.Helpers;
 using Seb.Vis;
 using Seb.Vis.UI;
 using UnityEngine;
-using System.Linq;
-using System;
 
 namespace DLS.Graphics
 {
@@ -58,7 +56,7 @@ namespace DLS.Graphics
 				bool scrolling = !(scrollInput == 0f);
 
 				// Check for key input or scrolling only if not hovering over buttons
-				if ((InputHelper.AnyKeyOrMouseDownThisFrame && (!string.IsNullOrEmpty(InputHelper.GetKeyCodePressedThisFrame().ToString())) || scrolling) && !hoveringOverButtons && !noKeyButtonUsed)
+				if ((InputHelper.AnyKeyOrMouseDownThisFrame && !string.IsNullOrEmpty(InputHelper.GetKeyCodePressedThisFrame().ToString()) || scrolling) && !hoveringOverButtons && !noKeyButtonUsed)
 				{
 					if (scrolling)
 					{

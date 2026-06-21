@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using DLS.Description;
 using DLS.Graphics;
 using DLS.Simulation;
@@ -24,7 +23,7 @@ namespace DLS.Game
 		public float LocalPosY;
 		public string Name;
 		public int face;
-        public int ID;
+        public readonly int ID;
 		
 
         public PinInstance(PinDescription desc, PinAddress address, IMoveable parent, bool isSourcePin)
@@ -36,7 +35,7 @@ namespace DLS.Game
 			IsSourcePin = isSourcePin;
 			Colour = desc.Colour;
 
-            IsBusPin = parent is SubChipInstance subchip && subchip.IsBus;
+            IsBusPin = parent is SubChipInstance { IsBus: true };
 			faceRight = isSourcePin;
 			desc.face = faceRight ? 1 : 3; // 1 for right, 3 for left
 			face = faceRight ? 1 : 3;
@@ -56,19 +55,19 @@ namespace DLS.Game
             {
                 case DevPinInstance devPin:
                     return devPin.PinPosition;
-                case SubChipInstance subchip:
+                case SubChipInstance subChip:
                     {
-                        Vector2 chipSize = subchip.Size;
-                        Vector2 chipPos = subchip.Position;
+                        Vector2 chipSize = subChip.Size;
+                        Vector2 chipPos = subChip.Position;
 
-                        float halfWidth = (chipSize.x / 2f) * (faceRight ? 1 : -1);
+                        float halfWidth = chipSize.x / 2f * (faceRight ? 1 : -1);
                         float halfHeight = chipSize.y / 2f;
                         float inset = DrawSettings.SubChipPinInset;
                         float outlineOffset = DrawSettings.ChipOutlineWidth / 2f;
 
                         
-                        float x = 0f;
-                        float y = 0f;
+                        float x;
+                        float y;
 
                         switch (face)
                         {
@@ -113,16 +112,12 @@ namespace DLS.Game
 
 		public Color GetStateCol(int bitIndex, bool hover = false, bool canUsePlayerState = true, bool forWires = false)
 		{
-			PinStateValue pinState = (IsSourcePin && canUsePlayerState) ? PlayerInputState : State; // dev input pin uses player state (so it updates even when sim is paused)
+			PinStateValue pinState = IsSourcePin && canUsePlayerState ? PlayerInputState : State; // dev input pin uses player state (so it updates even when sim is paused)
 			uint state = pinState.GetTristatedValue(bitIndex);
 			if (state == PinStateValue.LOGIC_DISCONNECTED) return DrawSettings.ActiveTheme.StateDisconnectedCol;
 			if(forWires && bitCount >= 64) { return DrawSettings.GetFlatColour(state == PinStateValue.LOGIC_HIGH, (uint)Colour, hover); }
 			return DrawSettings.GetStateColour(state == PinStateValue.LOGIC_HIGH, (uint)Colour, hover);
 			
-		}
-		public void ChangeBitCount(int NewBitCount)
-		{ 
-			bitCount.BitCount = (ushort)NewBitCount;
 		}
 	}
 }

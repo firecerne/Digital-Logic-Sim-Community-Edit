@@ -1,9 +1,9 @@
 using DLS.Game;
+using Seb.Helpers;
 using Seb.Vis;
 using Seb.Vis.UI;
 using UnityEngine;
 using static DLS.Graphics.DrawSettings;
-using Seb.Helpers;
 
 namespace DLS.Graphics
 {

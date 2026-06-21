@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using DLS.Description;
@@ -128,7 +127,7 @@ namespace DLS.Game
 			}
 			catch (Exception e)
 			{
-				UnityEngine.Debug.LogError("Error opening folder: " + e.Message);
+				Debug.LogError("Error opening folder: " + e.Message);
 			}
 		}
 

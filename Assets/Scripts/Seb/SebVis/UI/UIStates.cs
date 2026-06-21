@@ -97,7 +97,7 @@ namespace Seb.Vis.UI
 				focused = newFocusState;
 				lastInputTime = Time.time;
 
-				if (newFocusState == false)
+				if (!newFocusState)
 				{
 					isSelecting = false;
 				}

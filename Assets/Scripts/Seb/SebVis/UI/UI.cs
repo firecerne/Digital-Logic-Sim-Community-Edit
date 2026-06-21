@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using Seb.Helpers;
 using Seb.Types;
@@ -391,7 +392,7 @@ namespace Seb.Vis.UI
 					Draw.QuadOutline(ss.centre, ss.size, outlineWidth * scale, theme.focusBorderCol);
 					foreach (char c in InputHelper.InputStringThisFrame)
 					{
-						bool invalidChar = char.IsControl(c) || char.IsSurrogate(c) || char.GetUnicodeCategory(c) == System.Globalization.UnicodeCategory.Format || char.GetUnicodeCategory(c) == System.Globalization.UnicodeCategory.PrivateUse;
+						bool invalidChar = char.IsControl(c) || char.IsSurrogate(c) || char.GetUnicodeCategory(c) == UnicodeCategory.Format || char.GetUnicodeCategory(c) == UnicodeCategory.PrivateUse;
 						if (invalidChar) continue;
 						state.TryInsertText(c + "", validation);
 					}

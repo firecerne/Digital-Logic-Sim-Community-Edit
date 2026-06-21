@@ -12,7 +12,7 @@ public class AudioUnity : MonoBehaviour
 	public int bufferLength;
 	public int numBuffers;
 	public int batchesPerSecond;
-    [Space()]
+    [Space]
     public float maxRawSampleLastBatch;
     public float maxProcessedSampleLastBatch;
 	public double audioTime;
@@ -24,7 +24,7 @@ public class AudioUnity : MonoBehaviour
 		sampleRate = AudioSettings.outputSampleRate;
 		AudioSettings.GetDSPBufferSize(out bufferLength, out numBuffers);
 		batchesPerSecond = sampleRate / bufferLength;
-		numChannels = (AudioSettings.speakerMode == AudioSpeakerMode.Stereo) ? 2 : 1;
+		numChannels = AudioSettings.speakerMode == AudioSpeakerMode.Stereo ? 2 : 1;
 
 	}
     

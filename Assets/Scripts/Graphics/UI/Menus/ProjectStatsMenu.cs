@@ -129,15 +129,15 @@ namespace DLS.Graphics
 
 			return uses;
 		}
-		static string FormatTime(TimeSpan time) {
+		static string FormatTime(TimeSpan time)
+		{
 			if (time.Days == 0 && time.Hours == 0 && time.Minutes == 0)
 				return $"{time.Seconds}s";
-			else if (time.Days == 0 && time.Hours == 0)
+			if (time.Days == 0 && time.Hours == 0)
 				return $"{time.Minutes}m {time.Seconds}s";
-			else if (time.Days == 0)
+			if (time.Days == 0)
 				return $"{time.Hours}h {time.Minutes}m {time.Seconds}s";
-			else
-				return $"{time.Days}d {time.Hours}h {time.Minutes}m {time.Seconds}s";
+			return $"{time.Days}d {time.Hours}h {time.Minutes}m {time.Seconds}s";
 		}
 		static string FormatTime(DateTime time) {
 			return time.ToString(@"MMM dd\, yyyy", CultureInfo.InvariantCulture);
