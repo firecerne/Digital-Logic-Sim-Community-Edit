@@ -18,9 +18,13 @@ namespace DLS.Description
 			{ ChipType.Constant_8Bit, "CONST" },
 			{ ChipType.Detector, "DETECTOR" },
 			// ---- Memory ----
-			{ ChipType.dev_Ram_8Bit, "RAM-8" },
+			{ ChipType.Ram_256x8, $"RAM 256{mulSymbol}8" },
+			{ ChipType.Ram_65536x16, $"RAM 65536{mulSymbol}16" },
 			{ ChipType.Rom_256x16, $"ROM 256{mulSymbol}16" },
+			{ ChipType.Rom_65536x16, $"ROM 65536{mulSymbol}16" },
             { ChipType.EEPROM_256x16, $"EEPROM 256{mulSymbol}16" },
+            { ChipType.EEPROM_65536x16, $"EEPROM 65536{mulSymbol}16" },
+
 
 			// ---- Displays -----
 			{ ChipType.DisplayRGB, "RGB DISPLAY" },
@@ -52,7 +56,10 @@ namespace DLS.Description
 
 		public static bool IsBusTerminusType(ChipType type) => type is ChipType.BusTerminus;
 
-		public static bool IsRomType(ChipType type) => type == ChipType.Rom_256x16 || type == ChipType.EEPROM_256x16;
+		public static bool IsRomType(ChipType type) => type == ChipType.Rom_256x16 || type == ChipType.Rom_65536x16 ||type == ChipType.EEPROM_256x16 || type == ChipType.EEPROM_65536x16;
+
+		public static bool IsEepromType(ChipType type) =>
+    		type == ChipType.EEPROM_256x16 || type == ChipType.EEPROM_65536x16;
 
 		public static (bool isInput, bool isOutput, PinBitCount numBits) IsInputOrOutputPin(ChipDescription chip)
 		{
@@ -91,7 +98,7 @@ namespace DLS.Description
 		}
 
 		public static bool IsInternalDataModifiable(ChipType type) {
-			return type == ChipType.EEPROM_256x16 || type == ChipType.Toggle;
+			return type == ChipType.EEPROM_256x16 || type == ChipType.EEPROM_65536x16 || type == ChipType.Toggle;
 		}
 
 		public static bool IsMergeSplitChip(ChipType chipType)

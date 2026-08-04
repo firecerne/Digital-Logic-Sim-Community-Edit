@@ -468,7 +468,7 @@ namespace DLS.Simulation
 					chip.OutputPins[0].State.SmallSet(chip.InternalState[addressPin]);
 					break;
 				}
-				case ChipType.dev_Ram_8Bit:
+				case ChipType.Ram_256x8:
 				{
 					uint addressPin = chip.InputPins[0].State.GetShortValues();
 
@@ -498,10 +498,52 @@ namespace DLS.Simulation
 
 					break;
 				}
+				case ChipType.Ram_65536x16:
+				{
+					uint address = (chip.InputPins[0].State.GetShortValues() << 8) | chip.InputPins[1].State.GetShortValues();
+
+					// Detect clock rising edge
+					bool clockHigh = chip.InputPins[6].State.SmallHigh();
+					bool isRisingEdge = clockHigh && chip.InternalState[^1] == 0;
+					chip.InternalState[^1] = clockHigh ? 1u : 0;
+
+					// Write/Reset on rising edge
+					if (isRisingEdge)
+					{
+						if (chip.InputPins[5].State.SmallHigh()) // Reset
+						{
+							for (int i = 0; i < 65536; i++)
+							{
+								chip.InternalState[i] = 0;
+							}
+						}
+						else if (chip.InputPins[4].State.SmallHigh()) // Write
+						{
+							chip.InternalState[address] = (chip.InputPins[2].State.GetShortValues() << 8) | chip.InputPins[3].State.GetShortValues();
+						}
+					}
+
+					// Output data at current address
+					chip.OutputPins[0].State.SetShort((chip.InternalState[address] >> 8) & 0xFF);
+					chip.OutputPins[1].State.SetShort(chip.InternalState[address] & 0xFF);
+
+					break;
+				}
 				case ChipType.Rom_256x16:
 				{
 					const uint mask = 0x00ff;
 					uint address = chip.InputPins[0].State.GetShortValues();
+					uint data = chip.InternalState[address];
+
+					chip.OutputPins[0].State.SetShort((data>>8) & mask);
+					chip.OutputPins[1].State.SetShort(data & mask);
+			
+                    break;
+				}
+				case ChipType.Rom_65536x16:
+				{
+					const uint mask = 0x00ff;
+					uint address = (chip.InputPins[0].State.GetShortValues() << 8) | chip.InputPins[1].State.GetShortValues();
 					uint data = chip.InternalState[address];
 
 					chip.OutputPins[0].State.SetShort((data>>8) & mask);
@@ -514,7 +556,7 @@ namespace DLS.Simulation
 				{
                     const uint mask = 0x00ff;
 					uint address = chip.InputPins[0].State.GetShortValues();
-                    bool isWriting = chip.InputPins[3].State.SmallHigh();
+                    bool isWriting = chip.InputPins[2].State.SmallHigh();
                     bool clockHigh = chip.InputPins[4].State.SmallHigh();
                     bool isRisingEdge = clockHigh && chip.InternalState[^1] == 0;
                     chip.InternalState[^1] = clockHigh ? 1u : 0;
@@ -523,6 +565,28 @@ namespace DLS.Simulation
 					if (isWriting && isRisingEdge)
 					{
 							uint writeData = (ushort)(((chip.InputPins[1].State.GetShortValues() & mask) << 8) | (chip.InputPins[2].State.GetShortValues() & mask));
+						chip.InternalState[address] = writeData;
+						Project.ActiveProject.NotifyRomContentsEditedRuntime(chip);
+					}
+          
+            		uint data = chip.InternalState[address];
+            		chip.OutputPins[0].State.SetShort((data >> 8) & mask);
+					chip.OutputPins[1]. State.SetShort(data & mask);
+            		break;
+                }
+				case ChipType.EEPROM_65536x16:
+				{
+                    const uint mask = 0x00ff;
+					uint address = (chip.InputPins[0].State.GetShortValues() << 8) | chip.InputPins[1].State.GetShortValues();
+                    bool isWriting = chip.InputPins[4].State.SmallHigh();
+                    bool clockHigh = chip.InputPins[6].State.SmallHigh();
+                    bool isRisingEdge = clockHigh && chip.InternalState[^1] == 0;
+                    chip.InternalState[^1] = clockHigh ? 1u : 0;
+
+
+					if (isWriting && isRisingEdge)
+					{
+							uint writeData = (ushort)(((chip.InputPins[2].State.GetShortValues() & mask) << 8) | (chip.InputPins[3].State.GetShortValues() & mask));
 						chip.InternalState[address] = writeData;
 						Project.ActiveProject.NotifyRomContentsEditedRuntime(chip);
 					}

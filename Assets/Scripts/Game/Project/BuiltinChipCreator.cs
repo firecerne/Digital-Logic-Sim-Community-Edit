@@ -33,9 +33,12 @@ namespace DLS.Game
 				CreateDetector(),
 
 				// ---- Memory ----
-				dev_CreateRAM_8(),
-				CreateROM_8(),
+				CreateRAM_256x8(),
+				CreateRAM_65536x16(),
+				CreateROM_256x16(),
+				CreateROM_65536x16(),
 				CreateEEPROM_8(),
+				CreateEEPROM_16(),
 
 				// ---- Merge / Split ----
 
@@ -226,7 +229,7 @@ namespace DLS.Game
 			return CreateBuiltinChipDescription(ChipType.RTC, size, col, null, outputPins, canBeCached: false);
 		}
 
-		static ChipDescription dev_CreateRAM_8()
+		static ChipDescription CreateRAM_256x8()
 		{
 			Color col = GetColor(new(0.85f, 0.45f, 0.3f));
 
@@ -241,10 +244,33 @@ namespace DLS.Game
 			PinDescription[] outputPins = { CreatePinDescription("OUT", 5, PinBitCount.Bit8) };
 			Vector2 size = new(GridSize * 10, SubChipInstance.MinChipHeightForPins(inputPins, outputPins));
 
-			return CreateBuiltinChipDescription(ChipType.dev_Ram_8Bit, size, col, inputPins, outputPins, canBeCached: false);
+			return CreateBuiltinChipDescription(ChipType.Ram_256x8, size, col, inputPins, outputPins, canBeCached: false);
+		}
+		static ChipDescription CreateRAM_65536x16()
+		{
+			Color col = GetColor(new(0.85f, 0.45f, 0.3f));
+
+			PinDescription[] inputPins =
+			{
+				CreatePinDescription("ADDRESS B", 0, PinBitCount.Bit8),
+				CreatePinDescription("ADDRESS A", 1, PinBitCount.Bit8),
+				CreatePinDescription("DATA B", 2, PinBitCount.Bit8),
+				CreatePinDescription("DATA A", 3, PinBitCount.Bit8),
+				CreatePinDescription("WRITE", 4),
+				CreatePinDescription("RESET", 5),
+				CreatePinDescription("CLOCK", 6)
+			};
+			PinDescription[] outputPins =
+			{ 
+				CreatePinDescription("OUT B", 7, PinBitCount.Bit8),
+				CreatePinDescription("OUT A", 8, PinBitCount.Bit8)
+			};
+			Vector2 size = new(GridSize * 10, SubChipInstance.MinChipHeightForPins(inputPins, outputPins));
+
+			return CreateBuiltinChipDescription(ChipType.Ram_65536x16, size, col, inputPins, outputPins, canBeCached: false);
 		}
 
-		static ChipDescription CreateROM_8()
+		static ChipDescription CreateROM_256x16()
 		{
 			PinDescription[] inputPins =
 			{
@@ -260,6 +286,24 @@ namespace DLS.Game
 			Vector2 size = new(GridSize * 12, SubChipInstance.MinChipHeightForPins(inputPins, outputPins));
 
 			return CreateBuiltinChipDescription(ChipType.Rom_256x16, size, col, inputPins, outputPins);
+		}
+		static ChipDescription CreateROM_65536x16()
+		{
+			PinDescription[] inputPins =
+			{
+				CreatePinDescription("ADDRESS B", 0, PinBitCount.Bit8),
+				CreatePinDescription("ADDRESS A", 1, PinBitCount.Bit8)
+			};
+			PinDescription[] outputPins =
+			{
+                CreatePinDescription("OUT B", 2, PinBitCount.Bit8),
+                CreatePinDescription("OUT A", 3, PinBitCount.Bit8)
+            };
+
+			Color col = GetColor(new(0.25f, 0.35f, 0.5f));
+			Vector2 size = new(GridSize * 12, SubChipInstance.MinChipHeightForPins(inputPins, outputPins));
+
+			return CreateBuiltinChipDescription(ChipType.Rom_65536x16, size, col, inputPins, outputPins);
 		}
 
         static ChipDescription CreateEEPROM_8()
@@ -283,6 +327,29 @@ namespace DLS.Game
             Vector2 size = new(GridSize * 12, SubChipInstance.MinChipHeightForPins(inputPins, outputPins));
 
             return CreateBuiltinChipDescription(ChipType.EEPROM_256x16, size, col, inputPins, outputPins, canBeCached: false);
+        }
+		static ChipDescription CreateEEPROM_16()
+        {
+            PinDescription[] inputPins =
+            {
+                CreatePinDescription("ADDRESS B", 0, PinBitCount.Bit8),
+                CreatePinDescription("ADDRESS A", 1, PinBitCount.Bit8),
+				CreatePinDescription("DATA B", 2, PinBitCount.Bit8),
+				CreatePinDescription("DATA A", 3, PinBitCount.Bit8),
+                CreatePinDescription("WRITE", 4, PinBitCount.Bit1),
+				CreatePinDescription("CLOCK", 5, PinBitCount.Bit1)
+            };
+            PinDescription[] outputPins =
+            {
+                CreatePinDescription("OUT B", 6, PinBitCount.Bit8),
+				CreatePinDescription("OUT A", 7, PinBitCount.Bit8)
+
+            };
+
+            Color col = GetColor(new(0.25f, 0.35f, 0.5f));
+            Vector2 size = new(GridSize * 12, SubChipInstance.MinChipHeightForPins(inputPins, outputPins));
+
+            return CreateBuiltinChipDescription(ChipType.EEPROM_65536x16, size, col, inputPins, outputPins, canBeCached: false);
         }
 
 		static ChipDescription CreateConstant_8()

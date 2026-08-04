@@ -12,9 +12,12 @@ namespace DLS.Description
 		Detector,
 
 		// ---- Memory ----
-		dev_Ram_8Bit,
+		Ram_256x8,
+		Ram_65536x16,
 		Rom_256x16,
+		Rom_65536x16,
 		EEPROM_256x16,
+		EEPROM_65536x16,
 
 		// ---- Displays ----
 		SevenSegmentDisplay,
