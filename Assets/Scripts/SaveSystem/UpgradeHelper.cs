@@ -12,7 +12,9 @@ namespace DLS.SaveSystem
 		public static void ApplyVersionChanges(ChipDescription[] customChips, ChipDescription[] builtinChips)
 		{
 			Main.Version defaultVersion = new(2, 0, 0);
+			Main.Version defaultModdedVersion = new(1, 0, 0);
 			Main.Version version_2_1_4 = new(2, 1, 4);
+			Main.Version moddedVersion_1_3_0 = new(1, 3, 0); // Fixed caching
 
 			foreach (ChipDescription chipDesc in customChips)
 			{
@@ -21,10 +23,21 @@ namespace DLS.SaveSystem
 					chipVersion = defaultVersion;
 				}
 
+				if (!Main.Version.TryParse(chipDesc.LastSavedModdedVersion, out Main.Version moddedChipVersion))
+				{
+					moddedChipVersion = defaultModdedVersion;
+				}
+
 				if (chipVersion.ToInt() <= version_2_1_4.ToInt())
 				{
 					UpdateChipPre_2_1_5(chipDesc);
 					chipDesc.DLSVersion = version_2_1_4.ToString();
+				}
+
+				if (moddedChipVersion.ToInt() <= moddedVersion_1_3_0.ToInt())
+				{
+					UpdateChipPreModded_1_3_0(chipDesc);
+					chipDesc.LastSavedModdedVersion = moddedVersion_1_3_0.ToString();
 				}
 			}
 		}
@@ -102,6 +115,12 @@ namespace DLS.SaveSystem
 
 				return (PinColour)colourIndex;
 			}
+		}
+
+		static void UpdateChipPreModded_1_3_0(ChipDescription chipDesc)
+		{
+			// ---- Fixed Caching ----
+			SavedDescriptionCachingCorrector.CorrectCachingAbility(chipDesc);
 		}
 	}
 }

@@ -119,7 +119,7 @@ namespace DLS.Graphics
         static SubChipInstance CreateCustomizationState()
         {
             DevChipInstance viewedChip = Project.ActiveProject.ViewedChip;
-            ChipDescription desc = DescriptionCreator.CreateChipDescription(viewedChip);
+            ChipDescription desc = DescriptionCreator.CreateChipDescription(viewedChip, true);
 
             desc.HasCustomLayout = viewedChip.HasCustomLayout;
 

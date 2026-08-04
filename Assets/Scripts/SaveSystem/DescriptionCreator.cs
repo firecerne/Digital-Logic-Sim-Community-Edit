@@ -10,12 +10,11 @@ namespace DLS.SaveSystem
 {
 	public static class DescriptionCreator
 	{
-		public static ChipDescription CreateChipDescription(DevChipInstance chip)
+		public static ChipDescription CreateChipDescription(DevChipInstance chip, bool isSaving = false)
 		{
 			// Get previously saved customizations such as name and colour (if exist)
 			ChipDescription descOld = chip.LastSavedDescription;
 			bool hasSavedDesc = descOld != null;
-			Vector2 size = hasSavedDesc ? descOld.Size : Vector2.zero;
 			Color col = hasSavedDesc ? descOld.Colour : RandomInitialChipColour();
 			string name = hasSavedDesc ? descOld.Name : string.Empty;
 			DisplayDescription[] displays = hasSavedDesc ? descOld.Displays : null;
@@ -75,20 +74,40 @@ namespace DLS.SaveSystem
 				outputPins = OrderPins(chip.GetOutputPins()).Select(CreatePinDescription).ToArray();
 			}
 			SubChipDescription[] subchips = chip.GetSubchips().Select(CreateSubChipDescription).ToArray();
-			Vector2 minChipsSize = SubChipInstance.CalculateMinChipSize(inputPins, outputPins, name);
-			size = Vector2.Max(minChipsSize, size);
 
 			UpdateWireIndicesForDescriptionCreation(chip);
+
+			Vector2 size;
+			bool shouldBeCached = false;
+			if (isSaving)
+			{
+				var minChipSize = SubChipInstance.CalculateMinChipSize(inputPins, outputPins, name);
+				if (hasSavedDesc)
+				{
+					size = Vector2.Max(minChipSize, descOld.Size);
+					shouldBeCached = descOld.ShouldBeCached && chip.SimChip.CanCache();
+				}
+				else
+				{
+					size = minChipSize;
+				}
+			}
+			else
+			{
+				size = descOld!.Size;
+				shouldBeCached =  descOld.ShouldBeCached;
+			}
 
 			// Create and return the chip description
 			return new ChipDescription
 			{
 				DLSVersion = Main.DLSVersion.ToString(),
+				LastSavedModdedVersion = Main.DLSVersion_ModdedID.ToString(),
 				Name = name,
 				NameLocation = hasSavedDesc ? descOld.NameLocation : NameDisplayLocation.Centre,
 				Size = size,
 				Colour = col,
-				ShouldBeCached = hasSavedDesc ? descOld.ShouldBeCached : false,
+				ShouldBeCached = shouldBeCached,
 
 				SubChips = subchips,
 				InputPins = inputPins,
