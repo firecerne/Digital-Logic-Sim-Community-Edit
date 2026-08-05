@@ -60,6 +60,17 @@ namespace DLS.Description
 
 		public static bool IsRomType(ChipType type) => type == ChipType.Rom_256x16 || type == ChipType.Rom_65536x16 ||type == ChipType.EEPROM_256x16 || type == ChipType.EEPROM_65536x16;
 
+		public static bool IsUnstable(ChipType type) =>
+			type == ChipType.Button ||
+			type == ChipType.SPS ||
+			type == ChipType.Clock ||
+			type == ChipType.DisplayRGBTouch ||
+			type == ChipType.DisplayRGBTouch8BitColor ||
+			type == ChipType.Key ||
+			type == ChipType.Pulse ||
+			type == ChipType.RTC ||
+			type == ChipType.Buzzer ||
+			type == ChipType.Toggle;
 		public static bool IsEepromType(ChipType type) =>
     		type == ChipType.EEPROM_256x16 || type == ChipType.EEPROM_65536x16;
 

@@ -1,7 +1,6 @@
 using DLS.Description;
 using System;
 using System.Collections;
-using DLS.Description;
 
 namespace DLS.Simulation
 {

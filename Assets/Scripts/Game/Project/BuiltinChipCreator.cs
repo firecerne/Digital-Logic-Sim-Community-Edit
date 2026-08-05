@@ -622,7 +622,7 @@ namespace DLS.Game
 				}
 			};
 
-			return CreateBuiltinChipDescription(ChipType.DisplayRGBTouch, size, col, inputPins, outputPins, displays, NameDisplayLocation.Hidden);
+			return CreateBuiltinChipDescription(ChipType.DisplayRGBTouch, size, col, inputPins, outputPins, displays, NameDisplayLocation.Hidden, canBeCached: false);
 		}
 
 		static ChipDescription CreateDisplayRGBTouch8BitColor()
@@ -665,7 +665,7 @@ namespace DLS.Game
 				}
 			};
 
-			return CreateBuiltinChipDescription(ChipType.DisplayRGBTouch8BitColor, size, col, inputPins, outputPins, displays, NameDisplayLocation.Hidden);
+			return CreateBuiltinChipDescription(ChipType.DisplayRGBTouch8BitColor, size, col, inputPins, outputPins, displays, NameDisplayLocation.Hidden, canBeCached: false);
 		}
 
 		static ChipDescription CreateDisplayDot()

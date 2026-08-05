@@ -32,6 +32,14 @@ namespace DLS.Simulation
 		public int numInputsReady;
 		public SimPin[] OutputPins = Array.Empty<SimPin>();
 		public SimChip[] SubChips = Array.Empty<SimChip>();
+
+		// if the inputs on an combinational chip dont change we can skip the LUT lookup. And just propagate the inputs
+		public PinStateValue[] lastInputSnapshot;
+		public bool isStable; // True, if the chip or its subchips dont contain any inputs which arent pins (clock, touch display, SPS, ...)
+		public bool canSleep; // True, if Chip can wait
+		public PinStateValue[] lastOutputSnapshot;
+
+
 		// Small, purely combinational chips use a LUT for fast calculations. These are stored here. Maps the name of a chip to its LUT.
 		public static readonly Dictionary<string, (int framCacheWasMade, uint[][] LUT)> combinationalChipCaches = new();
 		public uint[][] LUT = null;
@@ -111,18 +119,6 @@ namespace DLS.Simulation
 				for (int i = 0; i < InternalState.Length - 1; i++)
 				{
 					Simulator.rng.NextBytes(randomBytes);
-					InternalState[i] = BitConverter.ToUInt32(randomBytes) & 0x00FF00FF; // Limit to 8 first bits, otherwise the value is too big
-				}
-			}
-			else if (ChipType is ChipType.Ram_65536x16)
-			{
-				InternalState = new uint[addressSize_16Bit + 1]; // +1 for clock state (to allow edge-trigger behaviour)
-
-				// Initialize memory contents to random state
-				Span<byte> randomBytes = stackalloc byte[4];
-				for (int i = 0; i < InternalState.Length - 1; i++)
-				{
-					Simulator.rng.NextBytes(randomBytes);
 					InternalState[i] = BitConverter.ToUInt32(randomBytes);
 				}
 			}
@@ -133,6 +129,7 @@ namespace DLS.Simulation
 				InternalState = new uint[internalState.Length];
 				UpdateInternalState(internalState);
 			}
+			canSleep = false;
 		}
 
 		public bool CanCache()
@@ -441,6 +438,94 @@ namespace DLS.Simulation
 
 		public void UpdateInternalState(uint[] source) => Array.Copy(source, InternalState, InternalState.Length);
 
+		public void RecalculateStability()
+		{
+			for (int i = 0; i < SubChips.Length; i++)
+			{
+				SubChips[i].RecalculateStability();
+			}
+
+			if (IsBuiltin)
+			{
+				// "Stable" here means: does not change spontaneously without input changes.
+				isStable = !ChipTypeHelper.IsUnstable(ChipType);
+			}
+			else
+			{
+				isStable = true;
+				for (int i = 0; i < SubChips.Length; i++)
+				{
+					if (!SubChips[i].isStable)
+					{
+						isStable = false;
+						break;
+					}
+				}
+			}
+
+			canSleep = false;
+			lastInputSnapshot = null;
+			lastOutputSnapshot = null;
+		}
+
+		public bool CanSkipEvaluation()
+		{
+			if (SimChip.isCreatingACache) return false;
+			if (!isStable) return false;
+			if (!canSleep) return false;
+
+			if (lastInputSnapshot == null || lastInputSnapshot.Length != InputPins.Length) return false;
+
+			for (int i = 0; i < InputPins.Length; i++)
+			{
+				if (!SamePinState(InputPins[i].State, lastInputSnapshot[i])) return false;
+			}
+
+			return true;
+		}
+
+		public void SaveInputSnapshot()
+		{
+			if (lastInputSnapshot == null || lastInputSnapshot.Length != InputPins.Length)
+			{
+				lastInputSnapshot = new PinStateValue[InputPins.Length];
+			}
+
+			for (int i = 0; i < InputPins.Length; i++)
+			{
+				// Note: If PinStateValue is a struct, this safely copies the value. 
+				// If it is a class, you must use a .Clone() or deep copy method here!
+				lastInputSnapshot[i] = InputPins[i].State; 
+			}
+		}
+
+		public bool UpdateOutputSnapshotAndDetectChange()
+		{
+			bool changed = false;
+
+			if (lastOutputSnapshot == null || lastOutputSnapshot.Length != OutputPins.Length)
+			{
+				changed = true;
+				lastOutputSnapshot = new PinStateValue[OutputPins.Length];
+			}
+
+			for (int i = 0; i < OutputPins.Length; i++)
+			{
+				if (!changed && !SamePinState(OutputPins[i].State, lastOutputSnapshot[i]))
+				{
+					changed = true;
+				}
+				lastOutputSnapshot[i] = OutputPins[i].State;
+			}
+
+			return changed;
+		}
+
+		static bool SamePinState(PinStateValue a, PinStateValue b)
+		{
+			// If PinStateValue doesn't override Equals properly, compare its internal data (e.g., a.a == b.a)
+			return a.Equals(b);
+		}
 
 		public void Sim_PropagateInputs()
 		{
