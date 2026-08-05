@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -107,16 +108,14 @@ namespace DLS.Game
 			}
 		}
 
+		Thread simThread; 
+
 		public void StartSimulation()
 		{
-			if (debug_runSimMainThread)
-			{
-				Debug.Log("Simulation will run on main thread");
-				return;
-			}
+			if (debug_runSimMainThread) return;
 
 			simThreadActive = true;
-			Thread simThread = new(SimThread)
+			simThread = new Thread(SimThread)
 			{
 				Priority = System.Threading.ThreadPriority.Highest,
 				Name = "DLS_SimThread",
@@ -124,6 +123,7 @@ namespace DLS.Game
 			};
 			simThread.Start();
 		}
+
 
 		public void EnterViewMode(SubChipInstance subchip)
 		{
@@ -579,35 +579,30 @@ namespace DLS.Game
 		public bool ShouldSnapToGrid => KeyboardShortcuts.SnapModeHeld || (description.Prefs_Snapping == 1 && ShowGrid) || description.Prefs_Snapping == 2;
 		public bool ForceStraightWires => KeyboardShortcuts.StraightLineModeHeld || (description.Prefs_StraightWires == 1 && ShowGrid) || description.Prefs_StraightWires == 2;
 
-		public void NotifyExit()
+		public void CloseProjectSafely()
 		{
-			// 1. Stop the simulation thread
 			simThreadActive = false;
-			
-			// Give the background thread a few milliseconds to actually stop safely
-			Thread.Sleep(20); 
+			SimChip.AbortCache(); 
 
-			// Save project state
-			UpdateAndSaveProjectDescription(description);
+			if (simThread != null && simThread.IsAlive)
+			{
+				simThread.Join(500); 
+			}
 
-			// --- MEMORY LEAK FIXES START HERE ---
-
-			// 2. Clear the Simulator's static references to the old SimChip tree
 			Simulator.UnloadProject();
-
-			// 3. Clear the LUT Caches (which hold massive arrays of old chip logic)
 			SimChip.ClearStaticCaches();
-
-			// 4. SEVER THE STATIC REFERENCE TO THIS PROJECT!
-			// This is the most important line. It tells the Garbage Collector 
-			// that the old Project, ChipLibrary, and DevChips can be deleted.
+			
+			long memoryBefore = System.GC.GetTotalMemory(true);
+			UnityEngine.Debug.Log($"[MEMORY] Managed C# memory BEFORE wipe: {memoryBefore / (1024 * 1024)} MB");
+			
 			ActiveProject = null;
-
-			// 5. Force Garbage Collection immediately. 
-			// (Normally you avoid this, but it is perfect for project transitions/loading screens)
+			
 			System.GC.Collect();
 			System.GC.WaitForPendingFinalizers();
 			System.GC.Collect();
+			
+			long memoryAfter = System.GC.GetTotalMemory(false);
+			UnityEngine.Debug.Log($"[MEMORY] Managed C# memory AFTER wipe: {memoryAfter / (1024 * 1024)} MB");
 		}
 
 		void SimThread()

@@ -394,7 +394,13 @@ namespace DLS.Graphics
 			{
 				if (exit)
 				{
-					Project.ActiveProject.NotifyExit();
+					if (Project.ActiveProject != null)
+					{
+						Project.ActiveProject.CloseProjectSafely();
+					}
+					
+					BottomBarUI.Reset(); 
+					
 					UIDrawer.SetActiveMenu(UIDrawer.MenuType.MainMenu);
 				}
 			}
