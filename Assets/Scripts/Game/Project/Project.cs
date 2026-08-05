@@ -581,8 +581,33 @@ namespace DLS.Game
 
 		public void NotifyExit()
 		{
+			// 1. Stop the simulation thread
 			simThreadActive = false;
-			ActiveProject.UpdateAndSaveProjectDescription(ActiveProject.description);
+			
+			// Give the background thread a few milliseconds to actually stop safely
+			Thread.Sleep(20); 
+
+			// Save project state
+			UpdateAndSaveProjectDescription(description);
+
+			// --- MEMORY LEAK FIXES START HERE ---
+
+			// 2. Clear the Simulator's static references to the old SimChip tree
+			Simulator.UnloadProject();
+
+			// 3. Clear the LUT Caches (which hold massive arrays of old chip logic)
+			SimChip.ClearStaticCaches();
+
+			// 4. SEVER THE STATIC REFERENCE TO THIS PROJECT!
+			// This is the most important line. It tells the Garbage Collector 
+			// that the old Project, ChipLibrary, and DevChips can be deleted.
+			ActiveProject = null;
+
+			// 5. Force Garbage Collection immediately. 
+			// (Normally you avoid this, but it is perfect for project transitions/loading screens)
+			System.GC.Collect();
+			System.GC.WaitForPendingFinalizers();
+			System.GC.Collect();
 		}
 
 		void SimThread()

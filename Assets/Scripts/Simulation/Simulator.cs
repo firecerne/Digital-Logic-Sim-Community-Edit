@@ -57,6 +57,27 @@ namespace DLS.Simulation
 		//   (would have to make exception for chips containing things like clock or key chip, which can activate 'spontaneously')
 		// * Create simplified connections network allowing only builtin chips to be processed during simulation
 
+		public static void UnloadProject()
+		{
+			modificationQueue.Clear();
+
+			prevRootSimChip?.ClearLUTRecursive();
+
+			prevRootSimChip = null;
+			audioState = null;
+
+			needsOrderPass = false;
+			canDynamicReorderThisFrame = false;
+			simulationFrame = 0;
+			elapsedSecondsOld = 0;
+			deltaTime = 0;
+			pcg_rngState = 0;
+
+			SimChip.ClearStaticCaches();
+		}
+
+		
+
 		public static void RunSimulationStep(SimChip rootSimChip, DevPinInstance[] inputPins, SimAudio audioState)
 		{
 			Simulator.audioState = audioState;
@@ -673,7 +694,7 @@ namespace DLS.Simulation
 				{
                     const uint mask = 0x00ff;
 					uint address = chip.InputPins[0].State.GetShortValues();
-                    bool isWriting = chip.InputPins[2].State.SmallHigh();
+                    bool isWriting = chip.InputPins[3].State.SmallHigh();
                     bool clockHigh = chip.InputPins[4].State.SmallHigh();
                     bool isRisingEdge = clockHigh && chip.InternalState[^1] == 0;
                     chip.InternalState[^1] = clockHigh ? 1u : 0;
@@ -696,7 +717,7 @@ namespace DLS.Simulation
                     const uint mask = 0x00ff;
 					uint address = (chip.InputPins[0].State.GetShortValues() << 8) | chip.InputPins[1].State.GetShortValues();
                     bool isWriting = chip.InputPins[4].State.SmallHigh();
-                    bool clockHigh = chip.InputPins[6].State.SmallHigh();
+                    bool clockHigh = chip.InputPins[5].State.SmallHigh();
                     bool isRisingEdge = clockHigh && chip.InternalState[^1] == 0;
                     chip.InternalState[^1] = clockHigh ? 1u : 0;
 
