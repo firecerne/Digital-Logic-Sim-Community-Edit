@@ -132,26 +132,6 @@ namespace DLS.Simulation
 			canSleep = false;
 		}
 
-		public static void ClearStaticCaches()
-		{
-			combinationalChipCaches.Clear();
-
-			isCreatingACache = false;
-			nameOfChipWhoseCacheIsBeingCreated = null;
-			cacheCreatingProgress = 0;
-			disabledCacheFrame = -1;
-		}
-
-		public void ClearLUTRecursive()
-		{
-			LUT = null;
-
-			for (int i = 0; i < SubChips.Length; i++)
-			{
-				SubChips[i].ClearLUTRecursive();
-			}
-		}
-
 		public bool CanCache()
 		{
 			// We don't cache builtin chips.

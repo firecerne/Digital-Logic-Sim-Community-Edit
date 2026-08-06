@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -108,14 +107,16 @@ namespace DLS.Game
 			}
 		}
 
-		Thread simThread; 
-
 		public void StartSimulation()
 		{
-			if (debug_runSimMainThread) return;
+			if (debug_runSimMainThread)
+			{
+				Debug.Log("Simulation will run on main thread");
+				return;
+			}
 
 			simThreadActive = true;
-			simThread = new Thread(SimThread)
+			Thread simThread = new(SimThread)
 			{
 				Priority = System.Threading.ThreadPriority.Highest,
 				Name = "DLS_SimThread",
@@ -123,7 +124,6 @@ namespace DLS.Game
 			};
 			simThread.Start();
 		}
-
 
 		public void EnterViewMode(SubChipInstance subchip)
 		{
@@ -579,30 +579,10 @@ namespace DLS.Game
 		public bool ShouldSnapToGrid => KeyboardShortcuts.SnapModeHeld || (description.Prefs_Snapping == 1 && ShowGrid) || description.Prefs_Snapping == 2;
 		public bool ForceStraightWires => KeyboardShortcuts.StraightLineModeHeld || (description.Prefs_StraightWires == 1 && ShowGrid) || description.Prefs_StraightWires == 2;
 
-		public void CloseProjectSafely()
+		public void NotifyExit()
 		{
 			simThreadActive = false;
-			SimChip.AbortCache(); 
-
-			if (simThread != null && simThread.IsAlive)
-			{
-				simThread.Join(500); 
-			}
-
-			Simulator.UnloadProject();
-			SimChip.ClearStaticCaches();
-			
-			long memoryBefore = System.GC.GetTotalMemory(true);
-			UnityEngine.Debug.Log($"[MEMORY] Managed C# memory BEFORE wipe: {memoryBefore / (1024 * 1024)} MB");
-			
-			ActiveProject = null;
-			
-			System.GC.Collect();
-			System.GC.WaitForPendingFinalizers();
-			System.GC.Collect();
-			
-			long memoryAfter = System.GC.GetTotalMemory(false);
-			UnityEngine.Debug.Log($"[MEMORY] Managed C# memory AFTER wipe: {memoryAfter / (1024 * 1024)} MB");
+			ActiveProject.UpdateAndSaveProjectDescription(ActiveProject.description);
 		}
 
 		void SimThread()

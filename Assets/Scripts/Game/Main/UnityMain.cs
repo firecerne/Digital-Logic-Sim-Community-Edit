@@ -153,7 +153,7 @@ namespace DLS.Game
 
 		void OnDestroy()
 		{
-			if (Project.ActiveProject != null) Project.ActiveProject.CloseProjectSafely();
+			if (Project.ActiveProject != null) Project.ActiveProject.NotifyExit();
 		}
 
 		void OnValidate()
@@ -169,9 +169,6 @@ namespace DLS.Game
 		static void ResetStatics()
 		{
 			Simulator.Reset();
-			Simulator.UnloadProject();
-			SimChip.ClearStaticCaches();
-			
 			UIDrawer.Reset();
 			InteractionState.Reset();
 			CameraController.Reset();
