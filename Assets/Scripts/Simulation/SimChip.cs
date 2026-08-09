@@ -78,6 +78,7 @@ namespace DLS.Simulation
 
 			// ---- Initialize internal state ----
 			const int addressSize_8Bit = 256;
+			const int addressSize_16Bit = 65536;
 
 			if (ChipType is ChipType.DisplayRGB  || ChipType is ChipType.DisplayRGBTouch || ChipType is ChipType.DisplayRGB8BitColor || ChipType is ChipType.DisplayRGBTouch8BitColor)
 			{
@@ -89,7 +90,7 @@ namespace DLS.Simulation
 				// first 256 bits = display buffer, next 256 bits = back buffer, last bit = clock state (to allow edge-trigger behaviour)
 				InternalState = new uint[addressSize_8Bit * 2 + 1];
 			}
-			else if (ChipType is ChipType.dev_Ram_8Bit)
+			else if (ChipType is ChipType.Ram_256x8)
 			{
 				InternalState = new uint[addressSize_8Bit + 1]; // +1 for clock state (to allow edge-trigger behaviour)
 
@@ -99,6 +100,30 @@ namespace DLS.Simulation
 				{
 					Simulator.rng.NextBytes(randomBytes);
 					InternalState[i] = BitConverter.ToUInt32(randomBytes) & 0x00FF00FF; // Limit to 8 first bits, otherwise the value is too big
+				}
+			}
+			else if (ChipType is ChipType.Ram_65536x16)
+			{
+				InternalState = new uint[addressSize_16Bit + 1]; // +1 for clock state (to allow edge-trigger behaviour)
+
+				// Initialize memory contents to random state
+				Span<byte> randomBytes = stackalloc byte[4];
+				for (int i = 0; i < InternalState.Length - 1; i++)
+				{
+					Simulator.rng.NextBytes(randomBytes);
+					InternalState[i] = BitConverter.ToUInt32(randomBytes) & 0x00FF00FF; // Limit to 8 first bits, otherwise the value is too big
+				}
+			}
+			else if (ChipType is ChipType.Ram_65536x16)
+			{
+				InternalState = new uint[addressSize_16Bit + 1]; // +1 for clock state (to allow edge-trigger behaviour)
+
+				// Initialize memory contents to random state
+				Span<byte> randomBytes = stackalloc byte[4];
+				for (int i = 0; i < InternalState.Length - 1; i++)
+				{
+					Simulator.rng.NextBytes(randomBytes);
+					InternalState[i] = BitConverter.ToUInt32(randomBytes);
 				}
 			}
 

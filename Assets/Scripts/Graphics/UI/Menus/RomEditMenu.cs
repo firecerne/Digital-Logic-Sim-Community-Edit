@@ -1,5 +1,6 @@
 using System;
 using System.Text;
+using DLS.Description;
 using DLS.Game;
 using Seb.Helpers;
 using Seb.Types;
@@ -296,51 +297,53 @@ namespace DLS.Graphics
 			Project.ActiveProject.NotifyRomContentsEdited(romChip);
 		}
 
+		static float AddressColumnWidth; // set based on how wide the labels actually are
+
 		static void DrawScrollEntry(Vector2 topLeft, float width, int index, bool isLayoutPass)
 		{
 			Vector2 panelSize = new(width, height);
 			Bounds2D entryBounds = Bounds2D.CreateFromTopLeftAndSize(topLeft, panelSize);
 
-			if (entryBounds.Overlaps(scrollViewBounds) && !isLayoutPass) // don't bother with draw stuff if outside of scroll view / in layout pass
+			if (entryBounds.Overlaps(scrollViewBounds) && !isLayoutPass)
 			{
 				UIHandle inputFieldID = IDS_inputRow[index];
 				InputFieldState inputFieldState = UI.GetInputFieldState(inputFieldID);
 
-				// Alternating colour for each row
 				Color col = index % 2 == 0 ? ColHelper.MakeCol(0.17f) : ColHelper.MakeCol(0.13f);
-				// Highlight row if it has focus
 				if (inputFieldState.focused)
 				{
-					if (focusedRowIndex != index)
-					{
-						OnFieldLostFocus(focusedRowIndex);
-						focusedRowIndex = index;
-					}
-
+					if (focusedRowIndex != index) { OnFieldLostFocus(focusedRowIndex); focusedRowIndex = index; }
 					col = new Color(0.33f, 0.55f, 0.34f);
 				}
 
+				// Draw the row's background spanning the FULL row width, before anything else
+				UI.DrawPanel(topLeft, panelSize, col, Anchor.TopLeft);
+
 				InputFieldTheme inputTheme = MenuHelper.Theme.ChipNameInputField;
 				inputTheme.fontSize = MenuHelper.Theme.FontSizeRegular;
-				inputTheme.bgCol = col;
+				inputTheme.bgCol = Color.clear;       // <-- no longer draws its own background
 				inputTheme.focusBorderCol = Color.clear;
 
-
-				UI.InputField(inputFieldID, inputTheme, topLeft, panelSize, "0", Anchor.TopLeft, 5, inputStringValidator);
-
-				// Draw line index
+				// Draw the address label in its own reserved column, on the left
 				Color lineNumCol = inputFieldState.focused ? new Color(0.53f, 0.8f, 0.57f) : ColHelper.MakeCol(0.32f);
-				UI.DrawText(rowNumberStrings[index], MenuHelper.Theme.FontBold, MenuHelper.Theme.FontSizeRegular, entryBounds.CentreLeft + Vector2.right * textPad, Anchor.TextCentreLeft, lineNumCol);
+				UI.DrawText(rowNumberStrings[index], MenuHelper.Theme.FontBold, MenuHelper.Theme.FontSizeRegular,
+					entryBounds.CentreLeft + Vector2.right * textPad * 2, Anchor.TextCentreLeft, lineNumCol);
+
+				// Input field now starts after the address column, and is correspondingly narrower
+				Vector2 inputTopLeft = topLeft + Vector2.right * (AddressColumnWidth + 1f);
+				Vector2 inputSize = new(width - AddressColumnWidth, height);
+				UI.InputField(inputFieldID, inputTheme, inputTopLeft, inputSize, "0", Anchor.TopLeft, 5, inputStringValidator);
 			}
 
-			// Set bounding box of scroll list element 
 			UI.OverridePreviousBounds(entryBounds);
 		}
 
 		public static void OnMenuOpened()
 		{
 			romChip = (SubChipInstance)ContextMenu.interactionContext;
-			RowCount = romChip.InternalData.Length;
+			RowCount = ChipTypeHelper.IsEepromType(romChip.ChipType)
+				? romChip.InternalData.Length - 1   // exclude trailing clock/edge-state slot
+				: romChip.InternalData.Length;
 			ActiveRomDataBitCount = 16; //
 
 			ID_DataDisplayMode = new UIHandle("ROM_DataDisplayMode", romChip.ID);
