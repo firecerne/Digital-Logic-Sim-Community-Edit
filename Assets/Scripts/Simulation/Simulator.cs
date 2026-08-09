@@ -52,7 +52,7 @@ namespace DLS.Simulation
 		//    In this case we process one of the remaining unprocessed (and non-ready) subchips at random, and return to step 3.
 		//
 		// Optimization ideas (todo):
-		// * Compute lookup table for combinational chips -> Done
+		// * Compute lookup table for combinational chips
 		// * Ignore chip if inputs are same as last frame, and no internal pins changed state last frame.
 		//   (would have to make exception for chips containing things like clock or key chip, which can activate 'spontaneously')
 		// * Create simplified connections network allowing only builtin chips to be processed during simulation
@@ -147,38 +147,13 @@ namespace DLS.Simulation
 					}
 				}
 
-				if (!SimChip.isCreatingACache && nextSubChip.CanSkipEvaluation())
+				if (nextSubChip.IsBuiltin)
 				{
-					// Chip is asleep: inputs haven't changed, and it settled last frame.
-					// Just reset flags so it's ready for the next frame, but skip heavy evaluation.
-					nextSubChip.ResetReceivedFlagsOnThisChipsPins();
+					ProcessBuiltinChip(nextSubChip); // We've reached a built-in chip, so process it directly
 				}
-				else
+				else if (!(useCaching && nextSubChip.TryProcessingFromCache()))
 				{
-					if (!SimChip.isCreatingACache)
-					{
-						nextSubChip.SaveInputSnapshot();
-					}
-
-					if (nextSubChip.IsBuiltin)
-					{
-						ProcessBuiltinChip(nextSubChip);
-					}
-					else if (!(useCaching && nextSubChip.TryProcessingFromCache()))
-					{
-						StepChip(nextSubChip);
-					}
-
-					if (!SimChip.isCreatingACache)
-					{
-						bool outputsChanged = nextSubChip.UpdateOutputSnapshotAndDetectChange();
-						// Only allow sleep if it's time-independent AND outputs didn't change this frame
-						nextSubChip.canSleep = nextSubChip.isStable && !outputsChanged;
-					}
-					else
-					{
-						nextSubChip.canSleep = false;
-					}
+					StepChip(nextSubChip); // Recursively process custom chip
 				}
 
 				// Step 3) Forward the outputs of the processed subchip to connected pins
@@ -814,8 +789,6 @@ namespace DLS.Simulation
 				simChip.AddConnection(chipDesc.Wires[i].SourcePinAddress, chipDesc.Wires[i].TargetPinAddress);
 			}
 
-			simChip.RecalculateStability();
-
 			return simChip;
 		}
 
@@ -894,14 +867,12 @@ namespace DLS.Simulation
 		// Note: this should only be called from the sim thread
 		public static void ApplyModifications()
 		{
-			bool modified = false; 
 			while (modificationQueue.Count > 0)
 			{
 				needsOrderPass = true;
 
 				if (modificationQueue.TryDequeue(out SimModifyCommand cmd))
 				{
-					modified = true;
 					if (cmd.type == SimModifyCommand.ModificationType.AddSubchip)
 					{
 						SimChip newSubChip = BuildSimChip(cmd.chipDesc, cmd.lib, cmd.subChipID, cmd.subChipInternalData);
@@ -928,10 +899,6 @@ namespace DLS.Simulation
 						cmd.modifyTarget.RemovePin(cmd.removePinID);
 					}
 				}
-			}
-			if (modified)
-			{
-				prevRootSimChip?.RecalculateStability();
 			}
 		}
 

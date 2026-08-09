@@ -124,31 +124,9 @@ namespace DLS.Graphics
 				UpdateChipColFromHexString(hexColInput.text);
 			}
 
-			SimChip chip = Project.ActiveProject.ViewedChip.SimChip;
-
-			UI.DrawText("Chip Logic Type:", UIThemeLibrary.DefaultFont, UIThemeLibrary.FontSizeDefault, NextPos(1), Anchor.TopLeft, Color.white);
-			
-			bool isTimeDependent = !chip.isStable; // Contains builtin clocks, pulses, buttons
-			bool isCombinational = chip.IsCombinational(); // No feedback loops
-
-			if (isTimeDependent)
-			{
-				UI.DrawText("Time-Dependent", UIThemeLibrary.DefaultFont,
-					UIThemeLibrary.FontSizeSmall, NextPos(), Anchor.TopLeft, new Color(1f, 0.6f, 0.2f)); // Orange
-			}
-			else if (!isCombinational)
-			{
-				UI.DrawText("Sequential (Feedback)", UIThemeLibrary.DefaultFont,
-					UIThemeLibrary.FontSizeSmall, NextPos(), Anchor.TopLeft, Color.cyan);
-			}
-			else
-			{
-				UI.DrawText("Combinational", UIThemeLibrary.DefaultFont,
-					UIThemeLibrary.FontSizeSmall, NextPos(), Anchor.TopLeft, Color.green);
-			}
-
 			// ---- Chip caching UI ----
 			UI.DrawText("Chip Caching:", UIThemeLibrary.DefaultFont, UIThemeLibrary.FontSizeDefault, NextPos(1), Anchor.TopLeft, Color.white);
+			SimChip chip = Project.ActiveProject.ViewedChip.SimChip;
 			if (chip.IsCombinational())
 			{
 				int numberOfInputBits = chip.CalculateNumberOfInputBits();
