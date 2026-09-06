@@ -16,6 +16,8 @@ namespace DLS.Description
 		Rom_256x16,
 		EEPROM_256x16,
 
+		Ram,
+
 		// ---- Displays ----
 		SevenSegmentDisplay,
 		DisplayRGB,

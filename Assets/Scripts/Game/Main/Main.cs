@@ -107,8 +107,9 @@ namespace DLS.Game
 				StarredList = BuiltinCollectionCreator.GetDefaultStarredList().ToList(),
 				ChipCollections = new List<ChipCollection>(BuiltinCollectionCreator.CreateDefaultChipCollections()),
 				pinBitCounts = Project.PinBitCounts,
-				SplitMergePairs = Project.SplitMergePairs
-			};
+				SplitMergePairs = Project.SplitMergePairs,
+                RAMs = Project.RAMs
+            };
 
 			Saver.SaveProjectDescription(initialDescription);
 			return LoadProject(projectName);

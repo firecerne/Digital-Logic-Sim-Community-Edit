@@ -100,5 +100,8 @@ namespace DLS.Description
 		{
 			return chipType == ChipType.Split_Pin || chipType == ChipType.Merge_Pin;
 		}
-	}
+        public static bool IsRAMChip(ChipType chipType) {
+            return chipType == ChipType.Ram;
+        }
+    }
 } 
