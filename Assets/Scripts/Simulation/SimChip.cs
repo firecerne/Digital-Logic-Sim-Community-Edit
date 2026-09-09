@@ -102,6 +102,18 @@ namespace DLS.Simulation
 				}
 			}
 
+			else if (ChipType is ChipType.Ram) {
+                int bitCount = InputPins[0].State.size;
+                int addressSize = (int)Math.Pow(2, bitCount);
+
+                InternalState = new uint[addressSize + 1];
+
+                // Initialize memory contents to 0
+                for (int i = 0; i < InternalState.Length - 1; i++) {
+					InternalState[i] = 0;
+                }
+            }
+
 			// Load in serialized persistent state (rom data, etc.)
 			else if (internalState is { Length: > 0 })
 			{

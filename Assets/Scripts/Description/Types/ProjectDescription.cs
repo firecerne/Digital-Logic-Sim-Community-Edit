@@ -13,7 +13,9 @@ namespace DLS.Description
             "OUT-1", "OUT-4", "OUT-8",
 
             "1-4BIT", "1-8BIT", "4-8BIT",
-            "4-1BIT", "8-1BIT", "8-4BIT"
+            "4-1BIT", "8-1BIT", "8-4BIT",
+
+            "RAM 8\u00d78"
         };
 
         public string ProjectName;
@@ -51,6 +53,12 @@ namespace DLS.Description
 		// Dictionnary of  Big Pin and  Small Pin  Ex : (4,1) or (8,4) or (8,1)
 		public List<KeyValuePair<PinBitCount, PinBitCount>> SplitMergePairs;
 
+		// Used for RAM definition
+		// Dictionnary of Address Pin and Data Pin Ex: (16, 8) 16 is the address bit size and 8 is the data bit size.
+		// The RAM has a max Address Bit Size of 29 Bits due to Arrays in C#
+		// The RAM has a max Data Bit Size of 16 due to Uints in C#
+        public List<KeyValuePair<PinBitCount, PinBitCount>> RAMs;
+
         // ---- Helper functions ----
         public bool IsStarred(string chipName, bool isCollection)
 		{
@@ -74,7 +82,15 @@ namespace DLS.Description
 			
 		}
 
-		public List<String> SplitMergeNames()
+        public List<String> RAMNames() {
+            List<String> result = new List<String>();
+            foreach (KeyValuePair<PinBitCount, PinBitCount> pair in RAMs) {
+                result.Add("RAM " + pair.Key.ToString() + "\u00d7" + pair.Value.ToString());
+            }
+            return result;
+        }
+
+        public List<String> SplitMergeNames()
 		{
 			List<String> result = new List<String>();
 			foreach(KeyValuePair<PinBitCount, PinBitCount> pair in SplitMergePairs)
@@ -100,6 +116,7 @@ namespace DLS.Description
 		{
 			List<String> result = new List<string>(SplitMergeNames());
 			result.AddRange(InOutNames());
+			result.AddRange(RAMNames());
 
 			// Add ulterior special types here
 
@@ -126,6 +143,9 @@ namespace DLS.Description
 			{
 				RemoveSplitMerge(name);
 			}
+			if (RAMNames().Contains(name)) {
+				RemoveRAM(name);
+			}
 		}
 
 		void RemoveInOut(string name) {
@@ -139,17 +159,20 @@ namespace DLS.Description
 			SplitMergePairs.RemoveAt(index);
 		}
 
-		public List<String> CorrespondingSpecials(string name) {
-			List<String> result = new List<string>();
-			if(InOutNames().Contains(name))
-			{
-				result = CorrespondingInOut(name);
-			}
-			else if (SplitMergeNames().Contains(name))
-			{
-                result = CorrespondingSplitMerge(name);
-			}
+        void RemoveRAM(string name) {
+            int index = RAMNames().IndexOf(name);
+            RAMs.RemoveAt(index);
+        }
 
+        public List<String> CorrespondingSpecials(string name) {
+			List<String> result = new List<string>();
+			if (InOutNames().Contains(name)) {
+				result = CorrespondingInOut(name);
+			} else if (SplitMergeNames().Contains(name)) {
+				result = CorrespondingSplitMerge(name);
+			} else if (RAMNames().Contains(name)) {
+				result = CorrespondingRAM(name);
+			}
 			return result;
 		}
 
@@ -170,6 +193,12 @@ namespace DLS.Description
             int index = SplitMergeNames().IndexOf(name);
             int indexNext = index % 2 == 0 ? index + 1 : index - 1;
             result.Add(SplitMergeNames()[indexNext]);
+            return result;
+        }
+
+        public List<String> CorrespondingRAM(string name) {
+            List<String> result = new List<String>();
+            result.Add(name);
             return result;
         }
 

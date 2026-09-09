@@ -677,6 +677,34 @@ namespace DLS.Simulation
 					break;
 				}
 
+				case ChipType.Ram: {
+                        uint addressPin = chip.InputPins[0].State.GetShortValues();
+						int bitCount = chip.InputPins[0].State.size;
+						int addressSize = (int)Math.Pow(2, bitCount);
+
+                        // Detect clock rising edge
+                        bool clockHigh = chip.InputPins[4].State.SmallHigh();
+                        bool isRisingEdge = clockHigh && chip.InternalState[^1] == 0;
+                        chip.InternalState[^1] = clockHigh ? 1u : 0;
+
+                        // Write/Reset on rising edge
+                        if (isRisingEdge) {
+                            if (chip.InputPins[3].State.SmallHigh()) {
+                                for (int i = 0; i < addressSize; i++) {
+                                    chip.InternalState[i] = 0;
+                                }
+                            } else if (chip.InputPins[2].State.SmallHigh()) {
+                                chip.InternalState[addressPin] = chip.InputPins[1].State.GetShortValues();
+                            }
+                        }
+
+                        // Output data at current address
+                        chip.OutputPins[0].State.SetShort((ushort)chip.InternalState[addressPin]);
+
+                        break;
+                    }
+
+
 				// ---- Bus types ----
 				default:
 				{

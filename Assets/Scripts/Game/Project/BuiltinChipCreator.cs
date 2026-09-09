@@ -1,8 +1,8 @@
+using DLS.Description;
+using DLS.Simulation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using DLS.Description;
-using DLS.Simulation;
 using UnityEngine;
 using static DLS.Graphics.DrawSettings;
 
@@ -57,7 +57,9 @@ namespace DLS.Game
 			.Concat(CreateInOutPins(description.pinBitCounts))
 			.Concat(CreateSplitMergePins(description.SplitMergePairs))
 			.Concat(CreateBusAndBusTerminus(description.pinBitCounts))
-			.ToArray();
+
+            .Concat(CreateRAMChips(description.RAMs))
+            .ToArray();
 				
 			
 		}
@@ -148,6 +150,35 @@ namespace DLS.Game
             Vector2 size = new Vector2(width, minChipSize.y);
 
             return CreateBuiltinChipDescription(ChipType.Merge_Pin, size, GetColor(ChipCol_SplitMerge), mergeIN, mergeOUT, name: mergeName);
+        }
+
+        static ChipDescription[] CreateRAMChips(List<KeyValuePair<PinBitCount, PinBitCount>> pairs) {
+            ChipDescription[] RAMDescriptions = new ChipDescription[pairs.Count];
+
+            for (int i = 0; i < pairs.Count; i++) {
+                RAMDescriptions[i] = CreateRAMChip(pairs[i]);
+            }
+
+            return RAMDescriptions;
+        }
+
+        public static ChipDescription CreateRAMChip(KeyValuePair<PinBitCount, PinBitCount> pair) {
+            (PinBitCount a, PinBitCount b) counts = (pair.Key, pair.Value);
+
+            PinDescription[] inputPins =
+            {
+                CreatePinDescription("ADDRESS", 0, counts.a),
+                CreatePinDescription("DATA", 1, counts.b),
+                CreatePinDescription("WRITE", 2),
+                CreatePinDescription("RESET", 3),
+                CreatePinDescription("CLOCK", 4)
+            };
+            PinDescription[] outputPins = { CreatePinDescription("OUT", 5, counts.b) };
+            Vector2 size = new(GridSize * 10, SubChipInstance.MinChipHeightForPins(inputPins, outputPins));
+
+            string ramName = "RAM " + counts.a.ToString() + "\u00d7" + counts.b.ToString();
+
+            return CreateBuiltinChipDescription(ChipType.Ram, size, GetColor(new(0.85f, 0.45f, 0.3f)), inputPins, outputPins, name: ramName, canBeCached: false);
         }
 
 
@@ -704,7 +735,7 @@ namespace DLS.Game
 
 		static ChipDescription CreateBuiltinChipDescription(ChipType type, Vector2 size, Color col, PinDescription[] inputs, PinDescription[] outputs, DisplayDescription[] displays = null, NameDisplayLocation nameLoc = NameDisplayLocation.Centre, string name = "", bool canBeCached = true)
 		{
-			if (!ChipTypeHelper.IsDevPin(type) && !ChipTypeHelper.IsMergeSplitChip(type) && !ChipTypeHelper.IsBusType(type)){name = ChipTypeHelper.GetName(type); }
+			if (!ChipTypeHelper.IsDevPin(type) && !ChipTypeHelper.IsMergeSplitChip(type) && !ChipTypeHelper.IsBusType(type) && !ChipTypeHelper.IsRAMChip(type)) { name = ChipTypeHelper.GetName(type); }
 			
 			ValidatePinIDs(inputs, outputs, name);
 

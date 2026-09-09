@@ -1,0 +1,8 @@
+﻿<Solution>
+  <Project Path="DLS.csproj" />
+  <Project Path="SebVisDev.csproj" />
+  <Project Path="Assembly-Seb.csproj" />
+  <Project Path="DLS.Description.csproj" />
+  <Project Path="DLS.Dev.csproj" />
+  <Project Path="Unity.Nuget.NewtonsoftJson.EditorTests.csproj" />
+</Solution>

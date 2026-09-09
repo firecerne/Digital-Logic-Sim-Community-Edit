@@ -16,8 +16,12 @@ namespace DLS.Graphics
         public static List<int> PinBitCountsMade = new();
         public static List<KeyValuePair<int, int>> MergeSplitsMade = new();
 
+        public static List<KeyValuePair<int, int>> RAMsMade = new();
+
         public static List<int> PinBitCountsAwaitingSave = new();
         public static List<KeyValuePair<int, int>> MergeSplitsAwaitingSave = new();
+
+        public static List<KeyValuePair<int, int>> RAMsAwaitingSave = new();
 
         public static bool saved;
 
@@ -36,10 +40,12 @@ namespace DLS.Graphics
         static readonly string[] SpecialChipTypes =
         {
             "Pins",
-            "Merge/Split"
+            "Merge/Split",
+            "RAM"
         };
         const int OPTION_PIN = 0;
         const int OPTION_MERGE_SPLIT = 1;
+        const int OPTION_RAM = 2;
 
 
         static readonly UIHandle ID_SpecialChipTypes = new("SPEC_SpecialChipTypes");
@@ -47,6 +53,9 @@ namespace DLS.Graphics
 
         static readonly UIHandle ID_FirstMergeSplit = new("SPEC_MergeSplitA");
         static readonly UIHandle ID_SecondMergeSplit = new("SPEC_MergeSplitB");
+
+        static readonly UIHandle ID_FirstRAM = new("SPEC_RAMA");
+        static readonly UIHandle ID_SecondRAM = new("SPEC_RAMB");
 
 
 
@@ -56,6 +65,8 @@ namespace DLS.Graphics
         static int currentlyAddingPinBitOfSize;
 
         static KeyValuePair<int, int> currentlyAddingMergeSplit;
+
+        static KeyValuePair<int, int> currentlyAddingRAM;
 
         public static void DrawMenu()
         {
@@ -87,6 +98,9 @@ namespace DLS.Graphics
                 {
                     DrawSpecialMergeSplitMenu();
                 }
+                else if (mainPinNamesMode == OPTION_RAM) {
+                    DrawSpecialRAMMenu();
+                }
 
                 AddSpacing();
                 DrawDoneSection(displayDone);
@@ -105,7 +119,10 @@ namespace DLS.Graphics
                     AddNewMergeSplit(currentlyAddingMergeSplit.Key, currentlyAddingMergeSplit.Value);
                     changeToBeAdded = false;
                 }
-
+                if (mainPinNamesMode == OPTION_RAM && canAddChip && addOrClose == 0) {
+                    AddNewRAM(currentlyAddingRAM.Key, currentlyAddingRAM.Value);
+                    changeToBeAdded = false;
+                }
 
                 if (addOrClose == 1)
                 {
@@ -125,6 +142,31 @@ namespace DLS.Graphics
             if(KeyboardShortcuts.CancelShortcutTriggered())
             {
                 UIDrawer.SetActiveMenu(UIDrawer.MenuType.None) ;
+            }
+
+            void DrawSpecialRAMMenu() {
+                DrawHeader("NEW RAM CHIP:");
+                InputFieldState firstPinSize = MenuHelper.LabeledInputField("Address pin size:", labelCol, labelPosCurr, entrySize, ID_FirstRAM, pinSizeInputValidator, settingFieldSize.x);
+                AddSpacing();
+                InputFieldState secondPinSize = MenuHelper.LabeledInputField("Data pin size:", labelCol, labelPosCurr, entrySize, ID_SecondRAM, pinSizeInputValidator, settingFieldSize.x);
+                int firstPinSizeAttempt = int.TryParse(firstPinSize.text, out int a) ? a : -1;
+                int secondPinSizeAttempt = int.TryParse(secondPinSize.text, out int b) ? b : -1;
+                (bool valid, string reason) confirmation = RealRAMConfirmation(firstPinSizeAttempt, secondPinSizeAttempt);
+
+
+
+                if (firstPinSizeAttempt != -1 && secondPinSizeAttempt != -1 && !confirmation.valid && !displayDone) {
+                    AddSpacing();
+                    DrawErrorSection(confirmation.reason);
+                    canAddChip = false;
+                } else if (firstPinSizeAttempt != -1 && secondPinSizeAttempt != -1 && confirmation.valid) {
+                    canAddChip = true;
+                    currentlyAddingRAM = new(firstPinSizeAttempt, secondPinSizeAttempt);
+                    displayDone = DisplayDone(false);
+                    return;
+                }
+                displayDone = DisplayDone(firstPinSizeAttempt == -1 && secondPinSizeAttempt == -1);
+                canAddChip = false;
             }
 
             void DrawSpecialMergeSplitMenu()
@@ -235,9 +277,11 @@ namespace DLS.Graphics
         {
             PinBitCountsAwaitingSave = new();
             MergeSplitsAwaitingSave = new();
+            RAMsAwaitingSave = new();
 
             RefreshPinBitCounts();
             RefreshMergeSplits();
+            RefreshRAMs();
             saved = true;
             changeToBeAdded = true;
             displayDone = false;
@@ -270,7 +314,18 @@ namespace DLS.Graphics
                 MergeSplitsMade.Add(pair);
             }
         }
-        
+
+        public static void RefreshRAMs() {
+            RAMsMade = new();
+            foreach (var PinBitPair in Main.ActiveProject.description.RAMs) {
+                RAMsMade.Add(new(PinBitPair.Key, PinBitPair.Value));
+            }
+
+            foreach (var pair in RAMsAwaitingSave) {
+                RAMsMade.Add(pair);
+            }
+        }
+
         public static bool ValidatePinSizeInput(string s)
         {
             if (string.IsNullOrEmpty(s)){ changeToBeAdded = false; return true; }
@@ -313,6 +368,18 @@ namespace DLS.Graphics
             return (true, "");
         }
 
+        public static (bool valid, string reason) RealRAMConfirmation(int a, int b) {
+            if (RAMsMade.Any(k => (k.Key == a && k.Value == b))) { return (false, "These RAM chips already exist."); }
+
+            if (a >= 30) { return (false, "Address pin size too large, it must be less than 30."); }
+            if (b >= 17) { return (false, "Data pin size too large, it can only be 16 or less."); }
+            if (!PinBitCountsMade.Contains(a) && !PinBitCountsMade.Contains(b)) { return (false, $"No pins with pinsize {a} and {b} exist. Create them first."); }
+            if (!PinBitCountsMade.Contains(a)) { return (false, $"No pin with pinsize {a} exist. Create it first, if valid."); }
+            if (!PinBitCountsMade.Contains(b)) { return (false, $"No pin with pinsize {b} exist. Create it first, if valid."); }
+
+            return (true, "");
+        }
+
         public static void AddNewBitSize(int a)
         {
             PinBitCountsAwaitingSave.Add(a);
@@ -325,6 +392,12 @@ namespace DLS.Graphics
         {
             MergeSplitsAwaitingSave.Add(new(a,b));
             RefreshMergeSplits();
+            saved = false;
+        }
+
+        public static void AddNewRAM(int a, int b) {
+            RAMsAwaitingSave.Add(new(a, b));
+            RefreshRAMs();
             saved = false;
         }
 
@@ -345,9 +418,13 @@ namespace DLS.Graphics
                 {
                     Main.ActiveProject.AddNewMergeSplit(pair.Key, pair.Value);
                 }
+                foreach (var pair in RAMsAwaitingSave) {
+                    Main.ActiveProject.AddNewRAM(pair.Key, pair.Value);
+                }
                 saved = true;
                 PinBitCountsAwaitingSave = new();
                 MergeSplitsAwaitingSave = new();
+                RAMsAwaitingSave = new();
             }
         }
     }

@@ -23,8 +23,11 @@ namespace DLS.Game
 			Rename,
 			SaveAs
 		}
+        public static readonly List<KeyValuePair<PinBitCount, PinBitCount>> RAMs = new() {
+			new(8, 8)
+        };
 
-		public static readonly List<KeyValuePair<PinBitCount,PinBitCount>> SplitMergePairs = new() {
+        public static readonly List<KeyValuePair<PinBitCount,PinBitCount>> SplitMergePairs = new() {
 			new(8,4), new(8,1),
 			new(4,1)
 		};
@@ -828,6 +831,17 @@ namespace DLS.Game
             {
                 description.ChipCollections.First(c => c.Name == "MERGE/SPLIT").Chips.Add(mergeChip.Name);
                 description.ChipCollections.First(c => c.Name == "MERGE/SPLIT").Chips.Add(splitChip.Name);
+            }
+
+        }
+
+        public void AddNewRAM(int a, int b) {
+            KeyValuePair<PinBitCount, PinBitCount> pair = new(a, b);
+            description.RAMs.Add(pair);
+            ChipDescription ramChip = BuiltinChipCreator.CreateRAMChip(pair);
+            chipLibrary.NotifyChipSaved(ramChip);
+            if (description.ChipCollections.Any(c => c.Name == "MEMORY")) {
+                description.ChipCollections.First(c => c.Name == "MEMORY").Chips.Add(ramChip.Name);
             }
 
         }
