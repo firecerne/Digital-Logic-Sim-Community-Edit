@@ -156,7 +156,7 @@ namespace DLS.Game
             ChipDescription[] RAMDescriptions = new ChipDescription[pairs.Count];
 
             for (int i = 0; i < pairs.Count; i++) {
-                RAMDescriptions[i * 2] = CreateRAMChip(pairs[i]);
+                RAMDescriptions[i] = CreateRAMChip(pairs[i]);
             }
 
             return RAMDescriptions;

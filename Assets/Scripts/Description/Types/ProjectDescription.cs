@@ -13,7 +13,9 @@ namespace DLS.Description
             "OUT-1", "OUT-4", "OUT-8",
 
             "1-4BIT", "1-8BIT", "4-8BIT",
-            "4-1BIT", "8-1BIT", "8-4BIT"
+            "4-1BIT", "8-1BIT", "8-4BIT",
+
+            "RAM 8\u00d78"
         };
 
         public string ProjectName;

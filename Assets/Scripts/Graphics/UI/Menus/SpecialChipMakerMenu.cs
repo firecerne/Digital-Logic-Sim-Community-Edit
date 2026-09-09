@@ -370,6 +370,9 @@ namespace DLS.Graphics
 
         public static (bool valid, string reason) RealRAMConfirmation(int a, int b) {
             if (RAMsMade.Any(k => (k.Key == a && k.Value == b))) { return (false, "These RAM chips already exist."); }
+
+            if (a >= 30) { return (false, "Address pin size too large, it must be less than 30."); }
+            if (b >= 17) { return (false, "Data pin size too large, it can only be 16 or less."); }
             if (!PinBitCountsMade.Contains(a) && !PinBitCountsMade.Contains(b)) { return (false, $"No pins with pinsize {a} and {b} exist. Create them first."); }
             if (!PinBitCountsMade.Contains(a)) { return (false, $"No pin with pinsize {a} exist. Create it first, if valid."); }
             if (!PinBitCountsMade.Contains(b)) { return (false, $"No pin with pinsize {b} exist. Create it first, if valid."); }

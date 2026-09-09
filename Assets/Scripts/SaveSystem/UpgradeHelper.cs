@@ -47,7 +47,7 @@ namespace DLS.SaveSystem
 			Main.Version defaultModdedVersion = new(1, 0, 0);
 			Main.Version moddedVersion_1_1_0 = new(1, 1, 0); // Custom IN and OUTS version
 			Main.Version moddedVersion_1_1_1 = new(1, 1, 1); // New 16 and 32 bit pins
-			Main.Version moddedVersion_1_1_2 = new(1, 1, 2); // New memory
+			Main.Version moddedVersion_1_1_2 = new(1, 1, 2); // New RAM
 
 
 			bool canParseModdedVersion = Main.Version.TryParse(projectDescription.DLSVersion_LastSavedModdedVersion, out Main.Version projectVersion);

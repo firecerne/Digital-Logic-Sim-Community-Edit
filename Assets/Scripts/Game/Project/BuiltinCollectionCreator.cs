@@ -66,7 +66,7 @@ namespace DLS.Game
 					ChipType.Rom_256x16,
 					ChipType.EEPROM_256x16,
 					ChipType.dev_Ram_8Bit
-				)
+				).AddNames("RAM 8\u00d78")
 			};
 		}
 
