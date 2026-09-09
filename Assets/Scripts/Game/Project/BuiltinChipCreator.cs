@@ -735,7 +735,7 @@ namespace DLS.Game
 
 		static ChipDescription CreateBuiltinChipDescription(ChipType type, Vector2 size, Color col, PinDescription[] inputs, PinDescription[] outputs, DisplayDescription[] displays = null, NameDisplayLocation nameLoc = NameDisplayLocation.Centre, string name = "", bool canBeCached = true)
 		{
-			if (!ChipTypeHelper.IsDevPin(type) && !ChipTypeHelper.IsMergeSplitChip(type) && !ChipTypeHelper.IsBusType(type) && !ChipTypeHelper.IsRAMChip(type)){name = ChipTypeHelper.GetName(type); }
+			if (!ChipTypeHelper.IsDevPin(type) && !ChipTypeHelper.IsMergeSplitChip(type) && !ChipTypeHelper.IsBusType(type) && !ChipTypeHelper.IsRAMChip(type)) { name = ChipTypeHelper.GetName(type); }
 			
 			ValidatePinIDs(inputs, outputs, name);
 
