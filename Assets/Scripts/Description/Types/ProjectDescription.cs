@@ -55,6 +55,8 @@ namespace DLS.Description
 
 		// Used for RAM definition
 		// Dictionnary of Address Pin and Data Pin Ex: (16, 8) 16 is the address bit size and 8 is the data bit size.
+		// The RAM has a max Address Bit Size of 29 Bits due to Arrays in C#
+		// The RAM has a max Data Bit Size of 16 due to Uints in C#
         public List<KeyValuePair<PinBitCount, PinBitCount>> RAMs;
 
         // ---- Helper functions ----
