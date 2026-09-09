@@ -53,6 +53,8 @@ namespace DLS.Description
 		// Dictionnary of  Big Pin and  Small Pin  Ex : (4,1) or (8,4) or (8,1)
 		public List<KeyValuePair<PinBitCount, PinBitCount>> SplitMergePairs;
 
+		// Used for RAM definition
+		// Dictionnary of Address Pin and Data Pin Ex: (16, 8) 16 is the address bit size and 8 is the data bit size.
         public List<KeyValuePair<PinBitCount, PinBitCount>> RAMs;
 
         // ---- Helper functions ----
